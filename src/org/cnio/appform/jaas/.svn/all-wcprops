@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas
+END
+._AppPrincipal.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/._AppPrincipal.java
+END
+AppLoginModule.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/episrc/!svn/ver/177/admtool/src/org/cnio/appform/jaas/AppLoginModule.java
+END
+AppPrincipal.java
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/AppPrincipal.java
+END
+._AppPassiveCallbackHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/._AppPassiveCallbackHandler.java
+END
+AppPrincipalRole.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/AppPrincipalRole.java
+END
+AppPassiveCallbackHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/AppPassiveCallbackHandler.java
+END
+AppJaasConfiguration.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/AppJaasConfiguration.java
+END
+._AppCredential.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/._AppCredential.java
+END
+AppUserValidation.java
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/AppUserValidation.java
+END
+AppCredential.java
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/AppCredential.java
+END
+._AppLoginModule.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/episrc/!svn/ver/19/admtool/src/org/cnio/appform/jaas/._AppLoginModule.java
+END

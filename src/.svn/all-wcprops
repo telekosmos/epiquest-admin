@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/episrc/!svn/ver/19/admtool/src
+END
+hibernate-epidb.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/episrc/!svn/ver/88/admtool/src/hibernate-epidb.cfg.xml
+END
+hibernate-pre-cegen.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/episrc/!svn/ver/151/admtool/src/hibernate-pre-cegen.cfg.xml
+END
+hibernate-pre.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/episrc/!svn/ver/88/admtool/src/hibernate-pre.cfg.xml
+END
+hibernate-war-cegen.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/episrc/!svn/ver/160/admtool/src/hibernate-war-cegen.cfg.xml
+END
+hibernate-war.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/episrc/!svn/ver/19/admtool/src/hibernate-war.cfg.xml
+END
+hibernate-generic.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/episrc/!svn/ver/170/admtool/src/hibernate-generic.cfg.xml
+END
+log4j-generic.xml
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/episrc/!svn/ver/170/admtool/src/log4j-generic.xml
+END
+log4j.dtd
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/episrc/!svn/ver/19/admtool/src/log4j.dtd
+END
+log4j-cegen.xml
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/episrc/!svn/ver/151/admtool/src/log4j-cegen.xml
+END
+hibernate.cfg.xml
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/episrc/!svn/ver/177/admtool/src/hibernate.cfg.xml
+END
+log4j.xml
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/episrc/!svn/ver/19/admtool/src/log4j.xml
+END

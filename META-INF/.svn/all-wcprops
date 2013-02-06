@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/episrc/!svn/ver/19/admtool/META-INF
+END
+context-generic-war.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/episrc/!svn/ver/171/admtool/META-INF/context-generic-war.xml
+END
+context-cegen-pre.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/episrc/!svn/ver/151/admtool/META-INF/context-cegen-pre.xml
+END
+MANIFEST.MF
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/episrc/!svn/ver/19/admtool/META-INF/MANIFEST.MF
+END
+context-pre.xml
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/episrc/!svn/ver/191/admtool/META-INF/context-pre.xml
+END
+context-cegen-war.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/episrc/!svn/ver/160/admtool/META-INF/context-cegen-war.xml
+END
+context-war.xml
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/episrc/!svn/ver/19/admtool/META-INF/context-war.xml
+END

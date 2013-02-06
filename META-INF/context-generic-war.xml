@@ -1,0 +1,31 @@
+<!-- PRODUCTION application context file -->
+<!--
+<Context path="/admintool" docBase="/Users/bioinfo/Development/Project/admtool"
+        debug="0" privileged="true" reloadable="true">
+
+    <Realm  className="org.apache.catalina.realm.JDBCRealm" debug="99"
+             driverName="org.postgresql.Driver"
+        connectionURL="jdbc:postgresql://jpop:5432/appform" 
+        connectionName="gcomesana" connectionPassword="appform"
+     userTable="appuser" userNameCol="username" userCredCol="passwd"
+       userRoleTable="user_role" roleNameCol="rolename" />
+                       
+</Context>
+-
+
+<Context path="/admintool" docBase="/Users/bioinfo/Development/Projects/admtool" debug="0" privileged="true" reloadable="true">
+    <Realm className="org.apache.catalina.realm.JAASRealm" debug="99"
+           appName="admtool" userClassNames="org.cnio.appform.jaas.AppPrincipal" 
+           roleClassNames="org.cnio.appform.jaas.AppPrincipalRole"
+           userContextClassLoader="false" />
+</Context>
+
+-->
+
+
+<Context path="/epiquestadmin" docBase="${catalina.home}/webapps/epiquestadmin" debug="0" privileged="true" reloadable="true">
+    <Realm className="org.apache.catalina.realm.JAASRealm" debug="99"
+           appName="epiquestadmin" userClassNames="org.cnio.appform.jaas.AppPrincipal" 
+           roleClassNames="org.cnio.appform.jaas.AppPrincipalRole"
+           userContextClassLoader="false" />
+</Context>
