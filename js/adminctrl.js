@@ -50,10 +50,12 @@ var AdmFormCtrl = function () {
 	var changeState = function (newState) {
 		state = newState
 		
-		if (state == MODE_CREATE)
-			txtUsrName.removeAttribute ('disable')
-		else
-			txtUsrName.disabled = 'disabled'
+		var guard = state == MODE_CREATE && txtUsrName != null;
+		if (guard)
+			txtUsrName.removeAttribute ('disable');
+			
+		else if (txtUsrName != null)
+			txtUsrName.disabled = 'disabled';
 		
 	}
 	

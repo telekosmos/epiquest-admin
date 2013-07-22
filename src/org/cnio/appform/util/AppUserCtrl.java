@@ -1034,6 +1034,9 @@ public class AppUserCtrl {
 
 		return true;
 	}
+	
+	
+	
 
 	public boolean rmvUserFromPrj(AppUser user, Project prj)
 			throws HibernateException {
@@ -1041,7 +1044,7 @@ public class AppUserCtrl {
 		List lUsers;
 		Transaction tx = null;
 
-		String hql = "from RelGrpAppuser where project=:prj and appuser=:usr";
+		String hql = "from RelPrjAppusers where project=:prj and appuser=:usr";
 		Query qry = null;
 		try {
 			tx = this.theSess.beginTransaction();
@@ -1075,6 +1078,9 @@ public class AppUserCtrl {
 
 		return true;
 	}
+	
+	
+	
 
 	public int createRole(String name, String desc) {
 		Transaction tx = null;

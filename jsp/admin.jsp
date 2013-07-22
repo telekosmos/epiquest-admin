@@ -136,6 +136,7 @@ while (params.hasMoreElements())
 				}
 				else {
 					if(sParamName.equals(PROJECT)) {
+						System.out.println("admin.js projects param: "+ request.getParameterValues(sParamName)[0]);
 						String aParameterValues[] = request.getParameterValues(sParamName)[0].split(";");
 						try {
 							if (aParameterValues.length != 0)	{
@@ -298,7 +299,9 @@ oRelPrjUser.setAppuser(theUser);
 		if (!theUser.isAdmin()) {
 			for (Project auxPrj: usrPrjs) {
 				Integer prjId = auxPrj.getId();
-				if (aGroup == null || !aGroup.contains(prjId))
+				System.out.println("admin.jsp: user project: "+auxPrj.getName() +"("
+						+prjId+")");
+				if (aProject == null || !aProject.contains(prjId))
 					usrCtrl.rmvUserFromPrj(theUser, auxPrj);
 			}
 			thePrjs = (thePrjs.equals(""))? thePrjs: 

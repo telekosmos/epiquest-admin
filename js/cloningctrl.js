@@ -85,6 +85,7 @@ var ClonFormCtrl = function () {
 	
 	
 	var init = function () {
+		console.log("ClonFormCtrl initializing...");
     ajaxResp = new ClonAjaxResponse ();
     
 		srcPrj = $("#frmSrcPrj");
@@ -98,9 +99,9 @@ var ClonFormCtrl = function () {
 		theForm = $('#frmCloning');
 		
 		
-		$(srcPrj).change (fillIntrvSrc);
-		$(srcGrp).change (fillIntrvSrc);
-		$(srcIntrv).change (enableTarget);
+		$(srcPrj).change(fillIntrvSrc);
+		$(srcGrp).change(fillIntrvSrc);
+		$(srcIntrv).change(enableTarget);
     
     
 		$("#btnOk").click(function(ev) {
@@ -131,7 +132,7 @@ var clonCtrl;
 $(document).ready(function () {
 //	overlay = new Overlay ();
 	clonCtrl = new ClonFormCtrl();
-	clonCtrl.init ();
+	clonCtrl.init();
 });
 
 

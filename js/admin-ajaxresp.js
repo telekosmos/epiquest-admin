@@ -46,7 +46,15 @@ var groupSecondary = 2
 		document.getElementById('lastname').value = '';
     document.getElementById('re-password').value = '';
     document.getElementById('email').value = '';
-    document.getElementById('registered_role').options[0].selected = true;
+//    document.getElementById('registered_role').options[0].selected = true;
+
+
+		var aSelectedRoleList = document.getElementById('selected_role').options;
+    for (var iIndex = 0; iIndex < aSelectedRoleList.length; iIndex++) {
+      aSelectedRoleList[iIndex].selected = true;
+    }
+    moveOptions(document.getElementById('selected_role'), 
+                document.getElementById('registered_role'));
     
     var aSelectedGroupList = document.getElementById('selected_group').options;
     for (var iIndex = 0; iIndex < aSelectedGroupList.length; iIndex++) {
