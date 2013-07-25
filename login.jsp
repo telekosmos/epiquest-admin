@@ -85,10 +85,11 @@
       </button>
       <a class="brand" href="#">EPIQUEST Admin</a>
       <div class="nav-collapse collapse">
-        
+        <!-- 
         <p class="navbar-text pull-right">
           Logged in as <a href="#" class="navbar-link">username (administrator)</a>
         </p>
+        -->
       
         <ul class="nav">
           <li class="active"><a href="users.html">Users</a></li>
@@ -102,6 +103,9 @@
 </div>
 
 <div class="container">
+	<div class="page-header page-title" style="text-align:center;">
+    <h1>EPIQUEST - Administration</h1>
+  </div>
   <div class="row-fluid">
     <div class="span4 offset4">
       <form class="box-login" method="POST"
@@ -131,8 +135,9 @@
     </p>
   </div>
 </div>
-
-<script type="text/javascript" src="../assets/js/bootstrap.js"></script>
-
+<!-- 
+<script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
+-->
 </body>
 </html>
