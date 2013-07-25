@@ -138,6 +138,9 @@ System.out.println("Principal's name: "+user);
 <body>
 <div id="wrap">
 
+<%@include file="inc/navbar.jsp" %>
+
+<%-- 
 <div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
@@ -159,10 +162,12 @@ System.out.println("Principal's name: "+user);
           <!-- <li><a href="#contact">Contact</a></li> -->
           <li><a href="dbmanage.jsp">DB Management</a></li>
         </ul>
-      </div><!--/.nav-collapse -->
+      </div>  !--/.nav-collapse --
     </div>
   </div>
 </div>
+--%>
+
 
 <div class="container-fluid">
   <div class="page-header page-title">
@@ -305,8 +310,10 @@ System.out.println("Principal's name: "+user);
 <script type="text/javascript" src="../js/yahoo/connection-debug.js"></script>
 <script type="text/javascript" src="../js/yahoo/json-debug.js"></script>
 
+<script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
+<!--
 <script type="text/javascript" src="../js/jquery/jquery-1.2.6.js"></script>
-
+-->
 <script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
 <script type="text/javascript" src="../js/overlay.js"></script>
 		

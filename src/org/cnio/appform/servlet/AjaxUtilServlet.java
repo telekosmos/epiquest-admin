@@ -13,6 +13,8 @@ import org.cnio.appform.util.IntrvFormCtrl;
 import org.cnio.appform.util.IntrvController;
 import org.cnio.appform.util.Singleton;
 
+import org.cnio.appform.util.dump.*;
+
 import org.hibernate.Session;
 
 import org.json.simple.*;
@@ -36,6 +38,11 @@ import java.net.URLEncoder;
    static final String GRPS = "grp";
    static final String ROLES = "rol";
    
+   static final String INTRV = "intrvs";
+   static final String SECTION = "secs";
+   static final String HOSPITALS = "hosp";
+   
+   static final String DBDUMP = "dump";
    
     /* (non-Java-doc)
 	 * @see javax.servlet.http.HttpServlet#HttpServlet()
@@ -51,13 +58,23 @@ import java.net.URLEncoder;
 		String what = request.getParameter("what");
 		String usrId = request.getParameter("usrid");
 		String jsonResp = "";
+		List<Interview> intrvs = null;
+		List<Section> sections = null;
+		
 		List<AppGroup> groups = null;
 		List<Project> prjs = null;
 		List<Role> roles = null;
 		boolean nothing = false;
 		
-		response.setHeader("Content-type", "application/json");
+
+		// set Content Types
+		if (what.equals(AjaxUtilServlet.DBDUMP))
+			response.setHeader("Content-type", "text/x-csv");
+		else
+			response.setHeader("Content-type", "application/json");
+		 
 		response.setCharacterEncoding("UTF-8");
+				
 		PrintWriter out = response.getWriter();
 		Session hibSes = HibernateUtil.getSessionFactory().openSession();
 		AppUser theUsr = null;
@@ -65,11 +82,46 @@ import java.net.URLEncoder;
 			theUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
 		
 		AppUserCtrl usrCtrl = new AppUserCtrl (hibSes);
+		IntrvController intrvCtrl = new IntrvController(hibSes);
 		what = (what==null)? "": what;
-
+		
+// DBDUMP issue
+		if (what.equals(AjaxUtilServlet.DBDUMP)) {
+			DataRetriever dr = new DataRetriever ();
+			String prjCode = request.getParameter("prjid");
+			String intrvId = request.getParameter("intrvid");
+			String grpId = request.getParameter("grpid");
+			String orderSec = request.getParameter("secid"); // actually the section order
+			
+			String dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+			
+			out.print(dumpOut);
+			return;
+		}
+		
+		
 // GET GROUPS
 		if (what.equals(AjaxUtilServlet.GRPS)) {
 			groups = (theUsr == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(theUsr);
+			if (groups.size() == 0){
+				nothing = true;
+				jsonResp = "{\"groups\":[]}";
+			}
+			else {
+				jsonResp = "{\"groups\":[";
+				for (AppGroup grp: groups) 
+					jsonResp += "{\"name\":\""+URLEncoder.encode(grp.getName(), "UTF-8") +
+												"\",\"id\":"+grp.getId()+", \"type\":"+grp.getType().getId()+"},";
+			}
+		}
+		
+		if (what.equals(AjaxUtilServlet.HOSPITALS)) {
+			String prjId = request.getParameter("prjid");
+			String grpId = request.getParameter("grpid");
+			
+			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
+			groups = group.getContainees();
+			
 			if (groups.size() == 0){
 				nothing = true;
 				jsonResp = "{\"groups\":[]}";
@@ -108,7 +160,49 @@ import java.net.URLEncoder;
 			else {
 				jsonResp = "{\"roles\":[";
 				for (Role role: roles) 
-					jsonResp += "{\"name\":\""+URLEncoder.encode(role.getName(), "UTF-8")+"\",\"id\":"+role.getId()+"},";
+					jsonResp += "{\"name\":\""+URLEncoder.encode(role.getName(), "UTF-8")+
+												"\",\"id\":"+role.getId()+"},";
+			}
+		}
+
+// INTERVIEWS BASED on a prjid and a grpId 		
+		else if (what.equals(AjaxUtilServlet.INTRV)) {
+			String prjCode = request.getParameter("prjid");
+			String grpId = request.getParameter("grpid");
+
+			Project prj = HibernateUtil.getProjectByCode(hibSes, prjCode);
+			Integer prjId = prj.getId();
+			Integer grpIdInt = (grpId != null && grpId.equals("") == false)? Integer.parseInt(grpId): null;
+			
+			intrvs = intrvCtrl.getInterviews(prjId, grpIdInt);
+			if (intrvs.size() == 0) {
+				nothing = true;
+				jsonResp = "{\"intrvs\":[]}";
+			}
+			else {
+				jsonResp = "{\"intrvs\":[";
+				for (Interview intrv: intrvs) 
+					jsonResp += "{\"name\":\""+intrv.getName()+
+											"\",\"id\":"+intrv.getId()+"},";
+			}
+		}
+		
+		
+		else if (what.equals(AjaxUtilServlet.SECTION)) {
+			String intrvId = request.getParameter("intrvid");
+			// String grpId = request.getParameter("grpid");
+			Interview intrv = (Interview)hibSes.get(Interview.class, Integer.parseInt(intrvId));
+			sections = intrv.getSections();
+			
+			if (sections.size() == 0) {
+				nothing = true;
+				jsonResp = "{\"sections\":[]}";
+			}
+			else {
+				jsonResp = "{\"sections\":[";
+				for (Section sec: sections) 
+					jsonResp += "{\"name\":\""+sec.getName()+
+											"\",\"id\":"+sec.getId()+", \"order\":"+sec.getSectionOrder()+"},";
 			}
 		}
 		

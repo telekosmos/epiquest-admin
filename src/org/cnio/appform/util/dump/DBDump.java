@@ -203,6 +203,7 @@ public class DBDump
       	int sortOrd = Integer.valueOf(this.sortOrd);
       	String myFilename = this.fileName;
       	
+System.out.println("retriever.getDump("+prjName+", "+intrvName+", "+grpName+", "+orderSec+", "+sortOrd+", "+myFilename+")");
         retriever.getDump(prjName, intrvName, grpName, orderSec, sortOrd, myFilename);
       }
       

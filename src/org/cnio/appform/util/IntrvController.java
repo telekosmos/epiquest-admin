@@ -55,18 +55,26 @@ public class IntrvController {
 	public List<Interview> getInterviews (Integer prjid, Integer grpid) {
 		List<Interview> intrvs = null;
 		String hql = "select i from Interview i join i.relIntrvGrps r " +
-				"where i.parentPrj=:prj and r.appgroup=:grp" +
-				" order by i.name";
+				"where i.parentPrj=:prj";
+		
+		if (grpid != null)
+			hql += " and r.appgroup=:grp";
+		
+		hql += " order by i.name";
 		Transaction tx = null;
 		
 		try {
 			tx = hibSes.beginTransaction();
 			Query qry = hibSes.createQuery(hql);
 			
+			AppGroup grp;
 			Project prj = (Project)hibSes.get(Project.class, prjid);
-			AppGroup grp = (AppGroup)hibSes.get(AppGroup.class, grpid);
+
 			qry.setEntity("prj", prj);
-			qry.setEntity("grp", grp);
+			if (grpid != null) {
+				grp = (AppGroup)hibSes.get(AppGroup.class, grpid);
+				qry.setEntity("grp", grp);
+			}
 			
 			intrvs = qry.list();
 			tx.commit();
@@ -764,6 +772,44 @@ String hqlIntr = "from RelIntrvGroup rig where rig.appgroup=:group and " +
 		}
 		
 	}
+	
+	
+	
+	/**
+	 * Get a list of interviews with the name 'intrvName' belonging to project 'prj'.
+	 * Usually there will be only one interview, but it returns a list to prevent
+	 * @param prj, the project which the interview is contained in
+	 * @param intrvName, the name of the interview
+	 * @return, a list of interviews matching the parameters criteria
+	 */
+		public List<Interview> getIntr4Proj (Project prj, String intrvName) {
+			Transaction tx = null;
+			String hql = "from Interview i where i.parentPrj=:prj and i.name='"+intrvName+"'";
+			List<Interview> intrvs = null;
+			
+			try {
+				tx = hibSes.beginTransaction();
+				Query qry = hibSes.createQuery(hql);
+				qry.setEntity("prj", prj);
+//				qry.setString("name", intrvName);
+				
+				intrvs = qry.list();
+				tx.commit();
+			}
+			catch (HibernateException hibEx) {
+				if (tx != null)
+					tx.rollback();
+				
+				LogFile.error("IntrvController.getIntr4Proj: Fail retrieving interview:\t");
+				LogFile.error(hibEx.getLocalizedMessage());
+				StackTraceElement[] stack = hibEx.getStackTrace();
+				LogFile.logStackTrace(stack);
+	hibEx.printStackTrace();
+			}
+			
+			return intrvs;
+		}
+		
 
 
 

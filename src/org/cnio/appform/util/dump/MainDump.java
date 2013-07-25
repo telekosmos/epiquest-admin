@@ -371,6 +371,8 @@ System.out.println("Perform batch job...");
 			if (pm.getSec().length() != 0)
 				dumper.setOrderSec(Integer.decode(pm.getSec()));
 			
+			System.out.println("Paramters: "+pm.toString());
+			
 //			dumper.spitInfo();
 			dumper.dump();
 System.out.println ("=================================================");

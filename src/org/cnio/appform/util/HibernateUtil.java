@@ -1098,12 +1098,21 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
  * @param name, the name of the section
  * @return a Collection of Section objects
  */		
-		public static Collection<Project> getProjectByName (Session hibSes, String name,
-																			int userId) {
-			Criteria ctSec = hibSes.createCriteria(Project.class).
-															 add(like("name", "%"+name+"%"));
-			return ctSec.list();
-		}	
+	public static List<Project> getProjectByName (Session hibSes, String name) {
+		Criteria ctSec = hibSes.createCriteria(Project.class).
+														 add(like("name", "%"+name+"%"));
+		return ctSec.list();
+	}	
+	
+	
+	
+	public static Project getProjectByCode (Session hibSes, String code) {
+		Criteria ctSec = hibSes.createCriteria(Project.class).
+		 											add(eq("projectCode", code));
+		
+		return (Project)ctSec.uniqueResult();
+	}
+	
 	
 	
 /**
@@ -1137,6 +1146,30 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 			return false;
 		}
 		
+	}
+	
+	
+	/**
+	 * Get all patients with a code matching with the parameter patCode. 
+	 * Example:<br/>
+	 * if paramter <code>patCode</code> is 15701, it will match will match with all
+	 * subjects starting with 15701*
+	 * @param hibSes, the hibernate session
+	 * @param patCode, a part or the full subject code
+	 * @return a list with the codes of the matching subjects 
+	 */
+	public static List<String> getPatientsFromCode (Session hibSes, String patCode) {
+		
+		Criteria ctPats = hibSes.createCriteria(Patient.class).
+		 add(like("codpatient", patCode+"%"));
+		
+		List<Patient> pats = ctPats.list();
+		List<String> patCodes = new ArrayList<String>();
+		
+		for (Patient pat: pats)
+			patCodes.add(pat.getCodpatient());
+		
+		return patCodes;
 	}
 }
 

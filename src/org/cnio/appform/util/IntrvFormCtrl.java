@@ -36,12 +36,16 @@ public class IntrvFormCtrl {
 	private String errMsg;
 	
 	public static final String DEFAULT_PRJ = "157";
-	
-// This is the patient code used for previewing
-	public static final String NULL_PATIENT = "00000000";
-	
-// This is the patient code used for testing, it won't be included on queries
-	public static final String TEST_PATIENT = "69696969";
+
+  // This is the patient code used for previewing
+  public static final String NULL_PATIENT = "15700000000";
+
+  // This is the patient code used for testing, it won't be included on queries
+  public static final String TEST_PATIENT = "15769696969";
+
+  public static final String JUSTIFICATION_NAME = "frmJustify";
+  
+  public static final String MISSING_ANSWER = "9999";
 	
 	public IntrvFormCtrl (Session aSession) {
 		hibSes = aSession;
@@ -427,6 +431,38 @@ System.out.println ("setCurretnPerfUser: user: "+user.getUsername());
 		return true;
 	}
 
+	
+	
+	
+	
+/**
+ * Wrapper for the main method to save an answer. Objects for question, patient
+ * and answer item where replaced by their ids. The method gets the entity objects
+ * and call the saveAnswer method with those values
+ * @param qId, the question identifier
+ * @param patId, the patien identifier
+ * @param ansNumber, the answer number
+ * @param ansOrder, the answer order
+ * @param ansGroup
+ * @param ansVal, the answer value
+ * @param answerItId, the answer item identifier
+ * @return
+ */  
+  public boolean saveAnswer (Integer qId, Integer patId, Integer ansNumber, Integer ansOrder,
+  												Integer ansGroup, String ansVal, Integer answerItId) {
+  	
+  	Question q = (Question)hibSes.get(Question.class, qId.longValue());
+  	Patient pat = (Patient)hibSes.get(Patient.class, patId);
+  	AnswerItem ait = (AnswerItem)hibSes.get(AnswerItem.class, answerItId.longValue());
+  	
+  	boolean res;
+  	res = saveAnswer (q, pat, ansNumber, ansOrder, ansGroup, ansVal, ait);
+  	
+  	return res;
+  }
+  		
+	
+	
 
 /**
  * Update the value of an answer from the answer id
@@ -463,6 +499,98 @@ System.out.println ("setCurretnPerfUser: user: "+user.getUsername());
 		}
 		return true;
 	}
+	
+	
+	
+/**
+ * Remove records from entity classes PatGivesAnswer2Ques and Answer from the
+ * ids parameter got from client.
+ * 
+ * @param paramIds
+ *          , the list of ids for the questions whose answers have to be
+ *          removed They looks like QQQQQ1-N1-O1,...,QQQQQn-Nn-On
+ * @param patId
+ *          , the patient identifier who the interviews is being performed for
+ * @return true on successfully completion; false otherwise. The items on
+ *         database were removed
+ */
+	public boolean removeAnswers(String paramIds, Integer patId) {
+	  boolean res = false;
+	  Transaction tx = null;
+	  String[] ids = paramIds.split(",");
+	  String qryPga = "from PatGivesAns2Ques pga where patient=:pat "
+	      + "and question=:ques " + "and answerNumber=:num "
+	      + "and answerOrder=:ord";
+	
+	  try {
+	    tx = hibSes.beginTransaction();
+	    Patient pat = (Patient) hibSes.get(Patient.class, patId);
+	    Query qry = hibSes.createQuery(qryPga);
+	//      PatGivesAns2Ques pga = null;
+	    List<PatGivesAns2Ques> pgaList;
+	
+	    // loop over ids to remove them one by one, questions and pga items
+	    for (String id : ids) {
+	      String[] partId = id.split("-");
+	      Question q = (Question) hibSes.get(Question.class, Long
+	          .decode(partId[0]));
+	
+	      qry.setEntity("pat", pat);
+	      qry.setEntity("ques", q);
+	      qry.setInteger("num", Integer.decode(partId[1]));
+	      qry.setInteger("ord", Integer.decode(partId[2]));
+	
+	//        pga = (PatGivesAns2Ques) qry.uniqueResult();
+	      
+	// Usually, it should be just one answer per question, number, order
+	// But, as sometimes there are more than one answer, a list has to be retrieved
+	      pgaList = qry.list();
+	      for (PatGivesAns2Ques pga: pgaList) {
+	      	Answer ans = pga.getAnswer();
+	      	String ansVal = ans.getValue();
+	      	Integer ansId = ans.getId();
+	        if (ans != null)
+	          hibSes.delete(ans);
+	
+	        if (pgaList.indexOf(pga) == pgaList.size()-1) {
+	        	hibSes.delete(pga);
+	        	errMsg = "Deleted entry for question "+q.getId()+" and subject "+patId;
+	        	LogFile.getLogger().info(errMsg);
+	        }
+	        errMsg = "Answer: '"+ansVal+"' ("+ansId+") was deleted for patient with id "+patId;
+	        LogFile.getLogger().info(errMsg);
+	      }
+	      
+	/*
+	        if (pga != null) {
+	          Answer ans = pga.getAnswer();
+	          if (ans != null)
+	            hibSes.delete(ans);
+	
+	          hibSes.delete(pga);
+	        }
+	*/
+	    }
+	    tx.commit();
+	
+	    res = true;
+	  }
+	  catch (HibernateException hibEx) {
+	    if (tx != null)
+	      tx.rollback();
+	
+	    errMsg = "Could not remove all requested answers";
+	    LogFile.getLogger().error(errMsg);
+	    LogFile.getLogger().error(hibEx.getLocalizedMessage());
+	    StackTraceElement[] stElems = hibEx.getStackTrace();
+	    LogFile.logStackTrace(stElems);
+	  }
+	  return res;
+	}
+	
+	
+	
+	
 	
 /**
  * Gets a Patient entity from the code assigned on interview time

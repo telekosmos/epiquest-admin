@@ -150,7 +150,7 @@ System.out.println("Principal's name: "+user);
 </head>
 <body style="xoverflow-x: hidden;">
 <div id="wrap">
-
+<!-- 
 <div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
@@ -169,13 +169,16 @@ System.out.println("Principal's name: "+user);
         <ul class="nav">
           <li><a href="users.html">Users</a></li>
           <li class="active"><a href="cloning.html">Cloning</a></li>
-          <!-- <li><a href="#contact">Contact</a></li> -->
+          -- <li><a href="#contact">Contact</a></li> --
           <li><a href="dbmanage.html">DB Management</a></li>
         </ul>
-      </div><!--/.nav-collapse -->
+      </div> --/.nav-collapse -
     </div>
   </div>
 </div>
+-->
+
+<%@include file="inc/navbar.jsp" %>
 
 <div class="container-fluid">
   <div class="page-header page-title">

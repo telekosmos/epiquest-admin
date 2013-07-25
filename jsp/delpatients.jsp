@@ -176,57 +176,130 @@ System.out.println("Principal's name: "+user);
 
 <%@include file="inc/navbar.jsp" %>
 
+
+
+
+
 <div class="container-fluid">
   <div class="page-header page-title">
-    <h1>EPIQUEST admin tool</h1>
+    <h1>Delete subjects</h1>
   </div>
-  <!-- Intro -->
-  <div class="row-fluid">
-    <div class="span12">
-    <p class="intro-description text-center">
-      This is the main page of the administration tool. From here, by clicking on the upper navigation bar links or using the green buttons below, you can reach the sections to manage the main parts of the application.
-    </p>
-    </div>
+  <div class="description-list">
+    <ul>
+      <li><span class="text-error">Mind what you are doing: deleted patients only can be retrieved from backup and it takes a bit</span></li>
+      <li>Filter the patients you want to delete by choosing project, groups and types</li>
+      <li>Then choose the filtered patients from the list just below the combo boxes</li>
+      <li>When you are done, just click 'Delete' button to proceed</li>
+      <li>When finished, the form is reset and the list of deletions is showed below the list boxes</li>
+    </ul>
   </div>
-  <hr>
-
-  <!-- Admins -->
-  <div class="row-fluid adminrow">
-    <div class="offset1 span3">
-      <h2>User management</h2>
-      <p>Check and update user properties and disable users</p>
-      <p class="text-right"><a class="btn btn-info" href="users.jsp">Go &raquo;</a></p>
-    </div>
-    <div class="span4">
-      <h2>Questinonaire cloning</h2>
-      <p class="copy">Clone/copy questionnaires to replicate them from one project to another without effort</p>
-      <p  class="text-right"><a class="btn btn-info" href="cloning.jsp">Go &raquo;</a></p>
-   </div>
-    <div class="span3">
-      <h2>DB Management</h2>
-      <p>Delete subjects, interviews for subjects or change subject ids upon monitors request</p>
-      <!-- <p class="text-right"><a class="btn btn-info" href="dbmngment.jsp">Go &raquo;</a></p> -->
-      <div class="btn-group" style="margin-left: 70%;">
-	      <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#">Go &raquo;
-	        <span class="caret"></span>
-	      </a>
-	      <ul class="dropdown-menu">
-	        <li><a href="delpatients.jsp">Delete subjects</a></li>
-	        <li><a href="delintrvs.jsp">Delete interviews</a></li>
-	        <li><a href="changecodes.jsp">Change subjects code</a></li>
-	        <li class="divider"></li>
-	        <li style="background-color: #DEDEDE"><a href="dbdumps.jsp">Database dumps</a></li>
-	      </ul>
-      </div>
-    </div>
-  </div>
-
-  
 </div> <!-- EO container -->
+
+<div class="container-fluid">
+	<form name="frmDelPats" id="frmDelPats">
+  <div class="row-fluid">
+    <div class="offset2 span2">
+      <label>Project</label>
+      <select class="input-block-level" id="frmPrj" name="frmPrj">
+        <option value="-1" selected="selected">Choose</option>
+        <%
+					List<Project> projectList = userCtrl.getAllProjects();
+					for (Project project : projectList) {
+						out.println("<option value='" + project.getProjectCode() + "'>"
+								+ project.getName() + "</option>");
+					}
+				%>
+      </select>
+    </div>
+
+    <div class="span2">
+      <label>Group/Country</label>
+      <select class="input-block-level" id="frmCountry" name="frmCountry">
+        <option value="-1" selected="selected">Choose</option>
+        <%
+				List<AppGroup> primaryGrps = userCtrl.getPrimaryGroups();
+				for (AppGroup group : primaryGrps) {
+					out.println("<option value=\"" + group.getId() + "\"" + 
+							" onmouseover=\"Tip('"+ group.getName() + "');\" onmouseout=\"UnTip();\">" + 
+							group.getName()
+							+ "</option>");
+				}
+				%>
+      </select>
+    </div>
+    
+    <div class="span2">
+      <label>Group/Hospital</label>
+      <select class="input-block-level" id="frmHospital" name="frmHospital">
+        <option value="-1" selected="selected">Choose</option>
+      </select>
+    </div>
+
+    <div class="span2">
+      <label>Case/Control</label>
+      <select class="input-block-level">
+        <option value="">All</option>
+        <option value="1">Case</option>
+        <option value="2">Control</option>
+        <optoin value="3">Familiar</option>
+      </select>
+    </div>
+  </div> <!-- EO row-fluid for combo boxes -->
+  
+  <hr/>
+
+  <div class="row-fluid" style="margin: 0% 0% 0% -4%;">
+    <div class="offset2 span8 well">
+
+      <div class="span5" style="margin-left:4%" id="frmListPats" name="frmListPats">
+        <label>Retrieved subjects</label>
+        <select size="5" class="input-block-level">
+        </select>
+      </div>
+      <div class="span1" style="padding: 5% 0%;">
+        <button class="btn btn-mini btn-primary btn-block" type="button" style="margin-top: 20%"><i class="icon-arrow-right icon-white"></i></button>
+        <button class="btn btn-mini btn-primary btn-block" type="button"><i class="icon-arrow-left icon-white"></i></button>
+      </div>
+      <div class="span5">
+        <label>Selected subjects (for deletion)</label>
+        <select size="5" class="input-block-level" id="frmDelPats" name="frmDelPats">
+        <!-- 
+          <option value="100">selected</option>
+          <option value="100">selected</option>
+          <option value="100">selected</option>
+          <option value="100">selected</option>
+          <option value="100">selected</option>
+          <option value="100">selected</option>
+          <option value="100">selected</option>
+        -->
+        </select>
+      </div>
+      
+    </div>
+  </div> <!-- EO row-fluid for listOfRetreived - buttons - listOfSelected -->
+
+  <div class="row-fluid">
+    <div class="offset2 span2">
+      <button type="button" class="btn btn-inverse"><i class="icon-refresh icon-white"></i> Reset</button>
+    </div>
+
+    <div class="offset3 span2" xstyle="margin:0% 64%;">
+      <button type="button" class="btn btn-inverse"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
+    </div>
+    <div class="span2">
+      <button type="button" class="btn btn-inverse"><i class="icon-repeat icon-white"></i> Clear</button>
+    </div>
+ 
+  </div> <!-- EO row-fluid list patients -->
+  
+	</form>
+</div> <!-- container fluid -->
+
+
 
 
 </div> <!-- EO wrap -->
-
+<!--
 <div id="footer">
   <div class="container">
     <p class="muted credit">
@@ -235,13 +308,9 @@ System.out.println("Principal's name: "+user);
   </div>
 </div>
 
-<script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
-<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
+<script type="text/javascript" src="../assets/js/jquery-1.9.1.js"></script>
+-->
 
+<script type="text/javascript" src="../assets/js/bootstrap.js"></script>
 </body>
 </html>
-
-
-
-
-

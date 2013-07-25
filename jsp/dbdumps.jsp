@@ -178,54 +178,91 @@ System.out.println("Principal's name: "+user);
 
 <div class="container-fluid">
   <div class="page-header page-title">
-    <h1>EPIQUEST admin tool</h1>
+    <h1>EPIQUEST admin tool - Data dumper</h1>
   </div>
   <!-- Intro -->
   <div class="row-fluid">
     <div class="span12">
     <p class="intro-description text-center">
-      This is the main page of the administration tool. From here, by clicking on the upper navigation bar links or using the green buttons below, you can reach the sections to manage the main parts of the application.
+      Choose the right project, group/hospital/department, questionnaire and one or more sections in order to get the data dump for the requested data.
     </p>
     </div>
   </div>
   <hr>
 
   <!-- Admins -->
-  <div class="row-fluid adminrow">
-    <div class="offset1 span3">
-      <h2>User management</h2>
-      <p>Check and update user properties and disable users</p>
-      <p class="text-right"><a class="btn btn-info" href="users.jsp">Go &raquo;</a></p>
+  <form class="form-horizontal" id="frmDump" name="frmDump">
+  <div class="row-fluid" style="padding-top: 3%;">
+    <div class="span2 offset1" style="margin-left: 12%">
+      <label>Project</label>
+      <select class="input-large" id="frmProject" name="frmProject">
+      	<option value="-1" selected="selected">Choose</option>
+        <%
+					List<Project> projectList = userCtrl.getAllProjects();
+					for (Project project : projectList) {
+						out.println("<option value='" + project.getProjectCode() + "'>"
+								+ project.getName() + "</option>");
+					}
+				%>
+      </select>
     </div>
-    <div class="span4">
-      <h2>Questinonaire cloning</h2>
-      <p class="copy">Clone/copy questionnaires to replicate them from one project to another without effort</p>
-      <p  class="text-right"><a class="btn btn-info" href="cloning.jsp">Go &raquo;</a></p>
-   </div>
-    <div class="span3">
-      <h2>DB Management</h2>
-      <p>Delete subjects, interviews for subjects or change subject ids upon monitors request</p>
-      <!-- <p class="text-right"><a class="btn btn-info" href="dbmngment.jsp">Go &raquo;</a></p> -->
-      <div class="btn-group" style="margin-left: 70%;">
-	      <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#">Go &raquo;
-	        <span class="caret"></span>
-	      </a>
-	      <ul class="dropdown-menu">
-	        <li><a href="delpatients.jsp">Delete subjects</a></li>
-	        <li><a href="delintrvs.jsp">Delete interviews</a></li>
-	        <li><a href="changecodes.jsp">Change subjects code</a></li>
-	        <li class="divider"></li>
-	        <li style="background-color: #DEDEDE"><a href="dbdumps.jsp">Database dumps</a></li>
-	      </ul>
-      </div>
-    </div>
-  </div>
-
   
+    <div class="span2">  
+      <label>Group/Country</label>
+      <select class="input-large" id="frmGroup" name="frmGroup">
+        <option value="-1" selected="selected">Choose</option>
+        <%
+				List<AppGroup> primaryGrps = userCtrl.getPrimaryGroups();
+				for (AppGroup group : primaryGrps) {
+					out.println("<option value=\"" + group.getId() + "\"" + 
+							" onmouseover=\"Tip('"+ group.getName() + "');\" onmouseout=\"UnTip();\">" + 
+							group.getName()
+							+ "</option>");
+				}
+				%>
+      </select>
+    </div>
+      
+    <div class="span2">
+      <label>Questionnaire</label>
+      <select class="input-large" id="frmQuestionnaire" name="frmQuestionnaire">
+        <option value="-1" selected="selected">Choose</option>
+        <!-- 
+        <option value="-1">QES Español</option>
+        <option value="-1">IDC</option>
+        -->
+      </select>
+    </div>
+    <div class="span2">
+      <label>Section</label>
+      <select class="input-large" id="frmSection" name="frmSection">
+        <option value="-1" selected="selected">Choose</option>
+        <!-- 
+        <option value="-1">Introducción</option>
+        <option value="-1">Datos personales</option>
+       	-->
+      </select>
+    </div>
+
+    <div class="span2" style="padding-left:2%;">
+      <button class="btn btn-small btn-primary" id="btnSend" type="button" style="margin-top:17%">Send</button>
+      <button class="btn btn-small btn-primary" id="btnReset" type="reset" style="margin-top:17%">Reset</button>
+    </div>
+      
+  </div> <!-- EO row-fluid -->
+  </form>
 </div> <!-- EO container -->
 
-
 </div> <!-- EO wrap -->
+
+<%-- this is to create the modal "dialog" to run the progress bar --%>
+<div id="overlay" xstyle="min-height:100%; height:100%" style="visibility:hidden;">
+	<div>
+		<p style="font-family: Arial, Helvetica, sans-serif; Font-size: 12px;">
+		Processing...</p>
+		<p><img src="../img/ajax-loader-trans.gif" alt="Processing..." /></p>
+	</div>
+</div>
 
 <div id="footer">
   <div class="container">
@@ -236,12 +273,25 @@ System.out.println("Principal's name: "+user);
 </div>
 
 <script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
+
+<script type="text/javascript" src="../js/admin-cfg.js"></script>
+
+<script type="text/javascript" src="../js/yahoo/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../js/yahoo/connection-debug.js"></script>
+<script type="text/javascript" src="../js/yahoo/json-debug.js"></script>
+
+<script type="text/javascript" src="../js/overlay.js"></script>
+<script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
+
+<script type="text/javascript" src="../js/dbdump-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/dbdumps.js"></script>
+
+<script type="text/javascript" src="../js/wz_tooltip.js"></script>
+
 <script type="text/javascript" src="../js/lib/bootstrap.js"></script>
+
+
+
 
 </body>
 </html>
-
-
-
-
-

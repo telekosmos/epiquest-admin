@@ -928,6 +928,52 @@ public class AppUserCtrl {
 	}
 	
 	
+	
+/**
+ * Get a group with the name <b>name</b>. If several groups have the same name,
+ * the groups with lowest database id is returned
+ * @param name, the name of the group
+ * @return the group with the name or the group with lowest id if several ones overlap
+ */  
+  public AppGroup getGroupFromName (String name) {
+  	String hql = "select g from AppGroup g where name like :name order by g.id";
+  	Transaction tx = null;
+  	AppGroup grp = null;
+  	
+  	try {
+  		tx = theSess.beginTransaction();
+  		Query qry = theSess.createQuery(hql);
+// System.err.println("getGroupFromName: is theSess open?: "+theSess.isOpen());
+  		qry.setString("name", name);
+  		
+  		List<AppGroup> grps = qry.list();
+/* 
+System.out.println ("AppUserCtrl.getGroupFromName ("+name+"): "+grps.size());
+for (AppGroup group: grps) {
+	System.out.println ("- "+group.getName()+"("+group.getId()+")");
+}
+*/
+  		if (grps != null && grps.size() != 0)
+  			grp = grps.get(0);
+  		
+  		tx.commit();
+//	  		return grp;
+  	}
+  	catch (HibernateException ex) {
+  		if (tx != null) {
+        tx.rollback();
+      }
+      LogFile.getLogger().error(ex.getLocalizedMessage());
+      StackTraceElement[] stElems = ex.getStackTrace();
+      LogFile.logStackTrace(stElems);
+      
+ex.printStackTrace(System.err);
+      return null;
+  	}
+  	return grp;
+  }
+  
+	
 
 
 /**

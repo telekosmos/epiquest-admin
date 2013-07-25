@@ -5,6 +5,9 @@ import java.util.regex.Pattern;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.FileInputStream;
+import java.io.File;
+
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.spi.CharsetProvider;
@@ -44,6 +47,9 @@ public class DataRetriever {
 	
 	public final static int MAX_ROWS = 15000;
 	
+	private final static String DEFAULT_FILENAME = "admindump";
+	private final static String DEFAULT_PATH = "/tmp";
+	
 	public DataRetriever (String path, Hashtable map) {
 		filePath = path;
 		mapVarNames = map;
@@ -51,6 +57,12 @@ public class DataRetriever {
 		dw = new DataWriter (mapVarNames);
 	}
 
+	
+	public DataRetriever () {
+		this.filePath = DataRetriever.DEFAULT_PATH +"/"+ DataRetriever.DEFAULT_FILENAME+".csv";
+		
+		dw = new DataWriter (null);
+	}
 	
 	
 /**
@@ -872,6 +884,7 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 
 		  	SqlDataRetriever sqldr = new SqlDataRetriever();
 		  	java.sql.ResultSet rs = sqldr.getResultSet(prjCode, intrvId, grpId, orderSec);
+		  	
 		  	try {
 		  		if (patients.size() > 0)
 		  			dw.buildResultSet(patients, listMapHdr, rs, fileOut);
@@ -902,6 +915,36 @@ System.out.println ("num of results: "+resultSet.size());
   
 	  
 	  
+	  public String getAdminDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
+	  	
+	  	long timestamp = (new java.util.Date()).getTime();
+	  	String filename = DataRetriever.DEFAULT_PATH +"/"+ DataRetriever.DEFAULT_FILENAME + 
+	  						(new Long(timestamp)).toString()+".csv";
+	  	StringBuffer fileContent = new StringBuffer();
+	  	
+	  	try {
+	  		// this.getDump(prjCode, intrvId, grpId, orderSec, null, filename);
+// System.out.println("this.getDump("+prjCode+", "+Integer.parseInt(intrvId)+", null, "+orderSec+", 0, "+filename+")");
+	  		this.getDump(prjCode, Integer.parseInt(intrvId), null, orderSec, 0, filename);
+	  		
+	  		FileInputStream fis = new FileInputStream (filename);
+	  		java.util.Scanner scanner = new java.util.Scanner(fis, "UTF-8");
+	  		while (scanner.hasNextLine())
+	  			fileContent.append(scanner.nextLine().toString()+"\n");
+	  		
+	  		fis.close();
+	  		
+	  		File f = new File (filename);
+	  		f.delete();
+	  		
+	  		return fileContent.toString();
+	  	}
+	  	catch (java.io.IOException ioEx) {
+	  		ioEx.printStackTrace();
+	  		return null;
+	  	}
+	  }
+	  
 	  
 	  
   
@@ -916,6 +959,8 @@ System.out.println ("num of results: "+resultSet.size());
 	  public void getDump (String prjName, String intrvName, String grpName, 
 	  										Integer orderSec, Integer sortOrder, String fileName) 
 	  										throws java.io.FileNotFoundException, java.io.IOException {
+	  System.out.println("Right getDump!!");	
+	  	
 	  	String prjCode = "";
 	  	Integer intrvId, grpId;
 	  	
@@ -965,6 +1010,7 @@ System.out.println ("num of results: "+resultSet.size());
 	  	intrvId = intrv.getId();
 	  	grpId = grp != null? grp.getId(): null;
 	  	
+System.out.println("getDump("+prjCode+", "+intrvId+", "+grpId+", "+orderSec+", "+sortOrder+", "+fileName+")");	  	
 	  	getDump (prjCode, intrvId, grpId, orderSec, sortOrder, fileName);
 	  	
 	  	if (hibSes.isOpen())
