@@ -25,7 +25,7 @@
             </a>
             <ul class="dropdown-menu">
               <li><a href="delpatients.jsp">Delete subjects</a></li>
-              <li><a href="delintrvs.jsp">Delete interviews</a></li>
+              <li><a href="delinterviews.jsp">Delete interviews</a></li>
               <li><a href="changecodes.jsp">Change subjects code</a></li>
               <li class="divider"></li>
               <li style="background-color: #DEDEDE"><a href="dbdumps.jsp">Database dumps</a></li>

@@ -531,7 +531,7 @@ System.out.println("Principal's name: "+user);
 </div> <!-- EO wrap -->
 
 <%-- this is to create the modal "dialog" to run the progress bar --%>
-<div id="overlay">
+<div id="overlay" style="visibility: hidden;">
 	<div>
 		<p style="font-family: Arial, Helvetica, sans-serif; Font-size: 12px;">
 		Processing...</p>

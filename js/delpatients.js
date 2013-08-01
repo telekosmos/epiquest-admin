@@ -8,27 +8,31 @@ var DelPatsFormCtrl = function () {
   
   var ajaxResp;
   var txtNewName;
-  var comboProj, comboGrp, comboIntrv, listPats, delPats;
+  var comboProj, comboCountry, comboHosp, comboIntrv, listPats, delPats;
 	// var theForm;
   
 	
 	/**
 	 * Get questionnaires based on the project and group they belong to
 	 */
-	var fillIntrvs = function () {
+	var retrievePats = function () {
 		var xReq = new AjaxReq();
-		var postData = "what=intrvs";
+		var postData = "what=subj";
 		
-		var grpid = $(comboGrp).val();
-		grpid = grpid == -1? '': grpid;
-		var prjid = $(comboProj).val();
+		var grpCode = $(comboHosp).val();
+		grpCode = (grpCode == -1 || grpCode === undefined)? '': grpCode;
 		
-		if (prjid != -1) {
-			postData += "&grpid="+grpid+"&prjid="+prjid;		
+		var subjType = $(comboType).val();
+		subjType = (subjType == -1 || subjType === undefined)? '': subjType;
+		
+		var prjcode = $(comboProj).val();
+		
+		if (prjcode != -1) {
+			postData += "&grpCode="+grpCode+"&prjid="+prjcode+"&subjType="+subjType;		
 	    xReq.setUrl(APP_ROOT+"/servlet/AjaxUtilServlet");
 	    xReq.setMethod("GET");
 	    xReq.setPostdata(postData);
-	    xReq.setCallback(ajaxResp.onGetIntrvs, ajaxResp.onFail, ajaxResp, null);
+	    xReq.setCallback(ajaxResp.onGetSubjects, ajaxResp.onFail, ajaxResp, null);
 	    xReq.startReq();
 		} /*
 		else {
@@ -46,16 +50,16 @@ var DelPatsFormCtrl = function () {
 	 */
 	var fillHospitals = function () {
 		var xReq = new AjaxReq();
-		var postData = "what=secs";
+		var postData = "what=hosp";
 		
-		var intrvid = $(comboIntrv).val ();
+		var grpCode = $(comboCountry).val ();
 		
-		if (intrvid != -1) {
-			postData += "&intrvid="+intrvid;		
+		if (grpCode != -1) {
+			postData += "&grpCode="+grpCode;		
 	    xReq.setUrl(APP_ROOT+"/servlet/AjaxUtilServlet");
 	    xReq.setMethod("GET");
 	    xReq.setPostdata(postData);
-	    xReq.setCallback(ajaxResp.onGetSections, ajaxResp.onFail, ajaxResp, null);
+	    xReq.setCallback(ajaxResp.onGetHospitals, ajaxResp.onFail, ajaxResp, null);
 	    xReq.startReq();
 		}/*
 		else {
@@ -70,49 +74,86 @@ var DelPatsFormCtrl = function () {
 	
 	
 	
+	/**
+	 * Send an POST ajax request with the list of patients as param to delete them
+	 * @param {Object} patCodesList, an array with the patient codes to delete
+	 */
+	var sendPostReq = function (patCodesList) {
+		var xReq = new AjaxReq();
+		var postData = "what=dp"; // dp stands for Delete Patient
+		
+		var listEmpty = patCodesList.length == 0;
+		
+		if (!listEmpty) {
+			postData += "&pats="+patCodesList.join();		
+	    xReq.setUrl(APP_ROOT+"/servlet/AjaxUtilServlet");
+	    xReq.setMethod("POST");
+	    xReq.setPostdata(postData);
+	    xReq.setCallback(ajaxResp.onDelPatients, ajaxResp.onFail, ajaxResp, null);
+	    xReq.startReq();
+		}
+		
+	}
+	
+	
+	
 	
 	
 	
 	
 	var init = function () {
+		
+		var that = this;
+		
 		console.log("Dump control initializing...");
-    ajaxResp = new DBDumpAjaxResponse ();
+    ajaxResp = new DelPatsAjaxResponse ();
     
 		comboProj = $("#frmPrj");
 		comboCountry = $("#frmCountry");
 		comboHosp = $("#frmHospital");
+		comboType = $("#frmSubjType");
 		listPats = $("#frmListPats");
 		delPats = $("#frmDelPats");
 		
-		theForm = $('#frmDump');
+		// theForm = $('#frmDump');
 		
 		// Autofill data on change combos
-		$(comboProj).change(fillIntrvs);
-		$(comboGrp).change(fillIntrvs);
-		$(comboIntrv).change(fillSections);
+		$(comboProj).change(retrievePats);
+		$(comboCountry).change(fillHospitals);
+		$(comboHosp).change(retrievePats);
+		$(comboType).change(retrievePats);
 		
 //		$(srcIntrv).change(enableTarget);
     
+		
+		$("#add2DeleteBtn").click(function (ev){
+			moveOptions(document.getElementById('frmListPats'), document.getElementById('frmDelPats'));
+		});
+		
+		$("#rmvDeleteBtn").click(function (ev) {
+			moveOptions(document.getElementById('frmDelPats'), document.getElementById('frmListPats'));
+		});
     
+		$("#btnReset").click(function (ev) {
+			$("#frmPatsDeletion")[0].reset();
+			$(delPats).empty();
+			$(listPats).empty();
+		})
+		
 		$("#btnSend").click(function(ev) {
 			// getDump();
-			var prjid = $(comboProj).val();
-			var grpid = $(comboGrp).val();
-			var intrvid = $(comboIntrv).val();
-			var secOrder = $(comboSec).val();
+			var patCodes = [];
+			$("select#frmDelPats > option").each(function (index) {
+				patCodes.push($(this).val());
+			});
 			
-			grpid = grpid == -1? '': grpid;
-			var dumpUrl = APP_ROOT+'/servlet/AjaxUtilServlet?what=dump&prjid='+prjid+'&grpid=';
-			dumpUrl += grpid+'&intrvid='+intrvid+'&secid='+secOrder;
-			
-			document.location.href = dumpUrl;
-			$(theForm)[0].reset();
+			that.sendPostReq(patCodes);
 		});
 		
 		
-		$("#btnReset").focus(function (ev) {
+		$("#btnClr").click(function (ev) {
 //			$(this).css('border', '1px solid darkblue');
-			$(theForm)[0].reset();
+			$(delPats).empty();
 		});
 		
   }
@@ -120,9 +161,9 @@ var DelPatsFormCtrl = function () {
 	
 	
   return {
-		fillIntrvs: fillIntrvs,
 		fillHospitals: fillHospitals,
-		fillSubjects: fillSubjects,
+		retrievePats: retrievePats,
+		sendPostReq: sendPostReq,
 //		createClone: createClone,
 //		enableTarget: enableTarget,
     init: init

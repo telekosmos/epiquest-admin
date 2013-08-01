@@ -48,6 +48,8 @@ System.out.println("Principal's name: "+user);
   <!-- Le styles -->
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+  
+  <link href="../css/overlay.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {
@@ -184,19 +186,27 @@ System.out.println("Principal's name: "+user);
   <div class="page-header page-title">
     <h1>Delete subjects</h1>
   </div>
-  <div class="description-list">
-    <ul>
-      <li><span class="text-error">Mind what you are doing: deleted patients only can be retrieved from backup and it takes a bit</span></li>
-      <li>Filter the patients you want to delete by choosing project, groups and types</li>
-      <li>Then choose the filtered patients from the list just below the combo boxes</li>
-      <li>When you are done, just click 'Delete' button to proceed</li>
-      <li>When finished, the form is reset and the list of deletions is showed below the list boxes</li>
-    </ul>
-  </div>
+  <div class="row-fluid">
+	  <div class="span6 description-list" style="height:140px;">
+	  	<br/>
+	    <ul>
+	      <li><span class="text-error">Mind what you are doing: deleted patients only can be retrieved from backup and it takes a bit</span></li>
+	      <li>Filter the patients you want to delete by choosing project, groups and types</li>
+	      <li>Then choose the filtered patients from the list just below the combo boxes</li>
+	      <li>When you are done, just click 'Delete' button to proceed</li>
+	      <li>When finished, the form is reset and the list of deletions is showed below the list boxes</li>
+	    </ul>
+	  </div>
+	  <div class="span6 well" style="overflow-y: auto;height:140px;" id="responseDiv">
+	  	No previous operation message	    
+	  </div>
+	</div>
 </div> <!-- EO container -->
 
 <div class="container-fluid">
-	<form name="frmDelPats" id="frmDelPats">
+	<form name="frmPatsDeletion" id="frmPatsDeletion">
+	<input type="hidden" name="what" value="dp" />
+	
   <div class="row-fluid">
     <div class="offset2 span2">
       <label>Project</label>
@@ -237,32 +247,32 @@ System.out.println("Principal's name: "+user);
 
     <div class="span2">
       <label>Case/Control</label>
-      <select class="input-block-level">
-        <option value="">All</option>
+      <select class="input-block-level" id="frmSubjType" name="frmSubjType">
+        <option value="-1">All</option>
         <option value="1">Case</option>
         <option value="2">Control</option>
-        <optoin value="3">Familiar</option>
+        <option value="3">Familiar</option>
       </select>
     </div>
   </div> <!-- EO row-fluid for combo boxes -->
   
   <hr/>
 
-  <div class="row-fluid" style="margin: 0% 0% 0% -4%;">
+  <div class="row-fluid" xstyle="margin: 0% 0% 0% -4%;">
     <div class="offset2 span8 well">
 
-      <div class="span5" style="margin-left:4%" id="frmListPats" name="frmListPats">
+      <div class="span5" style="margin-left:4%">
         <label>Retrieved subjects</label>
-        <select size="5" class="input-block-level">
+        <select size="8" class="input-block-level" id="frmListPats" name="frmListPats" multiple="multiple">
         </select>
       </div>
       <div class="span1" style="padding: 5% 0%;">
-        <button class="btn btn-mini btn-primary btn-block" type="button" style="margin-top: 20%"><i class="icon-arrow-right icon-white"></i></button>
-        <button class="btn btn-mini btn-primary btn-block" type="button"><i class="icon-arrow-left icon-white"></i></button>
+        <button class="btn btn-primary btn-block" id="add2DeleteBtn" type="button" style="margin-top: 50%;"><i class="icon-arrow-right icon-white"></i></button>
+        <!-- <button class="btn btn-mini btn-primary btn-block" id="rmvDeleteBtn" type="button"><i class="icon-arrow-left icon-white"></i></button> -->
       </div>
       <div class="span5">
         <label>Selected subjects (for deletion)</label>
-        <select size="5" class="input-block-level" id="frmDelPats" name="frmDelPats">
+        <select size="8" class="input-block-level" id="frmDelPats" name="frmDelPats" multiple="multiple">
         <!-- 
           <option value="100">selected</option>
           <option value="100">selected</option>
@@ -280,14 +290,14 @@ System.out.println("Principal's name: "+user);
 
   <div class="row-fluid">
     <div class="offset2 span2">
-      <button type="button" class="btn btn-inverse"><i class="icon-refresh icon-white"></i> Reset</button>
+      <button type="button" class="btn btn-inverse" id="btnReset"><i class="icon-refresh icon-white"></i> Reset</button>
     </div>
 
-    <div class="offset3 span2" xstyle="margin:0% 64%;">
-      <button type="button" class="btn btn-inverse"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
+    <div class="offset3 span2" style="text-align: right;"> 
+      <button type="button" class="btn btn-inverse" id="btnSend"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
     </div>
     <div class="span2">
-      <button type="button" class="btn btn-inverse"><i class="icon-repeat icon-white"></i> Clear</button>
+      <button type="button" class="btn btn-inverse" id="btnClr"><i class="icon-repeat icon-white"></i> Clear</button>
     </div>
  
   </div> <!-- EO row-fluid list patients -->
@@ -307,10 +317,41 @@ System.out.println("Principal's name: "+user);
     </p>
   </div>
 </div>
-
-<script type="text/javascript" src="../assets/js/jquery-1.9.1.js"></script>
 -->
 
-<script type="text/javascript" src="../assets/js/bootstrap.js"></script>
+<%-- this is to create the modal "dialog" to run the progress bar --%>
+<div id="overlay" style="visibility: hidden;">
+	<div>
+		<p style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; text-align:center;">
+		Processing...<br/>
+		<img src="../img/ajax-loader-trans.gif" alt="Processing..." />
+		</p>
+	</div>
+</div>
+
+<%--
+	if (hibSes != null)
+		hibSes.close();
+--%>
+
+
+<script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
+
+<script type="text/javascript" src="../js/admin-cfg.js"></script>
+
+<script type="text/javascript" src="../js/yahoo/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../js/yahoo/connection-debug.js"></script>
+<script type="text/javascript" src="../js/yahoo/json-debug.js"></script>
+
+<script type="text/javascript" src="../js/overlay.js"></script>
+<script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
+<script type="text/javascript" src="../js/mixed2b.js"></script>
+
+<script type="text/javascript" src="../js/delpatients-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/delpatients.js"></script>
+
+<script type="text/javascript" src="../js/wz_tooltip.js"></script>
+
+<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
 </body>
 </html>

@@ -2,13 +2,16 @@
 var Overlay = function () {
 
   function show () {
-  		el = document.getElementById("overlay");
-  		el.style.visibility =  "visible";
+		// el = document.getElementById("overlay");
+		// el.style.visibility =  "visible";
+		// $("#overlay").show();
+		$("#overlay").css("visibility", "visible");
   };
   
   function hide () {
-    el = document.getElementById("overlay");
-  	el.style.visibility =  "hidden";    
+    // el = document.getElementById("overlay");
+  	// el.style.visibility =  "hidden";
+		$("#overlay").css('visibility', 'hidden');    
   }
   
   

@@ -1,7 +1,13 @@
 package org.cnio.appform.servlet;
 
+
+import org.inb.dbtask.*;
+import org.inb.util.*;
+
 import java.io.IOException;
 import javax.servlet.ServletException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -19,9 +25,7 @@ import org.hibernate.Session;
 
 import org.json.simple.*;
 
-import java.util.List;
-import java.util.Iterator;
-import java.util.Enumeration;
+import java.util.*;
 
 import java.io.PrintWriter;
 import java.net.URLDecoder;
@@ -41,8 +45,16 @@ import java.net.URLEncoder;
    static final String INTRV = "intrvs";
    static final String SECTION = "secs";
    static final String HOSPITALS = "hosp";
+   static final String SUBJECT = "subj";
    
    static final String DBDUMP = "dump";
+   
+   private String dbUser;
+   private String dbPasswd;
+   private String dbName;
+   private String dbHost;
+   private String dbPort;
+   
    
     /* (non-Java-doc)
 	 * @see javax.servlet.http.HttpServlet#HttpServlet()
@@ -50,6 +62,18 @@ import java.net.URLEncoder;
 	public AjaxUtilServlet() {
 		super();
 	}   	
+	
+	
+	public void init (ServletConfig config) throws ServletException {
+		super.init(config);
+    ServletContext context = getServletContext();
+    
+    dbName = context.getInitParameter("dbName");
+    dbPasswd = context.getInitParameter("dbPassword");
+    dbUser = context.getInitParameter("dbUserName");
+    dbHost = context.getInitParameter("dbServerName");
+    dbPort = context.getInitParameter("dbPort");
+	}
 	
 /* 
  * @see javax.servlet.http.HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -66,7 +90,6 @@ import java.net.URLEncoder;
 		List<Role> roles = null;
 		boolean nothing = false;
 		
-
 		// set Content Types
 		if (what.equals(AjaxUtilServlet.DBDUMP))
 			response.setHeader("Content-type", "text/x-csv");
@@ -77,6 +100,7 @@ import java.net.URLEncoder;
 				
 		PrintWriter out = response.getWriter();
 		Session hibSes = HibernateUtil.getSessionFactory().openSession();
+			
 		AppUser theUsr = null;
 		if (usrId != null)
 			theUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
@@ -105,32 +129,32 @@ import java.net.URLEncoder;
 			groups = (theUsr == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(theUsr);
 			if (groups.size() == 0){
 				nothing = true;
-				jsonResp = "{\"groups\":[]}";
+				jsonResp = "{\"totalCount\": 0, \"groups\":[]}";
 			}
 			else {
-				jsonResp = "{\"groups\":[";
+				jsonResp = "{\"totalCount\": 0, \"groups\":[";
 				for (AppGroup grp: groups) 
-					jsonResp += "{\"name\":\""+URLEncoder.encode(grp.getName(), "UTF-8") +
+					jsonResp += "{\"name\":\""+ grp.getName() +
 												"\",\"id\":"+grp.getId()+", \"type\":"+grp.getType().getId()+"},";
 			}
 		}
 		
-		if (what.equals(AjaxUtilServlet.HOSPITALS)) {
+		else if (what.equals(AjaxUtilServlet.HOSPITALS)) {
 			String prjId = request.getParameter("prjid");
-			String grpId = request.getParameter("grpid");
+			String grpId = request.getParameter("grpCode");
 			
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
 			groups = group.getContainees();
 			
 			if (groups.size() == 0){
 				nothing = true;
-				jsonResp = "{\"groups\":[]}";
+				jsonResp = "{\"totalCount\": 0, \"groups\":[]}";
 			}
 			else {
-				jsonResp = "{\"groups\":[";
+				jsonResp = "{\"totalCount\": "+groups.size()+", \"groups\":[";
 				for (AppGroup grp: groups) 
-					jsonResp += "{\"name\":\""+URLEncoder.encode(grp.getName(), "UTF-8") +
-												"\",\"id\":"+grp.getId()+", \"type\":"+grp.getType().getId()+"},";
+					jsonResp += "{\"name\":\""+grp.getName() +
+												"\",\"id\":"+grp.getId()+", \"code\":\""+grp.getCodgroup()+"\"},";
 			}
 		}
 		
@@ -139,10 +163,10 @@ import java.net.URLEncoder;
 			prjs = (theUsr == null)? usrCtrl.getAllProjects(): usrCtrl.getProjects(theUsr);
 			if (prjs.size() == 0){
 				nothing = true;
-				jsonResp = "{\"prjs\":[]}";
+				jsonResp = "{\"totalCount\": 0, \"prjs\":[]}";
 			}
 			else {
-				jsonResp = "{\"prjs\":[";
+				jsonResp = "{\"totalCount\": "+prjs.size()+", \"prjs\":[";
 				for (Project prj: prjs) 
 					jsonResp += "{\"name\":\""+URLEncoder.encode(prj.getName(), "UTF-8")+
 											"\",\"id\":"+prj.getId()+
@@ -155,10 +179,10 @@ import java.net.URLEncoder;
 			roles = (theUsr == null)? usrCtrl.getAllRoles(): usrCtrl.getRoleFromUser(theUsr);
 			if (roles.size() == 0){
 				nothing = true;
-				jsonResp = "{\"roles\":[]}";
+				jsonResp = "{\"totalCount\": 0, \"roles\":[]}";
 			}
 			else {
-				jsonResp = "{\"roles\":[";
+				jsonResp = "{\"totalCount\": "+roles.size()+", \"roles\":[";
 				for (Role role: roles) 
 					jsonResp += "{\"name\":\""+URLEncoder.encode(role.getName(), "UTF-8")+
 												"\",\"id\":"+role.getId()+"},";
@@ -177,10 +201,10 @@ import java.net.URLEncoder;
 			intrvs = intrvCtrl.getInterviews(prjId, grpIdInt);
 			if (intrvs.size() == 0) {
 				nothing = true;
-				jsonResp = "{\"intrvs\":[]}";
+				jsonResp = "{\"totalCount\": 0, \"intrvs\":[]}";
 			}
 			else {
-				jsonResp = "{\"intrvs\":[";
+				jsonResp = "{\"totalCount\": "+intrvs.size()+", \"intrvs\":[";
 				for (Interview intrv: intrvs) 
 					jsonResp += "{\"name\":\""+intrv.getName()+
 											"\",\"id\":"+intrv.getId()+"},";
@@ -196,19 +220,45 @@ import java.net.URLEncoder;
 			
 			if (sections.size() == 0) {
 				nothing = true;
-				jsonResp = "{\"sections\":[]}";
+				jsonResp = "{\"totalCount\": 0, \"sections\":[]}";
 			}
 			else {
-				jsonResp = "{\"sections\":[";
+				jsonResp = "{\"totalCount\": "+sections.size()+", \"sections\":[";
 				for (Section sec: sections) 
 					jsonResp += "{\"name\":\""+sec.getName()+
 											"\",\"id\":"+sec.getId()+", \"order\":"+sec.getSectionOrder()+"},";
 			}
 		}
 		
+		
+		else if (what.equals(AjaxUtilServlet.SUBJECT)) {
+			String prjCode = request.getParameter("prjid");
+			String hospCode = request.getParameter("grpCode");
+			String typeCode = request.getParameter("subjType"); // "", 1, 2 or 3
+			
+System.out.println("when getting subjects, hibSes is "+hibSes.isOpen());
+			List<Patient> pats = 
+						HibernateUtil.getPatiens4ProjsGrps(hibSes, prjCode, hospCode, typeCode);
+			
+			if (pats.size() == 0) {
+				nothing = true;
+				jsonResp = "{\"totalCount\": 0, \"subjects\":[]}";
+			}
+			else {
+				jsonResp = "{\"totalCount\": "+pats.size()+", \"subjects\":[";
+				for (Patient pat: pats) 
+					jsonResp += "{\"codpatient\":\""+pat.getCodpatient()+
+											"\",\"id\":"+pat.getId()+"},";
+			}
+		}
+		
+		
 // POST PERFORMANCE
 		else if (what.equalsIgnoreCase("perf")) {
 			doPost (request, response);
+			if (hibSes.isOpen())
+				hibSes.close();
+			
 			return;
 		}
 		
@@ -231,9 +281,10 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			nothing = true;
 		}
 		
+		
 		else {
 			nothing = true;
-			jsonResp = "{\"msg\":\"Nothing to retrieve\"}";
+			jsonResp = jsonResp.length() > 0? jsonResp: "{\"msg\":\"Nothing to retrieve\"}";
 			out.print(getServletInfo());
 		}
 		
@@ -242,6 +293,9 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 									jsonResp.substring(0, jsonResp.length()-1);
 			jsonResp += "]}";
 		}
+		
+		if (hibSes.isOpen())
+			hibSes.close();
 		
 		out.print (jsonResp);
 	}  	
@@ -255,7 +309,9 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String what = request.getParameter("what");
 		String patId = request.getParameter("patid"), jsonStr;
+		PrintWriter pwr = response.getWriter();
 		
+		// This is to remove system users from the application or so (basically, not used!)
 		if (what.equalsIgnoreCase("rmv")) {
 			String paramUsers = request.getParameter("users");
 			String[] users = paramUsers.split(",");
@@ -265,7 +321,6 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			for (String user: users)
 				Singleton.getInstance().rmvUser(user);
 			
-			PrintWriter pwr = response.getWriter();
 			pwr.print(jsonStr);
 			
 			return;
@@ -278,13 +333,132 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 //			response.setHeader("Content-type", "application/json; charset=UTF-8");
 			response.setHeader("Content-type", "application/json");
 			response.setCharacterEncoding("UTF-8");
-			PrintWriter pwr = response.getWriter();
 			pwr.print(jsonStr);
 			
 			return;
 		}
-			
 		
+	// DELETE PATIENTS ////////////////////////////////////////////////////////
+		else if (what.equals("dp")) { // delete patients
+			String subjects = request.getParameter("pats");
+			String dbUrl = "jdbc:postgresql://"+this.dbHost+":"+this.dbPort+"/"+this.dbName;
+			
+			System.out.println("Deleting patients: "+subjects);			
+			
+			FixingTasksHub fth = new FixingTasksHub (dbUrl, this.dbUser, this.dbPasswd);
+			ArrayList<String> listCodsPatient = new ArrayList<String>();
+			String patsArray[] = subjects.split(",");
+			boolean simulation = true;
+			for (int i=0; i<patsArray.length; i++)
+				listCodsPatient.add(patsArray[i]);
+			
+			HashMap<String, Object> deletions =
+	      (HashMap<String, Object>)fth.deletePatients(this.dbHost, 
+	      		this.dbUser, 
+	      		this.dbPasswd, 
+	      		simulation, listCodsPatient);
+			ArrayList<String> noDeletions = fth.getNoDeletedPatients();
+			String jsonOut = "";
+			
+			Integer deletedPats = (Integer)deletions.get("rows_affected");
+
+	    HashMap<String, HashMap<String, Integer>> patientSamples =
+	                          (HashMap)deletions.get("pats_with_samples");
+	    Iterator itOne = patientSamples.entrySet().iterator();
+	    String jsonPat = "";
+	    while (itOne.hasNext()) {
+	      Map.Entry pair = (Map.Entry)itOne.next();
+	      String patientCode = (String)pair.getKey();
+
+	      HashMap samples = (HashMap)pair.getValue();
+	      Iterator sampleIt = samples.entrySet().iterator();
+	      String jsonSamples = "\"samples\": [";
+	      while (sampleIt.hasNext()) {
+	        Map.Entry samplePair = (Map.Entry)sampleIt.next();
+	        jsonSamples += "{\"sample_code\":\""+samplePair.getKey()+"\",";
+	        jsonSamples += "\"num_of_answers\": "+samplePair.getValue()+"},";
+	      }
+	      jsonSamples = jsonSamples.substring(0, jsonSamples.length()-1)+"]";
+
+	      jsonPat += "{\"patient_code\": \""+patientCode+"\", ";
+	      jsonPat += jsonSamples+"},";
+	    }
+	    jsonPat = jsonPat.substring(0, jsonPat.length()-1);
+
+	    ArrayList<String> patients_affected = (ArrayList)deletions.get("pats_affected");
+	    String jsonPatsAff = "\"patients_deleted\": [";
+	    for (String patientCode: patients_affected)
+	      jsonPatsAff += "\""+patientCode+"\",";
+
+	    jsonPatsAff = jsonPatsAff.substring(0, jsonPatsAff.length()-1)+"]";
+
+	    jsonOut = "{\"deletions\": "+deletedPats+", " + jsonPatsAff+","+
+	      " \"pats_with_samples\":["+jsonPat+"]}";
+	    
+	    System.out.println(jsonOut);
+	    pwr.print(jsonOut);
+	    
+	    return;
+		} // EO DELETE PATIENTS
+		
+			
+		/*
+		if (what.equals("dp")) { // delete patients
+			String subjects = request.getParameter("pats");
+			String dbUrl = "jdbc:postgresql://"+this.dbHost+":"+this.dbPort+"/"+this.dbName;
+			
+			FixingTasksHub fth = new FixingTasksHub(dbUrl, this.dbUser, this.dbPasswd);
+			ArrayList<String> listCodsPatient = new ArrayList<String>();
+			String patsArray[] = subjects.split(",");
+			for (int i=0; i<patsArray.length; i++)
+				listCodsPatient.add(patsArray[i]);
+			
+			HashMap<String, Object> deletions =
+	      (HashMap<String, Object>)fth.deletePatients(this.dbHost, 
+	      		this.dbUser, 
+	      		this.dbPasswd, 
+	      		true, listCodsPatient);
+			ArrayList<String> noDeletions = fth.getNoDeletedPatients();
+			String jsonOut = "";
+			
+			Integer deletedPats = (Integer)deletions.get("rows_affected");
+
+	    HashMap<String, HashMap<String, Integer>> patientSamples =
+	                          (HashMap)deletions.get("pats_with_samples");
+	    Iterator itOne = patientSamples.entrySet().iterator();
+	    String jsonPat = "";
+	    while (itOne.hasNext()) {
+	      Map.Entry pair = (Map.Entry)itOne.next();
+	      String patientCode = (String)pair.getKey();
+
+	      HashMap samples = (HashMap)pair.getValue();
+	      Iterator sampleIt = samples.entrySet().iterator();
+	      String jsonSamples = "\"samples\": [";
+	      while (sampleIt.hasNext()) {
+	        Map.Entry samplePair = (Map.Entry)sampleIt.next();
+	        jsonSamples += "{\"sample_code\":\""+samplePair.getKey()+"\",";
+	        jsonSamples += "\"num_of_answers\": "+samplePair.getValue()+"},";
+	      }
+	      jsonSamples = jsonSamples.substring(0, jsonSamples.length()-1)+"]";
+
+	      jsonPat += "{\"patient_code\": \""+patientCode+"\", ";
+	      jsonPat += jsonSamples+"},";
+	    }
+	    jsonPat = jsonPat.substring(0, jsonPat.length()-1);
+
+	    ArrayList<String> patients_affected = (ArrayList)deletions.get("pats_affected");
+	    String jsonPatsAff = "\"patients_deleted\": [";
+	    for (String patientCode: patients_affected)
+	      jsonPatsAff += "\""+patientCode+"\",";
+
+	    jsonPatsAff = jsonPatsAff.substring(0, jsonPatsAff.length()-1)+"]";
+
+	    jsonOut = "{\"deletions\": "+deletedPats+", " + jsonPatsAff+","+
+	      " \"pats_with_samples\":["+jsonPat+"]}";
+	    System.out.println("REAL JSON:");
+	    System.out.println(jsonOut);
+		}
+		*/
 		
 		Session ses = HibernateUtil.getSessionFactory().openSession();
 		Patient pat = (Patient)ses.get(Patient.class, Integer.decode(patId));
@@ -292,7 +466,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 		
 // the query string from the items on the interview is:
 // what=perf&q=q-NNNN-OO-GG&val=XXX&patid=patId
-		String quesId = request.getParameter("q"); 
+		String quesId = request.getParameter("q");
 		String paramVal = request.getParameter("val");
 		paramVal = URLDecoder.decode (paramVal, "UTF-8");
 		paramVal = (paramVal == "")? org.cnio.appform.util.RenderEng.MISSING_ANSWER:
@@ -344,7 +518,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	 	else
 	 		jsonStr = "{\"res\":0,\"itemname\":\""+quesId+"\",\"msg\":\"Value '"+paramVal+"' could not be saved\"}";
 	 		
-	 	PrintWriter pwr = response.getWriter();
+	 	// PrintWriter pwr = response.getWriter();
 	 	pwr.print (jsonStr);
 	}
 	 	
@@ -413,7 +587,10 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 		
 		return jsonStr;
 	}
-	 	
+	
+	
+	
+		
 	
 	 	
 	

@@ -1161,7 +1161,8 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 	public static List<String> getPatientsFromCode (Session hibSes, String patCode) {
 		
 		Criteria ctPats = hibSes.createCriteria(Patient.class).
-		 add(like("codpatient", patCode+"%"));
+		 				add(like("codpatient", patCode+"%")).
+		 				addOrder(Order.asc("codpatient"));
 		
 		List<Patient> pats = ctPats.list();
 		List<String> patCodes = new ArrayList<String>();
@@ -1171,5 +1172,43 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 		
 		return patCodes;
 	}
+	
+	/**
+	 * Retrieves the patients which have interviews for a project and (secondary) group
+	 * (if present) and type (if present). 
+	 * @param prjCode
+	 * @param grpCode
+	 * @param type
+	 * @return
+	 */
+	
+	public static List<Patient> getPatiens4ProjsGrps (Session hibSes, 
+																	String prjCode, String grpCode, String type) {
+		String patCode = prjCode;
+		
+		if (grpCode != null && !grpCode.equals(""))
+			patCode += grpCode;
+		
+		if (type != null && !type.equals("-1"))
+			patCode += type.toString();
+		
+		String likeCriteria = patCode+"%";
+		System.out.println("Shhhhhhit: hibSes.open?"+hibSes.isOpen()+"("+hibSes.toString()+")");
+		Criteria ctPats = hibSes.createCriteria(Patient.class).
+		 												add(like("codpatient", likeCriteria)).
+		 												addOrder(Order.asc("codpatient"));
+		
+		List<Patient> pats = ctPats.list();
+		/*
+		List<String> patCodes = new ArrayList<String>();
+		for (Patient pat: pats)
+			patCodes.add(pat.getCodpatient());
+		*/
+		return pats;
+	}
+	
+	
+	
+	
 }
 
