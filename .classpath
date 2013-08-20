@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="/Users/bioinfo/Development/Projects/lib/jbehave-core-2.3.jar"/>
 	<classpathentry kind="lib" path="/Users/bioinfo/Development/Projects/lib/junit-dep-4.5.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/hibernate-annotations"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/sqlfixer"/>
 	<classpathentry kind="output" path="WEB-INF/classes"/>
 </classpath>

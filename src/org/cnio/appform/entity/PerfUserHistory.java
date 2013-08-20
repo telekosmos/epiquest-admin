@@ -28,13 +28,13 @@ public class PerfUserHistory {
 //	@ManyToOne (cascade={CascadeType.ALL})
 
 	@ManyToOne (targetEntity=AppUser.class)
-	@JoinColumn(name="coduser")
+	@JoinColumn(name="coduser", nullable=true)
 	@ForeignKey(name="user_history_fk")
 	private AppUser theUser;
 	
 //	@ManyToOne (cascade={CascadeType.ALL})
 	@ManyToOne (targetEntity=Performance.class)
-	@JoinColumn(name="codperf")
+	@JoinColumn(name="codperf", nullable=true)
 	@ForeignKey(name="perf_history_fk")
 	private Performance performance;
 	

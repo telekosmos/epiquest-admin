@@ -118,10 +118,11 @@ var addOption = function (id, name) {
       
 			var numOfDeleted = jResponse.deletions;
 			var patsDeleted = jResponse.patients_deleted; // an array!!
+			var sim = jResponse.sim;
 			
 			var patsWithSamples = jResponse.pats_with_samples;
-			
-			var innerContent = numOfDeleted + " subjects where removed<br/>";
+			var innerContent = sim? "(<strong>Simulation</strong> update) ": "(<strong>Live</strong> update) ";
+			innerContent += numOfDeleted + " subjects where removed<br/>";
 	  	innerContent += patsWithSamples.length + " patients with samples were found and not deleted<br/>";
 			innerContent += "<ul>";
 			for (i=0; i<patsWithSamples.length; i++) {
@@ -130,7 +131,7 @@ var addOption = function (id, name) {
 				
 				innerContent += "<li><strong>"+patInfo.patient_code+"</strong> (samples: ";
 				for (j=0; j<samples.length; j++)
-					innerContent += samples[i].sample_code+",";
+					innerContent += samples[j].sample_code+",";
 					
 				innerContent = innerContent.substring(0, innerContent.length-1);
 				innerContent += ")</li>"

@@ -49,7 +49,7 @@ System.out.println("Principal's name: "+user);
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
   
-  <!link href="../css/overlay.css" rel="stylesheet">
+  <link href="../css/overlay.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {
@@ -135,6 +135,15 @@ System.out.println("Principal's name: "+user);
       border-radius:5px;
     }  
     
+    
+    .typeahead {
+			max-height: 200px;
+			overflow-y: auto;
+			overflow-x: hidden;
+			margin-top: 0px;
+		}
+    
+    
   </style>
   
   <title>EPIQUEST Admin</title>
@@ -150,8 +159,8 @@ System.out.println("Principal's name: "+user);
     <h1>Delete interviews of patients</h1>
   </div>
   <!-- Intro -->
-  <div class="row-fluid" style="padding-top: 2%;padding-bottom: 5%;">
-    <div class="span12">
+  <div class="row-fluid" style="padding-top: 2%;xpadding-bottom: 5%;">
+    <div class="span6 description-list">
       <ul>
         <li><span class="text-info">Autocomplete</span>: just start typing the patient code</li>
         <li><span class="text-info">Autocomplete</span>: codes matching while typing will be showed. Choosing one of them set the current subject</li>
@@ -159,7 +168,10 @@ System.out.println("Principal's name: "+user);
         <li>Select the interviews to be deleted and click on the Delete button</li>
       </ul>
     </div>
-  </div>
+    <div class="span6 well" style="overflow-y: auto;height:140px;" id="responseDiv">
+	  	No previous operation message	    
+	  </div>
+  </div> <!-- EO row-fluid -->
 </div> <!-- EO container -->
 
 
@@ -168,8 +180,10 @@ System.out.println("Principal's name: "+user);
   <div class="row-fluid">
     <div class="span6 offset3">
       <div class="input-append" style="width:100%;">
-        <input class="span2" type="text" id="type_code" style="width:50%;">
-        <button class="btn btn-medium" style="padding-bottom:1.4%;" id="btnSearch"><i class="icon-search"></i></button>  
+        <input type="text" class="typeahead" id="type_code" style="width:50%;">
+        <button type="button" class="btn btn-medium" style="padding-bottom:1.4%;" id="btnSearch">
+        	<i class="icon-search"></i>
+        </button>  
       </div>
     </div>
   </div>
@@ -177,21 +191,31 @@ System.out.println("Principal's name: "+user);
   <div class="row-fluid">
 	  <div class="span6 offset3 box-form">
 	    <legend>Interviews</legend>
-	    <select class="input-block-level" id="frmSrcPrj" name="frmSrcPrj" multiple="multiple" size="4">
+	    <select class="input-block-level" id="frmListIntrvs" name="frmListIntrvs" multiple="multiple" size="4">
+	      <!-- 
 	      <option value="-1">Identificación de paciente</option>
 	      <option value="-1">QES_Español</option>
 	      <option value="-1">Recogida_de_muestras</option>
 	      <option value="-1">Family questionnaire</option>
+	      -->
 	    </select>
 	    <div style="text-align:right;">
-	    	<a href="#" data-toggle="tooltip" data-placement="top" title="Delete selected interviews"><button type="button" class="btn btn-inverse" id="btnSubmit">Delete</button></a>
+	    	
+	    	<label class="checkbox inline" style="padding-right:2%">
+					<input type="checkbox" id="chkSimulation" checked="checked"> Simulation
+				</label>
+				
+	    	<a href="#" data-toggle="tooltip" data-placement="top" title="Delete selected interviews">
+	    		<button type="button" class="btn btn-inverse" id="btnSubmit">Delete</button>
+	    	</a>
+	    	<a href="#" data-toggle="tooltip" data-placement="top" title="Clear search box and list">
+	    		<button type="button" class="btn btn-inverse" id="btnClear">Clear</button>
+	    	</a>
 	    </div>
 	  </div>
   </div>
   </form>
 </div>
-
-
 
 
 </div> <!-- EO wrap -->
@@ -233,8 +257,8 @@ System.out.println("Principal's name: "+user);
 <script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
 <script type="text/javascript" src="../js/mixed2b.js"></script>
 
-<script type="text/javascript" src="../js/delpatients-ajaxresp.js"></script>
-<script type="text/javascript" src="../js/delpatients.js"></script>
+<script type="text/javascript" src="../js/delinterviews-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/delinterviews.js"></script>
 
 <script type="text/javascript" src="../js/wz_tooltip.js"></script>
 

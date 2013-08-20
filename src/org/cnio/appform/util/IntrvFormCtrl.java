@@ -195,6 +195,36 @@ public class IntrvFormCtrl {
 	
 	
 	
+	
+	/**
+	 * Gets the list of interviews performed for a subject.
+	 * @param subjCode, the subject code
+	 * @return the list of interviews
+	 */
+	public List<Object[]> getInterviews4Subject (String subjCode) {
+		/*
+		String hqlPat = "from Patient where codpatient=:patcode";
+		Query hqlQry = hibSes.createQuery(hqlPat);
+		hqlQry.setString("patcode", subjCode);
+		Patient pat = (Patient)hqlQry.uniqueResult();
+		*/
+		
+		String sqlQry = "select i.idinterview, i.name " +
+				"from patient p, performance pf, interview i " +
+				"where p.codpatient = 'xxx'" +
+				" and p.idpat = pf.codpat" +
+				" and pf.codinterview = i.idinterview	order by 2;";
+		
+		sqlQry = sqlQry.replaceFirst("xxx", subjCode);
+		
+		SQLQuery sql = hibSes.createSQLQuery(sqlQry);
+		List results = sql.list();
+		
+		return results;
+	}
+	
+	
+	
 /**
  * Gets a row of the Performance table based mostly on codPat and usrId. If the
  * interview was performed by another user in the same group than the current

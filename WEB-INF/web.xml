@@ -86,6 +86,11 @@
 	</servlet>
 	
 	<servlet>
+		<servlet-name>qryservlet</servlet-name>
+		<servlet-class>org.cnio.appform.servlet.QryServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
 		<description>"Simple" servlet to set the active groups</description>
 		<display-name>MngGroupsServlet</display-name>
 		
@@ -141,6 +146,11 @@
 	<servlet-mapping>
 		<servlet-name>AjaxUtilServlet</servlet-name>
 		<url-pattern>/servlet/AjaxUtilServlet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>qryservlet</servlet-name>
+		<url-pattern>/servlet/qryservlet</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

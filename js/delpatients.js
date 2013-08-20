@@ -11,6 +11,7 @@ var DelPatsFormCtrl = function () {
   var comboProj, comboCountry, comboHosp, comboIntrv, listPats, delPats;
 	// var theForm;
   
+	var simulation = true;
 	
 	/**
 	 * Get questionnaires based on the project and group they belong to
@@ -80,7 +81,7 @@ var DelPatsFormCtrl = function () {
 	 */
 	var sendPostReq = function (patCodesList) {
 		var xReq = new AjaxReq();
-		var postData = "what=dp"; // dp stands for Delete Patient
+		var postData = "what=dp&sim="+simulation; // dp stands for Delete Patient
 		
 		var listEmpty = patCodesList.length == 0;
 		
@@ -96,11 +97,6 @@ var DelPatsFormCtrl = function () {
 	}
 	
 	
-	
-	
-	
-	
-	
 	var init = function () {
 		
 		var that = this;
@@ -108,6 +104,16 @@ var DelPatsFormCtrl = function () {
 		console.log("Dump control initializing...");
     ajaxResp = new DelPatsAjaxResponse ();
     
+		simulation = $("#chkSimulation").is(":checked");
+		$("label.checkbox").tooltip({
+			title: "Does not perform a real delete",
+			placement: "bottom"
+		});
+		
+		$("#chkSimulation").change(function () {
+			simulation = !simulation;
+		});
+		
 		comboProj = $("#frmPrj");
 		comboCountry = $("#frmCountry");
 		comboHosp = $("#frmHospital");
@@ -146,7 +152,7 @@ var DelPatsFormCtrl = function () {
 			$("select#frmDelPats > option").each(function (index) {
 				patCodes.push($(this).val());
 			});
-			
+			overlay.show();
 			that.sendPostReq(patCodes);
 		});
 		

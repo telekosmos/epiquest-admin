@@ -47,6 +47,8 @@ import java.net.URLEncoder;
    static final String HOSPITALS = "hosp";
    static final String SUBJECT = "subj";
    
+   static final String PATS_FROM_TEXT = "pats";
+   
    static final String DBDUMP = "dump";
    
    private String dbUser;
@@ -68,11 +70,12 @@ import java.net.URLEncoder;
 		super.init(config);
     ServletContext context = getServletContext();
     
-    dbName = context.getInitParameter("dbName");
-    dbPasswd = context.getInitParameter("dbPassword");
-    dbUser = context.getInitParameter("dbUserName");
-    dbHost = context.getInitParameter("dbServerName");
-    dbPort = context.getInitParameter("dbPort");
+    this.dbName = context.getInitParameter("dbName");
+    this.dbPasswd = context.getInitParameter("dbPassword");
+    this.dbUser = context.getInitParameter("dbUserName");
+    this.dbHost = context.getInitParameter("dbServerName");
+    this.dbPort = context.getInitParameter("dbPort");
+		this.dbPort = this.dbPort == null? "5432": this.dbPort;
 	}
 	
 /* 
@@ -253,6 +256,20 @@ System.out.println("when getting subjects, hibSes is "+hibSes.isOpen());
 		}
 		
 		
+		// gets patient codes from the part of the code (autocomplete oriented)
+		else if (what.equals(AjaxUtilServlet.PATS_FROM_TEXT)) {
+			String patCode = (String)request.getParameter("q");
+			List<String> pats = HibernateUtil.getPatientsFromCode(hibSes, patCode);
+			
+			String[] patCodes = new String[pats.size()];
+			pats.toArray(patCodes);
+			jsonResp = "{\"subjects\":[";
+			for (String subjcode: patCodes)
+				jsonResp += "\""+subjcode+"\",";
+			
+		}
+		
+		
 // POST PERFORMANCE
 		else if (what.equalsIgnoreCase("perf")) {
 			doPost (request, response);
@@ -309,6 +326,8 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String what = request.getParameter("what");
 		String patId = request.getParameter("patid"), jsonStr;
+		
+		response.setCharacterEncoding("UTF-8");
 		PrintWriter pwr = response.getWriter();
 		
 		// This is to remove system users from the application or so (basically, not used!)
@@ -341,6 +360,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	// DELETE PATIENTS ////////////////////////////////////////////////////////
 		else if (what.equals("dp")) { // delete patients
 			String subjects = request.getParameter("pats");
+			String simParam = request.getParameter("sim");
 			String dbUrl = "jdbc:postgresql://"+this.dbHost+":"+this.dbPort+"/"+this.dbName;
 			
 			System.out.println("Deleting patients: "+subjects);			
@@ -348,7 +368,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			FixingTasksHub fth = new FixingTasksHub (dbUrl, this.dbUser, this.dbPasswd);
 			ArrayList<String> listCodsPatient = new ArrayList<String>();
 			String patsArray[] = subjects.split(",");
-			boolean simulation = true;
+			boolean simulation = Boolean.parseBoolean(simParam);
 			for (int i=0; i<patsArray.length; i++)
 				listCodsPatient.add(patsArray[i]);
 			
@@ -383,24 +403,41 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	      jsonPat += "{\"patient_code\": \""+patientCode+"\", ";
 	      jsonPat += jsonSamples+"},";
 	    }
-	    jsonPat = jsonPat.substring(0, jsonPat.length()-1);
+	    jsonPat = jsonPat.length() > 0? jsonPat.substring(0, jsonPat.length()-1): jsonPat;
 
 	    ArrayList<String> patients_affected = (ArrayList)deletions.get("pats_affected");
 	    String jsonPatsAff = "\"patients_deleted\": [";
-	    for (String patientCode: patients_affected)
-	      jsonPatsAff += "\""+patientCode+"\",";
-
-	    jsonPatsAff = jsonPatsAff.substring(0, jsonPatsAff.length()-1)+"]";
+	    if (patients_affected.size() == 0)
+	    	jsonPatsAff += "]";
+	    
+	    else {
+		    for (String patientCode: patients_affected)
+		      jsonPatsAff += "\""+patientCode+"\",";
+	
+		    jsonPatsAff = jsonPatsAff.substring(0, jsonPatsAff.length()-1)+"]";
+	    }
 
 	    jsonOut = "{\"deletions\": "+deletedPats+", " + jsonPatsAff+","+
-	      " \"pats_with_samples\":["+jsonPat+"]}";
+	      " \"pats_with_samples\":["+jsonPat+"], \"sim\":"+simParam+"}";
 	    
 	    System.out.println(jsonOut);
 	    pwr.print(jsonOut);
 	    
 	    return;
-		} // EO DELETE PATIENTS
+		} 
 		
+		// DELETE INTERVIEWS //////////////////////////////////////////////////////
+		else if (what.equals("di")) { // delete interviews for a patient
+			String patCode = request.getParameter("pat");
+			String intrvs = request.getParameter("intrvs");
+			String simParam = request.getParameter("sim");
+			boolean sim = Boolean.parseBoolean(simParam);
+			String jsonOut = this.delInterviews(patCode, intrvs, sim);
+			System.out.println(jsonOut);
+			pwr.print(jsonOut);
+			
+			return;
+		}
 			
 		/*
 		if (what.equals("dp")) { // delete patients
@@ -523,7 +560,65 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	}
 	 	
 	 	
+	
 	 	
+	/**
+	 * Performs an operation to delete interviews for a patient. Several checks
+	 * are done in order to be sure no wrong things are deleted
+	 * @param patCode, the patient code
+	 * @param listIntrvs, the list of the names of interviews to be deleted
+	 * @return a json string with the values returned by the operation
+	 */
+	private String delInterviews (String patCode, String listIntrvs, boolean sim) {
+		String dbUrl = "jdbc:postgresql://"+this.dbHost+":"+this.dbPort+"/"+this.dbName;
+		
+		System.out.println("Deleting interviews: "+listIntrvs);			
+		
+		HashMap hashMap = new HashMap();
+		String[] intrvs = listIntrvs.split(",");
+		List<String> theIntrvs = Arrays.asList(intrvs);
+		hashMap.put(patCode, theIntrvs);
+		
+    
+		boolean simulation = sim;
+		FixingTasksHub fs = new FixingTasksHub (dbUrl, this.dbUser, this.dbPasswd);
+    HashMap<String, Object> jsonMap =
+      (HashMap<String, Object>)fs.deleteInterviews(this.dbHost, 
+      		this.dbUser, 
+      		this.dbPasswd,
+        simulation, hashMap);
+
+    String jsonOut = "{\"rows_affected\": "+jsonMap.get("rows_affected").toString()+",";
+    jsonOut += "\"samples\": [";
+
+    HashMap patSamples = (HashMap)jsonMap.get("pats_with_samples");
+    List samples = new ArrayList();
+    samples.addAll(patSamples.values());
+
+
+    Iterator sampleIt = samples.iterator();
+    while (sampleIt.hasNext()) {
+      jsonOut += sampleIt.next().toString()+",";
+    }
+    jsonOut = samples.size()>0? jsonOut.substring(0, jsonOut.length()-1): jsonOut;
+    jsonOut += "], \"interviews_deleted\":[";
+
+
+    List deletedOnes = (List)jsonMap.get("interviews_deleted");
+    Iterator deletedIt = deletedOnes.iterator();
+    while (deletedIt.hasNext()) {
+      // jsonOut += "\""+deletedIt.next().toString()+"\",";
+    	List pair = (List)deletedIt.next();
+      jsonOut += "{\"codpat\":\""+pair.get(0)+"\", \"intrv\":\""+pair.get(1)+"\"},";
+    }
+    jsonOut = deletedOnes.size()>0? jsonOut.substring(0, jsonOut.length()-1):jsonOut;
+
+    jsonOut += "], \"sim\":"+sim+"}";
+    
+    return jsonOut;
+	}
+	
+	
 	 	
 /**
  * Private method to manage the clon management requests

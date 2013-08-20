@@ -27,6 +27,7 @@ import org.cnio.appform.entity.AppGroup;
 import org.cnio.appform.util.HibernateUtil;
 import org.cnio.appform.util.HibController;
 import org.cnio.appform.util.AppUserCtrl;
+import org.cnio.appform.util.IntrvFormCtrl;
 import org.cnio.appform.util.LogFile;
 
 import org.hibernate.Session;
@@ -76,8 +77,9 @@ order by 1,3
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 						throws ServletException, IOException {
 
-		String what = request.getParameter("what"), jsonOut;
+		String what = request.getParameter("what"), jsonOut = "";
 		List<?> list = null;
+		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
 		
 // Get the patient code for the current active secondary group
@@ -140,6 +142,17 @@ order by 1,3
 		}
 		
 		
+		// Retrieve interviews for patients
+		else if (what.equalsIgnoreCase("intrv4pat")) {
+			String patCode = request.getParameter("code");
+			
+			this.openHibSession();
+			IntrvFormCtrl ifctrl = new IntrvFormCtrl(this.hibSes);
+			list = ifctrl.getInterviews4Subject(patCode);
+			
+			this.closeHibSession();
+		}
+		
 		
 		else if (what.equalsIgnoreCase("sec")) {
 			String intrvId = request.getParameter("parentid");
@@ -153,6 +166,12 @@ order by 1,3
 			list = getSectionItems (Integer.parseInt(secId));
 		}
 		
+		else {
+			jsonOut = jsonOut.length() > 0? jsonOut: "{\"msg\":\"qryservlet: Nothing to retrieve\"}";
+			// out.print(getServletInfo());
+			out.print(jsonOut);
+			return;
+		}
 		
 		
 		jsonOut = buildJson (list, what);
@@ -186,7 +205,7 @@ order by 1,3
 		String jsonAux = null;
 		int numElems = (list != null)? list.size(): 0;
 		
-		jsonAux = "{\"num\":"+numElems+",\"";
+		jsonAux = "{\"num\":"+numElems+",";
 		if (list == null || list.size() == 0) {
 			jsonAux += "elems\":[]}";
 			return jsonAux;
@@ -229,6 +248,22 @@ order by 1,3
 			jsonAux = jsonAux.substring(0, jsonAux.length()-1) + "]},"; // finish below
 			
 		}
+		
+		else if (what.equalsIgnoreCase("intrv4pat")) {
+			jsonAux += "\"interviews\":[";
+			boolean thereAreInterviews = false;
+			for (Object item: list) {
+				Object[] row = (Object[])item;
+				String idintrv = ((Integer)row[0]).toString();
+				String nameIntrv = (String)row[1];
+				
+				jsonAux += "{\"id\":"+idintrv+", \"name\":\""+nameIntrv+"\"},";
+				thereAreInterviews = true;
+			}
+			jsonAux = thereAreInterviews? jsonAux: jsonAux+",";
+			// jsonAux += "]}";
+		}
+		
 		else if (what.equalsIgnoreCase("sec")) {
 			jsonAux += "secs\":[";
 			for (Object obj: list) {

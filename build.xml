@@ -351,6 +351,9 @@
 		<copy file="${src.dir}/hibernate-war.cfg.xml" 
 				tofile="${temp.dir.classes}/hibernate.cfg.xml" />
 		
+		<copy file="${webinf.dir}/web-war.xml"
+				tofile="${temp.dir.web-inf}/web.xml" overwrite="true" />
+		
 		<copy file="${src.dir}/log4j.xml"	tofile="${temp.dir.classes}/log4j.xml" />
 		<copy file="${src.dir}/log4j.dtd" tofile="${temp.dir.classes}/log4j.dtd" />
 		

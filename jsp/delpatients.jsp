@@ -294,6 +294,9 @@ System.out.println("Principal's name: "+user);
     </div>
 
     <div class="offset3 span2" style="text-align: right;"> 
+    	<label class="checkbox inline" style="padding-right:2%">
+				<input type="checkbox" id="chkSimulation" checked="checked"> Simulation
+			</label>
       <button type="button" class="btn btn-inverse" id="btnSend"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
     </div>
     <div class="span2">
@@ -309,7 +312,7 @@ System.out.println("Principal's name: "+user);
 
 
 </div> <!-- EO wrap -->
-<!--
+
 <div id="footer">
   <div class="container">
     <p class="muted credit">
@@ -317,7 +320,7 @@ System.out.println("Principal's name: "+user);
     </p>
   </div>
 </div>
--->
+
 
 <%-- this is to create the modal "dialog" to run the progress bar --%>
 <div id="overlay" style="visibility: hidden;">

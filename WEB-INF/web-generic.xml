@@ -11,6 +11,38 @@
   </session-config>
 -->	
 
+	<context-param>
+    <description>Database server name</description>
+    <param-name>dbServerName</param-name>
+<!--    <param-value>ubio.bioinfo.cnio.es</param-value> -->
+    <param-value>localhost</param-value>
+  </context-param>
+	
+	<context-param>
+    <description>Database User</description>
+    <param-name>dbUserName</param-name>
+    <param-value>gcomesana</param-value>
+  </context-param>
+	
+	<context-param>
+    <description>Database User Passwd</description>
+    <param-name>dbPassword</param-name>
+    <param-value>appform</param-value>
+  </context-param>
+	
+	<context-param>
+    <description>Database name</description>
+    <param-name>dbName</param-name>
+    <param-value>appform</param-value>
+  </context-param>
+	
+	<context-param>
+    <description>Database server port</description>
+    <param-name>dbPort</param-name>
+    <param-value>5432</param-value>
+  </context-param>
+	
+
 	<filter>
     <filter-name>AuthenticationFilter</filter-name>
     <display-name>AuthenticationFilter</display-name>
@@ -52,6 +84,11 @@
 	<servlet>
 		<servlet-name>AjaxUtilServlet</servlet-name>
 		<servlet-class>org.cnio.appform.servlet.AjaxUtilServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>qryservlet</servlet-name>
+		<servlet-class>org.cnio.appform.servlet.QryServlet</servlet-class>
 	</servlet>
 	
 	<servlet>
@@ -110,6 +147,11 @@
 	<servlet-mapping>
 		<servlet-name>AjaxUtilServlet</servlet-name>
 		<url-pattern>/servlet/AjaxUtilServlet</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>qryservlet</servlet-name>
+		<url-pattern>/servlet/qryservlet</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
