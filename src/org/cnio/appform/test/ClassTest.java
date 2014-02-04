@@ -989,7 +989,7 @@ System.out.print("* "+ai.getContent());
 			tx.commit();
 */
 	
-// HOSPITALS
+/* HOSPITALS
 			Hospital hosp1 = new Hospital ("Hospital del Mar", 1),
 			hosp2 = new Hospital ("Hospital Sant Pau", 2),
 			hosp3 = new Hospital ("Hospital Vall Hebron", 3),
@@ -997,7 +997,7 @@ System.out.print("* "+ai.getContent());
 			hosp5 = new Hospital ("Hospital Clinico Universitario, Salamanca", 5),
 			hosp6 = new Hospital ("Hospital Cl��nico Universitario, Santiago Compostela", 6),
 			hosp7 = new Hospital ("Instituto Universitario Oncolog��a Principado Asturias", 7);
-								
+
 			hibSess.save(hosp1);
 			hibSess.save(hosp2);
 			hibSess.save(hosp3);
@@ -1006,7 +1006,7 @@ System.out.print("* "+ai.getContent());
 			hibSess.save(hosp6);
 			hibSess.save(hosp7);
 			tx.commit();
-			
+*/
 // ROLES			
 			tx.begin();
 			Role admRole = new Role ("admin", "An admin user"),

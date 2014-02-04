@@ -1,7 +1,9 @@
 package org.cnio.appform.util.dump;
 
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.Properties;
 
 /**
  * This class retrieve the resultset for the interview, patient, section and, 
@@ -125,10 +127,25 @@ System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);
 	
 	
 	private Connection getConnection() throws ClassNotFoundException, SQLException {
+    Properties properties = new Properties();
+    try {
+      java.io.InputStream in = SqlDataRetriever.class.getResourceAsStream("/app.props");
+      properties.load(in);
+      in.close();
+    }
+    catch (IOException ioEx) {
+      ioEx.printStackTrace();
+      return null;
+    }
     Class.forName("org.postgresql.Driver");
-    String url = "jdbc:postgresql://padme:5432/appform";
+    String host = properties.getProperty("host");
+    String port = properties.getProperty("port");
+    String user = properties.getProperty("user");
+    String pw = properties.getProperty("pass");
+    String ds = properties.getProperty("datasource");
+    String url = "jdbc:postgresql://"+host+":"+port+"/"+ds;
 
-    return DriverManager.getConnection(url, "gcomesana", "appform");
+    return DriverManager.getConnection(url, user, pw);
   }
 
 }

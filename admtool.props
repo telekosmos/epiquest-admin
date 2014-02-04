@@ -2,4 +2,4 @@
 loginModule=org.cnio.appform.jaas.AppLoginModule
 flag=required
 options=debug="true",useTicketCache="true"
-
+max_login_attempts=5
