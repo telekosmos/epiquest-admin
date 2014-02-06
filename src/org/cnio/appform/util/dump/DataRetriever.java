@@ -39,16 +39,16 @@ import org.hibernate.Transaction;
  */
 public class DataRetriever {
 
-	private String filePath = "";
+	protected String filePath = "";
 	
-	private DataWriter dw;
+	protected DataWriter dw;
 	
-	private Hashtable mapVarNames;
+	protected Hashtable mapVarNames;
 	
 	public final static int MAX_ROWS = 15000;
 	
-	private final static String DEFAULT_FILENAME = "admindump";
-	private final static String DEFAULT_PATH = "/tmp";
+	protected final static String DEFAULT_FILENAME = "admindump";
+	protected final static String DEFAULT_PATH = "/tmp";
 	
 	public DataRetriever (String path, Hashtable map) {
 		filePath = path;
@@ -646,7 +646,7 @@ System.out.println ("\nResultSet query:\n"+sqlqry);
  * @param grpId, the id of the group (idem as interview)
  * @return a (ordered) list of patients code strings
  */
-  private List<Object[]> getPats4Intrv (String prjCode, Integer intrvId, Integer grpId) {
+  public List<Object[]> getPats4Intrv (String prjCode, Integer intrvId, Integer grpId) {
   	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
   	String sqlQry = "select p.codpatient as codpat, g.name as grpName" +
   			" from patient p, performance pf, appgroup g " +
@@ -843,11 +843,11 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	 * @param prjCode, the project code
 	 * @param intrvId, the interview id (can be redundant...)
 	 * @param grpId, the group the interviews are going to belong to
-	 * @param the section defined by its order in the questionnaire
+	 * @param sortOrder the section defined by its order in the questionnaire
 	 * @param fileName, the name of the file output
 	 */
 	  public void getDump (String prjCode, Integer intrvId, Integer grpId, 
-	  						Integer orderSec, Integer sortOrder, String fileName) 
+	  						        Integer orderSec, Integer sortOrder, String fileName)
 	  										throws java.io.FileNotFoundException, java.io.IOException {
 
 	  	BufferedWriter fileOut = new BufferedWriter (
@@ -1017,6 +1017,10 @@ System.out.println("getDump("+prjCode+", "+intrvId+", "+grpId+", "+orderSec+", "
 	  		hibSes.close();
 	  	
 	  }
+
+
+
+
 	  
 	  
 	/*  

@@ -721,7 +721,7 @@ String hqlIntr = "from RelIntrvGroup rig where rig.appgroup=:group and " +
 
 
 /**
- * Get the list of interviews for the project identified with prjId and for an
+ * Get the list of interviews for the project identified with prjCode and for an
  * owner identified with his/her system id. The list of interviews is the list of
  * interviews for all users in that group (actually, the country)
  * @param session
@@ -742,7 +742,7 @@ String hqlIntr = "from RelIntrvGroup rig where rig.appgroup=:group and " +
 			int numUsrs = lUsr.size(), cont=1;
 			
 			String sql = "select i.* from project p, interview i " +
-					"where p.idprj="+prjId+" and (";
+					"where p.idprj="+prjCode+" and (";
 			
 			for (AppUser usr: lUsr) {
 				sql += "i.codusr="+usr.getId();
@@ -935,12 +935,12 @@ LogFile.info("IntrvController.createInterview ()!!!");
 				return -1;
 			}
 			else {
-				Section intro = new Section ("Introducci—n", "");
+				Section intro = new Section ("Introducciï¿½n", "");
 				intro.setSectionOrder(new Integer (1));
 				intro.setInterview(intrv);
 				hibSes.save(intro);
 // Box for patient code				
-				Question qPatCode = new Question ("C—digo de paciente:");
+				Question qPatCode = new Question ("Cï¿½digo de paciente:");
 				qPatCode.setParentSec(intro);
 				qPatCode.setItemOrder(new Long (1));
 				qPatCode.setMandatory(1);

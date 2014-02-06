@@ -95,7 +95,7 @@ public class InterviewsCuration {
 	
 /**
  * Get the items with containees belonging to the secOrderth section in the 
- * interview intrvId and project prjId
+ * interview intrvId and project prjCode
  * @param prjId
  * @param intrvId
  * @param secOrder
@@ -692,7 +692,7 @@ bw.append("\nFix interview '"+intrv.getName()+"' ("+intrv.getId()+")\n");
 
 			fixIntrv (aPrj, intrv, null);
 /*
-			Integer intrId = intrv.getId(), prjId = aPrj.getId();
+			Integer intrId = intrv.getId(), prjCode = aPrj.getId();
 			List<Patient> patients = getSubjects4Intrv (intrv);
 			
 			List<Section> secs = 
@@ -704,7 +704,7 @@ bw.append("\nFix interview '"+intrv.getName()+"' ("+intrv.getId()+")\n");
 				
 				for (Iterator<Patient> itPat = patients.iterator(); itPat.hasNext();) {
 					Patient aPat = itPat.next();
-					List<AbstractItem> allItems = getAllParentItems(prjId, intrId, secOrder);
+					List<AbstractItem> allItems = getAllParentItems(prjCode, intrId, secOrder);
 					
 					fixedAns += fixAnswers (allItems, aPat.getId());
 				}
