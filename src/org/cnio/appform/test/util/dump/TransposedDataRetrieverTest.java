@@ -2,17 +2,21 @@ package org.cnio.appform.test.util.dump;
 
 import junit.framework.TestCase;
 import org.cnio.appform.util.dump.TransposedDataRetriever;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.TreeMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Matchers.startsWith;
 import static org.mockito.Mockito.mock;
 
 
@@ -25,7 +29,7 @@ import static org.mockito.Mockito.mock;
  * poco grande a partir de uno real y mockear todos los métodos de la clase ResultSet,
  * y si tal ni aún así
  */
-public class TransposedDataRetrieverTest extends TestCase {
+public class TransposedDataRetrieverTest {
 
   protected TransposedDataRetriever tdr;
   protected String prjCode = "157";
@@ -182,7 +186,7 @@ public class TransposedDataRetrieverTest extends TestCase {
     };
 
     // TransposedDataRetriever mockTdr = mock(TransposedDataRetriever.class);
-    Hashtable<String, ArrayList> res = tdr.getTransposedRS(prjCode, intrvId, grpId, orderSec);
+    TreeMap<String, ArrayList> res = tdr.getTransposedRS(prjCode, intrvId, grpId, orderSec);
     assertThat(res, notNullValue());
     assertThat(res, hasKey("HEADER"));
     assertThat(res, hasKey("157081001"));
@@ -194,11 +198,31 @@ public class TransposedDataRetrieverTest extends TestCase {
     assertThat(subj081003.size(), equalTo(3));
 
     for (int i=0; i < subj081001.size(); i++)
-      assertThat(subj081001.get(i), startsWith("157081001"));
+      assertThat(subj081001.get(i), Matchers.startsWith("157081001"));
 
     for (int i=0; i < subj081003.size(); i++)
-      assertThat(subj081003.get(i), startsWith("157081003"));
+      assertThat(subj081003.get(i), Matchers.startsWith("157081003"));
+  }
 
 
+  @Test
+  public void testWriteOutDump () throws Exception {
+    String fileContents = tdr.writOutDump(prjCode, intrvId, grpId, orderSec);
+
+    assertThat(fileContents, notNullValue());
+    assertThat(fileContents, not(equalTo("")));
+    String[] fileLines = fileContents.split("\\n");
+
+    assertThat(fileLines.length, greaterThan(0));
+    assertThat(fileLines[0], not(containsString("157"))); // header
+    assertThat(fileLines[1], containsString("157"));
+    assertThat(fileLines[1], containsString("|"));
+
+    for (int i=1; i<fileLines.length; i++) {
+      assertThat(fileLines[i], Matchers.startsWith("157"));
+      assertThat(fileLines[i], containsString("|"));
+    }
+
+    // System.out.println(fileContents);
   }
 }

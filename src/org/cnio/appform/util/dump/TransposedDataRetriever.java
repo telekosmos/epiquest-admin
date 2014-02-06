@@ -1,10 +1,8 @@
 package org.cnio.appform.util.dump;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.*;
 import java.sql.ResultSet;
-import java.util.List;
 
 /**
  * Class TransposedDataRetriever
@@ -165,18 +163,18 @@ public class TransposedDataRetriever extends DataRetriever {
    * @param grpId, the database id of the group
    * @param orderSec, the number of the section
    */
-  public Hashtable<String, ArrayList> getTransposedRS (String prjCode, String intrvId, String grpId,
+  public TreeMap<String, ArrayList> getTransposedRS (String prjCode, String intrvId, String grpId,
                                                        Integer orderSec) throws SQLException {
     java.sql.ResultSet rs = this.getResultSetBy(prjCode, intrvId, grpId, orderSec);
 
     String header="", rowResult, currentSubj="", oldSubj="";
     java.sql.ResultSetMetaData rmd = rs.getMetaData();
     int columnCount = rmd.getColumnCount(), countRows = 0;
-    Hashtable<String, ArrayList> fullRes = new Hashtable<String, ArrayList>();
+    TreeMap<String, ArrayList> fullRes = new TreeMap<String, ArrayList>();
     ArrayList<String> subjectValues = new ArrayList<String>();
 
-
     rs.next();
+    header = yieldHeader(row2Array(rs, columnCount));
     String refSubj = this.getSubject(rs);
     while (!rs.isAfterLast() && refSubj != null) {
       subjectValues = this.getValuesForSubj(rs, refSubj, columnCount);
@@ -209,6 +207,31 @@ public class TransposedDataRetriever extends DataRetriever {
 
     fullRes.put("HEADER", headerList);
     return fullRes;
-
   }
+
+
+  /**
+   * Builds up an string which is ready to be dumped in a file. This will be the
+   * actual dump file
+   * @param prjCode, the project code
+   * @param intrvId, the database interview id
+   * @param grpId, the group id
+   * @param orderSec, the number of section
+   * @return the dump regarding to the parameters
+   * @throws SQLException
+   */
+  public String writOutDump (String prjCode, String intrvId, String grpId,
+                            Integer orderSec) throws SQLException {
+    StringBuffer outputDump = new StringBuffer();
+    TreeMap<String, ArrayList> fullRes = this.getTransposedRS(prjCode, intrvId, grpId, orderSec);
+
+    outputDump.append(fullRes.get("HEADER").get(0)+"\n");
+    for (String k: fullRes.keySet())
+      if (!k.equalsIgnoreCase("HEADER"))
+        for (String line: (ArrayList<String>)fullRes.get(k))
+          outputDump.append(line+"\n");
+
+    return outputDump.toString();
+  }
+
 }

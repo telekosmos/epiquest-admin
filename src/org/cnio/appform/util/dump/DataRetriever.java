@@ -1,5 +1,6 @@
 package org.cnio.appform.util.dump;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.io.BufferedWriter;
@@ -67,7 +68,10 @@ public class DataRetriever {
 	
 /**
  * Execute an sql query on hibernate and return the result
- * @param sql, the string representing the query and ready to be runned
+ * @param qryStr, the string representing the query and ready to be runned
+ * @param offset, the row number to start to get data
+ * @param maxRows, the number maximum of rows to retrieve
+ * @return
  */
   private List<Object[]> execQuery (String qryStr, int offset, int maxRows) {
      Session myHibSes = HibernateUtil.getSessionFactory().openSession();
@@ -320,8 +324,8 @@ System.out.println();
  * with single answer and the listmap of repeatable questions. To do that, as
  * the order is absolutely custom, it is not possible to use a predefined
  * structure like a TreeMap and the merging has to be done manually
- * @param singlesMap
- * @param repMap
+ * @param singleSet
+ * @param repSet
  * @return
  */  
   private LinkedHashMap<String, String> buildFullMap(
@@ -944,6 +948,37 @@ System.out.println ("num of results: "+resultSet.size());
 	  		return null;
 	  	}
 	  }
+
+
+  /**
+   * Interface method to get a transposed dump from the TransposedDateRetriever class
+   * @param prjCode, the project code
+   * @param intrvId, the interview database id
+   * @param grpId, the group database id
+   * @param orderSec, the number of the section
+   * @return an String which will be returned to the client as the result of the dump
+   */
+    public String getTransposedDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
+      TransposedDataRetriever tdr;
+
+      if (this.mapVarNames != null)
+        tdr = new TransposedDataRetriever(this.filePath, mapVarNames);
+      else
+        tdr = new TransposedDataRetriever();
+
+      String strOut = "The requested data couldn't be retrieved. An error in the";
+      strOut += " was raised.\nPlease contact the administrators to get further ";
+      strOut += " information about how to proceed";
+      try {
+        // TreeMap<String, ArrayList> fullRes = tdr.getTransposedRS(prjCode, intrvId, grpId, orderSec);
+        strOut = tdr.writOutDump(prjCode, intrvId, grpId, orderSec);
+        return strOut;
+      }
+      catch (SQLException sqlEx) {
+        return strOut;
+      }
+
+    }
 	  
 	  
 	  
