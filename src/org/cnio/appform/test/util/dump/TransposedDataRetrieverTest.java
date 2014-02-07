@@ -109,9 +109,11 @@ public class TransposedDataRetrieverTest {
     assertThat(subjectVals.size(), equalTo(22));
     for (int i=0; i<subjectVals.size(); i++) {
       String[] vals = subjectVals.get(i).split("\\|");
-      assertThat(vals[0], equalTo(refSubj));
+      assertThat(vals[0], equalTo("\""+refSubj+"\""));
     }
   }
+
+
 
   @Test
   public void testGetValuesForSubj157081003 () throws Exception {
@@ -129,7 +131,7 @@ public class TransposedDataRetrieverTest {
     assertThat(subjectVals.size(), equalTo(3));
     for (int i=0; i<subjectVals.size(); i++) {
       String[] vals = subjectVals.get(i).split("\\|");
-      assertThat(vals[0], equalTo(refSubj));
+      assertThat(vals[0], equalTo("\""+refSubj+"\""));
     }
 
   }
@@ -143,7 +145,7 @@ public class TransposedDataRetrieverTest {
     assertThat(rowResult, notNullValue());
     String[] items = rowResult.split("\\|");
     assertThat(items.length, equalTo(3));
-    assertThat("no patient code", items[0], org.hamcrest.Matchers.startsWith("157"));
+    assertThat("no patient code", items[0], org.hamcrest.Matchers.startsWith("\"157"));
   }
 
 
@@ -198,10 +200,10 @@ public class TransposedDataRetrieverTest {
     assertThat(subj081003.size(), equalTo(3));
 
     for (int i=0; i < subj081001.size(); i++)
-      assertThat(subj081001.get(i), Matchers.startsWith("157081001"));
+      assertThat(subj081001.get(i), Matchers.startsWith("\"157081001"));
 
     for (int i=0; i < subj081003.size(); i++)
-      assertThat(subj081003.get(i), Matchers.startsWith("157081003"));
+      assertThat(subj081003.get(i), Matchers.startsWith("\"157081003"));
   }
 
 
@@ -219,7 +221,7 @@ public class TransposedDataRetrieverTest {
     assertThat(fileLines[1], containsString("|"));
 
     for (int i=1; i<fileLines.length; i++) {
-      assertThat(fileLines[i], Matchers.startsWith("157"));
+      assertThat(fileLines[i], Matchers.startsWith("\"157"));
       assertThat(fileLines[i], containsString("|"));
     }
 

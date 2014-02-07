@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="AdmTool WebApp" basedir="." default="preproduction-package">
+<project name="AdmTool WebApp" basedir="." default="generic-war">
 
 	<!-- project-specific variables -->
 	<property environment="env" />
@@ -9,15 +9,16 @@
 	<property name="epiadmin.name" value="epiadmin.war" />
 	<property name="cegen.package.name" value="cegenadmin.war" />
 	<property name="generic.package.name" value="epiquestadmin.war" />
-	<property name="webapp.dir" value="/Users/bioinfo/Development/Projects/admtool" />
-	<property name="dest.dir" value="/Users/bioinfo/Development/deploy/admtool" />
+	<property name="webapp.dir" value="/Users/telekosmos/DevOps/epiquest/epiquest-admin" />
+	<property name="dest.dir" value="/Users/telekosmos/DevOps/epiquest/deployments" />
 
 	<!-- lib and classes built related dirs -->
 	<property name="build.dir" value="build" />
 	<property name="classes.dir" value="WEB-INF/classes" />
-	<property file="${build.dir}/build.${env.HOSTNAME}" />
+	<!-- <property file="${build.dir}/build.${env.HOSTNAME}" /> -->
 	<property name="lib.dir" value="WEB-INF/lib" />
-	<property name="lib.tomcat.dir" value="/usr/local/apache-tomcat-6.0.18/lib" />
+	<!-- <property name="lib.tomcat.dir" value="/usr/local/apache-tomcat-6.0.18/lib" /> -->
+  <property name="lib.tomcat.dir" value="/opt/local/share/java/tomcat6/lib" />
 
 	<!-- src related dirs -->
 	<property name="src.dir" value="src" />
@@ -89,7 +90,7 @@
 <!-- here the META-INF AND .svn directories have to be excluded -->
 <!-- persistence.xml in WEB-INF/classes/META-INF is also excluded -->
 		<javac debug="on" srcdir="${src.dir}" destdir="${temp.dir.classes}" 
-			includes="**/*" excludes=".svn/ META-INF/ **/Water*.java Ajax*.java">
+			includes="**/*" excludes=".svn/ META-INF/ **/Water*.java Ajax*.java **/test/">
 			<classpath refid="build.class.path" />
 		</javac>
 
@@ -222,6 +223,9 @@
 			</fileset>
 			
 			<classes dir="${temp.dir.classes}" />
+      <fileset dir="${temp.dir.classes}">
+        <exclude name="**/test/*.class" />
+      </fileset>
 			<lib dir="${temp.dir.web-inf}/lib" />
 		</war>
 
@@ -445,7 +449,7 @@
 	<!-- JUST DEPLOY JSP's -->
 	<target name="jsps">
 		<echo>=== DEPLOY JSP'S ===</echo>
-		<!-- i'm trying to be explicit about what i put out there -->
+		<!-- i'm trying to be explicit about what i put out there -
 		<copy todir="${webapp.dir}/${jsp.dir.name}">
 			<fileset dir="${pages.dir}">
 				<include name="**/*.jsp" />
@@ -457,6 +461,7 @@
 				<include name="**/*.js" />
 			</fileset>
 		</copy>
+		-->
 	</target>
 
 	<!-- INSTALL -->
@@ -465,12 +470,13 @@
 		<copy file="${package.file}" tofile="${webapp.dir}/${package.name}" overwrite="true" />
 	</target>
 
-	<!-- INSTALL AND CLEAN -->
+	<!-- INSTALL AND CLEAN -
 	<target name="install-n-clean" depends="production-package">
 		<echo>=== INSTALL ===</echo>
 		<copy file="${package.file}" tofile="${webapp.dir}/${package.name}" overwrite="true" />
 
 		<antcall target="${clean}" />
 	</target>
+	-->
 
 </project>

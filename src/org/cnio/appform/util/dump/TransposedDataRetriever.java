@@ -114,7 +114,12 @@ public class TransposedDataRetriever extends DataRetriever {
            questionCoords = (String)row[4]+"-"+row[9].toString()+"-"+row[8].toString();
     String answerValue = (String)row[5];
 
-    return subject+"|"+questionCoords+"|"+answerValue;
+    StringBuffer strOut = new StringBuffer();
+    strOut.append("\""+subject+"\"|");
+    strOut.append("\""+questionCoords+"\"|");
+    strOut.append("\""+answerValue+"\"");
+
+    return strOut.toString();
   }
 
 
