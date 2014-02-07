@@ -8,20 +8,14 @@
     <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
     <property name="query.substitutions">yes 'Y', no 'N'</property>
     <property name="connection.driver_class">org.postgresql.Driver</property>
- 	  
+
 		<property name="connection.url">
- 			jdbc:postgresql://localhost:5432/appform 
-		</property> 		
-    <property name="connection.username">gcomesana</property>
- 		<property name="connection.password">appform</property>
-		 
-<!--
- 		<property name="connection.url">
-		 jdbc:postgresql://localhost:5432/epiquestdb
-		</property>  
-    <property name="connection.username">epiquestusr</property>
-    <property name="connection.password">3piqu3st</property>
--->
+ 			jdbc:postgresql://localhost:5432/appform
+		</property>
+    <property name="connection.username">username</property>
+ 		<property name="connection.password">userpasswd</property>
+
+
     <!-- Use the C3P0 connection pool provider -->
     <property name="hibernate.c3p0.min_size">5</property>
     <property name="hibernate.c3p0.max_size">20</property>
@@ -80,7 +74,7 @@
     <mapping class="auction.model.Shipment"/>
     <mapping resource="auction/model/DynamicModel.hbm.xml"/>
     -
-    
+
     <mapping class="org.cnio.pangenes.bean.Patient"/>
     <mapping class="org.cnio.pangenes.bean.Phone"/>
     -->

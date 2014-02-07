@@ -1,5 +1,6 @@
 package org.cnio.appform.util.dump;
 
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.io.BufferedWriter;
@@ -39,16 +40,16 @@ import org.hibernate.Transaction;
  */
 public class DataRetriever {
 
-	private String filePath = "";
+	protected String filePath = "";
 	
-	private DataWriter dw;
+	protected DataWriter dw;
 	
-	private Hashtable mapVarNames;
+	protected Hashtable mapVarNames;
 	
 	public final static int MAX_ROWS = 15000;
 	
-	private final static String DEFAULT_FILENAME = "admindump";
-	private final static String DEFAULT_PATH = "/tmp";
+	protected final static String DEFAULT_FILENAME = "admindump";
+	protected final static String DEFAULT_PATH = "/tmp";
 	
 	public DataRetriever (String path, Hashtable map) {
 		filePath = path;
@@ -67,7 +68,10 @@ public class DataRetriever {
 	
 /**
  * Execute an sql query on hibernate and return the result
- * @param sql, the string representing the query and ready to be runned
+ * @param qryStr, the string representing the query and ready to be runned
+ * @param offset, the row number to start to get data
+ * @param maxRows, the number maximum of rows to retrieve
+ * @return
  */
   private List<Object[]> execQuery (String qryStr, int offset, int maxRows) {
      Session myHibSes = HibernateUtil.getSessionFactory().openSession();
@@ -320,8 +324,8 @@ System.out.println();
  * with single answer and the listmap of repeatable questions. To do that, as
  * the order is absolutely custom, it is not possible to use a predefined
  * structure like a TreeMap and the merging has to be done manually
- * @param singlesMap
- * @param repMap
+ * @param singleSet
+ * @param repSet
  * @return
  */  
   private LinkedHashMap<String, String> buildFullMap(
@@ -646,7 +650,7 @@ System.out.println ("\nResultSet query:\n"+sqlqry);
  * @param grpId, the id of the group (idem as interview)
  * @return a (ordered) list of patients code strings
  */
-  private List<Object[]> getPats4Intrv (String prjCode, Integer intrvId, Integer grpId) {
+  public List<Object[]> getPats4Intrv (String prjCode, Integer intrvId, Integer grpId) {
   	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
   	String sqlQry = "select p.codpatient as codpat, g.name as grpName" +
   			" from patient p, performance pf, appgroup g " +
@@ -843,11 +847,11 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	 * @param prjCode, the project code
 	 * @param intrvId, the interview id (can be redundant...)
 	 * @param grpId, the group the interviews are going to belong to
-	 * @param the section defined by its order in the questionnaire
+	 * @param sortOrder the section defined by its order in the questionnaire
 	 * @param fileName, the name of the file output
 	 */
 	  public void getDump (String prjCode, Integer intrvId, Integer grpId, 
-	  						Integer orderSec, Integer sortOrder, String fileName) 
+	  						        Integer orderSec, Integer sortOrder, String fileName)
 	  										throws java.io.FileNotFoundException, java.io.IOException {
 
 	  	BufferedWriter fileOut = new BufferedWriter (
@@ -944,6 +948,37 @@ System.out.println ("num of results: "+resultSet.size());
 	  		return null;
 	  	}
 	  }
+
+
+  /**
+   * Interface method to get a transposed dump from the TransposedDateRetriever class
+   * @param prjCode, the project code
+   * @param intrvId, the interview database id
+   * @param grpId, the group database id
+   * @param orderSec, the number of the section
+   * @return an String which will be returned to the client as the result of the dump
+   */
+    public String getTransposedDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
+      TransposedDataRetriever tdr;
+
+      if (this.mapVarNames != null)
+        tdr = new TransposedDataRetriever(this.filePath, mapVarNames);
+      else
+        tdr = new TransposedDataRetriever();
+
+      String strOut = "The requested data couldn't be retrieved. An error in the";
+      strOut += " was raised.\nPlease contact the administrators to get further ";
+      strOut += " information about how to proceed";
+      try {
+        // TreeMap<String, ArrayList> fullRes = tdr.getTransposedRS(prjCode, intrvId, grpId, orderSec);
+        strOut = tdr.writOutDump(prjCode, intrvId, grpId, orderSec);
+        return strOut;
+      }
+      catch (SQLException sqlEx) {
+        return strOut;
+      }
+
+    }
 	  
 	  
 	  
@@ -1017,6 +1052,10 @@ System.out.println("getDump("+prjCode+", "+intrvId+", "+grpId+", "+orderSec+", "
 	  		hibSes.close();
 	  	
 	  }
+
+
+
+
 	  
 	  
 	/*  
