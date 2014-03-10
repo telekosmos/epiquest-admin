@@ -1,10 +1,10 @@
-WEB-INF/classes/.svn/**
 hibernate.cfg.xml
 src/*.xml
 src/*.props
-#*
+*\#
 code-backup.sh
 .DS_Store
 **/*.log*
 .svn
 *.class
+*.tmp

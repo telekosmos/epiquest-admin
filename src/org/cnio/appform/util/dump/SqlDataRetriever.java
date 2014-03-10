@@ -26,7 +26,7 @@ public class SqlDataRetriever {
  * @return a java.sql.ResultSet object with ALL queried rows
  */
 	public ResultSet getResultSet (String prjCode, Integer intrvId, Integer grpId,
-			Integer secOrder) {
+			                          Integer secOrder) {
 		
 		try {
 			this.conn = this.getConnection ();
@@ -56,16 +56,8 @@ public class SqlDataRetriever {
 	      "and it.idsection = s.idsection " +
 	      "and s.section_order = " + secParam +
 	      " order by 1, 7, 10, 8, 5, 9";
-/*      
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);      
->>>>>>> develop
-=======
->>>>>>> develop
-*/
-System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);	     
+
+      System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);
       ResultSet rs = stmt.executeQuery(sqlqry);
       
       return rs;

@@ -328,8 +328,7 @@ System.out.println ("Writing out data");
 //      String keyField = itOrd+"."+codq+"-"+num+"-"+ord;
       String keyField = itOrd+"."+num+"."+ord;
       String newkeyField = num+"."+itOrd+"."+codq+"."+ord;
-      
-      
+
 //      if (Pattern.matches(regexLab, ansVal))
       	ansVal = "\""+ansVal+"\"";
       
@@ -337,7 +336,6 @@ System.out.println ("Writing out data");
       	codes.put(keyField, ansVal);
       else
       	System.err.println("Interview '"+intrvName+"', sec. '"+secName+"': No key for question: " + keyField + "("+codq+")");
-      
 //      out.append(ansVal+CSV_SEP);
     } // EO while (rs.next()), loop over resultset
   	

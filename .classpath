@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/hibernate"/>
-	<classpathentry exported="true" kind="lib" path="/Users/bioinfo/Tools/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/aspectj"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/javamail1.4.2"/>
-	<classpathentry exported="true" kind="lib" path="/Users/bioinfo/Tools/lib/json_simple-1.1.jar"/>
-	<classpathentry kind="lib" path="/Users/bioinfo/Development/Projects/lib/jbehave-core-2.3.jar"/>
-	<classpathentry kind="lib" path="/Users/bioinfo/Development/Projects/lib/junit-dep-4.5.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/hibernate-annotations"/>
+	<classpathentry kind="lib" path="/Users/telekosmos/DevOps/epiquest/commons-lib/appform-lib/json_simple-1.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/sqlfixer"/>
+	<classpathentry kind="lib" path="/Users/telekosmos/DevOps/epiquest/commons-lib/appform-lib/asm-attrs.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/aspectj-new"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/hibernate-annotations-bis"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/hibernate3"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/javamail-1.4.2"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/log4j-1.2-commons-logging-1.1.1"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/mailapi.jar"/>
+	<classpathentry kind="lib" path="WEB-INF/lib/pop3.jar"/>
 	<classpathentry kind="output" path="WEB-INF/classes"/>
 </classpath>

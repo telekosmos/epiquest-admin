@@ -80,7 +80,7 @@ import java.net.URLEncoder;
 /* 
  * @see javax.servlet.http.HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
  */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String what = request.getParameter("what");
 		String usrId = request.getParameter("usrid");
 		String jsonResp = "";
@@ -118,8 +118,14 @@ import java.net.URLEncoder;
 			String intrvId = request.getParameter("intrvid");
 			String grpId = request.getParameter("grpid");
 			String orderSec = request.getParameter("secid"); // actually the section order
-			
-			String dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+
+      String isAliquot = request.getParameter("aliq");
+
+      String dumpOut;
+      if (isAliquot == null)
+			  dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+      else
+        dumpOut = dr.getTransposedDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
 			
 			out.print(dumpOut);
 			return;
