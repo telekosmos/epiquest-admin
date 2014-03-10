@@ -10,7 +10,7 @@
     <property name="connection.driver_class">org.postgresql.Driver</property>
  	  
 		<property name="connection.url">
- 			jdbc:postgresql://localhost:4321/appform 
+ 			jdbc:postgresql://localhost:5432/appform 
 		</property> 		
     <property name="connection.username">gcomesana</property>
  		<property name="connection.password">appform</property>

@@ -53,6 +53,7 @@ System.out.println("JaasServlet.init() - got jaasconfig.file: "+realPath);
 		AppJaasConfiguration.init(realPath);
 		
 		String maxLoginAttempts = config.getInitParameter("max_login_attempts");
+System.out.println("JaasServlet.init() - got max_login_attempts: "+maxLoginAttempts);
 		HibernateUtil.setMaxLoginAttempts(Integer.decode(maxLoginAttempts));
 		
 // Set up the singleton stuff to keep track the logged users 
