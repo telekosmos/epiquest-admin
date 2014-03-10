@@ -41,7 +41,12 @@
     <param-name>dbPort</param-name>
     <param-value>5432</param-value>
   </context-param>
-	
+
+  <context-param>
+    <description>Max number of login attempts</description>
+    <param-name>max_login_attempts</param-name>
+    <param-value>5</param-value>
+  </context-param>
 
 	<filter>
     <filter-name>AuthenticationFilter</filter-name>
@@ -121,6 +126,11 @@
 			<param-value>/jaas.config</param-value> 
 		</init-param>
 		-->
+    <init-param>
+      <param-name>max_login_attempts</param-name>
+      <param-value>5</param-value>
+    </init-param>
+
 		<init-param>
 			<param-name>jaasconfig.file</param-name>
 			<param-value>admtool.props</param-value>
