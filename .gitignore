@@ -9,3 +9,4 @@ code-backup.sh
 *.class
 *.tmp
 resources
+logs
