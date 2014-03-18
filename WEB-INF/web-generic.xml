@@ -74,6 +74,7 @@
     </listener-class>
 	</listener>
 
+  <!--
 	<servlet>
 		<display-name>Apache-Axis Servlet</display-name>
 		<servlet-name>AxisServlet</servlet-name>
@@ -85,6 +86,7 @@
 		<servlet-class>org.apache.axis.transport.http.AdminServlet</servlet-class>
 		<load-on-startup>100</load-on-startup>
 	</servlet>
+  -->
 	
 	<servlet>
 		<servlet-name>AjaxUtilServlet</servlet-name>
@@ -119,13 +121,7 @@
 		<servlet-name>JaasServlet</servlet-name>
 		<servlet-class>org.cnio.appform.servlet.JaasServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
-		<url-pattern>/servlet/JaasServlet</url-pattern>
-		<!--
-		<init-param> 
-			<param-name>java.security.auth.login.config</param-name> 
-			<param-value>/jaas.config</param-value> 
-		</init-param>
-		-->
+
     <init-param>
       <param-name>max_login_attempts</param-name>
       <param-value>5</param-value>
@@ -136,7 +132,8 @@
 			<param-value>admtool.props</param-value>
 		</init-param>
 	</servlet>
-	
+
+  <!--
 	<servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
 		<url-pattern>/servlet/AxisServlet</url-pattern>
@@ -153,16 +150,29 @@
 		<servlet-name>AdminServlet</servlet-name>
 		<url-pattern>/servlet/AdminServlet</url-pattern>
 	</servlet-mapping>
-	
-	<servlet-mapping>
+	-->
+
+  <servlet-mapping>
+    <servlet-name>JaasServlet</servlet-name>
+    <url-pattern>/servlet/JaasServlet</url-pattern>
+  </servlet-mapping>
+
+
+  <servlet-mapping>
 		<servlet-name>AjaxUtilServlet</servlet-name>
 		<url-pattern>/servlet/AjaxUtilServlet</url-pattern>
 	</servlet-mapping>
-	
+
+  <servlet-mapping>
+    <servlet-name>AjaxUtilServlet</servlet-name>
+    <url-pattern>/datadump/*</url-pattern>
+  </servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>qryservlet</servlet-name>
 		<url-pattern>/servlet/qryservlet</url-pattern>
 	</servlet-mapping>
+
 	
 	<servlet-mapping>
 		<servlet-name>MngGroupsServlet</servlet-name>

@@ -69,11 +69,11 @@ public class DataRetriever {
 /**
  * Execute an sql query on hibernate and return the result
  * @param qryStr, the string representing the query and ready to be runned
- * @param offset, the row number to start to get data
- * @param maxRows, the number maximum of rows to retrieve
+ * @param offset, the row number to start to get data, -1 for no offset
+ * @param maxRows, the number maximum of rows to retrieve, -1 for no limit
  * @return
  */
-  private List<Object[]> execQuery (String qryStr, int offset, int maxRows) {
+  protected List<Object[]> execQuery (String qryStr, int offset, int maxRows) {
      Session myHibSes = HibernateUtil.getSessionFactory().openSession();
      Transaction tx = null;
      List<Object[]> rows = null;
@@ -118,16 +118,20 @@ public class DataRetriever {
   public String getRepeatableItems (String prjCode, 
       															Integer intrvId, Integer secOrder) {
   	String theIds = "";
+    String secOrderConstraint = secOrder == null? "and 1 = 1 ":
+                                    "and s.section_order = "+secOrder +" ";
   	
   	String qry = 
-  		"select it.iditem, it.content "+
+  		"select it.iditem, it.content, s.section_order, it.item_order "+
   		"from interview i, section s, item it, project prj "+
   		"where prj.project_code = '"+prjCode+"' "+
   		"and prj.idprj = i.codprj " +
   		"and s.codinterview = i.idinterview "+
   		"and i.idinterview in ("+intrvId+") "+
   		"and it.idsection = s.idsection "  +
-  		"and it.\"repeatable\" = 1";
+      secOrderConstraint +
+  		"and it.\"repeatable\" = 1"+
+      "order by 3, 4;";
   	
   	List<Object[]> ids = execQuery (qry, -1, -1);
   	for (Object[] id: ids) {
@@ -159,7 +163,7 @@ public class DataRetriever {
   * @param res, the resultset with all repeatable questions
   * @return the ordered map
   */
-  private LinkedHashMap<String,String> buildRepMap (List<Object[]> res) {
+  protected LinkedHashMap<String,String> buildRepMap (List<Object[]> res) {
   	int maxAns = -1;
   	Integer oldParent = -1;
   	List<String> items = new ArrayList<String> ();
@@ -259,7 +263,7 @@ public class DataRetriever {
  * @param grpId the database id of the group
  * @param intrvId the database id of the interview
  * @param secOrder the order of the section
- * @return a tree map with header values for repeatable items
+ * @return a linked hashmap with header values for repeatable items
  */  
   @SuppressWarnings ("unused")
   public LinkedHashMap<String,String> getRepeatHeader (String prjCode, Integer grpId,
@@ -328,7 +332,7 @@ System.out.println();
  * @param repSet
  * @return
  */  
-  private LinkedHashMap<String, String> buildFullMap(
+  protected LinkedHashMap<String, String> buildFullMap(
                     Set<Map.Entry<String, String>> singleSet,
                     Set<Map.Entry<String, String>> repSet) {
 
@@ -879,9 +883,7 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 		  	int resultsetSize = 
 	  					this.getFullResultsetSize(prjCode, intrvId, grpId, orderSec);
 		  	int maxRows = DataRetriever.MAX_ROWS, offset = 0, rowsProcessed;
-		  	boolean moreResults = true;
-		  	List<Object[]> resultSet;
-		  	
+
 ////////////////////////////////////////////////////
 //		  	resultSet = getResultSet (prjCode, intrvId, grpId, orderSec, -1, -1);
 //		  	dw.buildResult (patients, listMapHdr, resultSet, fileOut);

@@ -273,8 +273,7 @@ System.out.println("when getting subjects, hibSes is "+hibSes.isOpen());
 				jsonResp += "\""+subjcode+"\",";
 			
 		}
-		
-		
+
 // POST PERFORMANCE
 		else if (what.equalsIgnoreCase("perf")) {
 			doPost (request, response);
@@ -322,9 +321,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 		out.print (jsonResp);
 	}  	
 	
-	
-	
-	
+
 	
 	
 	
