@@ -12,10 +12,9 @@ import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Matchers.endsWith;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNotNull;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
 
 public class RepetibleRetrieverTest {
   protected String prjCode = "157";
@@ -29,12 +28,12 @@ public class RepetibleRetrieverTest {
 
   protected String resourcesPath = "/Users/telekosmos/DevOps/epiquest/epiquest-admin/resources";
   protected BufferedReader reader;
-
+  protected String sec10Hdr = "Subject|Project|Questionnaire|Section|I1A_1|I1B_1|I1C_1|I1C_2|I1C_3|I1D_1|I1D_2|I1D_3|I1E_1|I1E_2|I1E_3|I1F_1|I1F_2|I1F_3|I1G_1|I1G_2|I1G_3|I1H_1|I1H_2|I1H_3";
+  protected String sec8Hdr1 = "Subject|Project|Questionnaire|Section|G41A_1|G41_1_1";
   @Before
   public void setUp() throws Exception {
     dr = new RepeteableRetriever();
 
-    reader = new BufferedReader(new FileReader(resourcesPath+"/repeatable-blocks.txt"));
   }
 
   @After
@@ -58,10 +57,7 @@ public class RepetibleRetrieverTest {
   }
 
 
-  /**
-   *
-   * @throws Exception
-   */
+
   @Test
   public void testRepBlockHeadingItems () throws Exception {
     String listReps = dr.getRepeatableItems(prjCode,Integer.parseInt(intrvId), orderSec);
@@ -80,7 +76,8 @@ public class RepetibleRetrieverTest {
 
     assertThat(header, notNullValue());
     assertThat(header.split("\\|"), not(emptyArray()));
-    assertThat(header.split("\\|"), arrayWithSize(equalTo(5)));
+//     assertThat(header.split("\\|"), arrayWithSize(equalTo(5)));
+    System.out.println(header);
 
     // no repeats this time
     parentId = repeatableParents8[1];
@@ -91,7 +88,7 @@ public class RepetibleRetrieverTest {
     parentId = repeatableParents10[0];
     header = dr.buildRepBlockHeader(prjCode, Integer.parseInt(intrvId),
                           orderSec, parentId);
-    System.out.println(header);
+
     assertThat(header, notNullValue());
     List listHdr = Arrays.asList(header.split("\\|"));
     List headerItems = listHdr.subList(3, listHdr.size());
@@ -109,22 +106,60 @@ public class RepetibleRetrieverTest {
     orderSec = 10;
     Integer parentItem = 1713;
     List<Object[]> rs = dr.getAnswersForRepBlock(prjCode, Integer.parseInt(intrvId), null, orderSec, parentItem);
+    String header = dr.buildRepBlockHeader(prjCode, Integer.parseInt(intrvId),
+                                orderSec, parentItem);
+    System.out.println(header);
+    assertThat(header, notNullValue());
+    String[] headerArr = header.split("\\|");
+    assertThat(headerArr, not(emptyArray()));
+
     assertThat(rs, notNullValue());
     assertThat(rs, hasSize(1000));
 
-    Iterator<Object[]> itRs = rs.iterator();
-
-    while (itRs.hasNext()) {
-      String line = reader.readLine();
-      if (line == null)
-        break;
-      line = line.replaceAll("\\|", ", ");
-      String row = Arrays.toString(itRs.next());
-      row = row.substring(1, row.length()-1);
-
-      assertThat(line, equalTo(row));
-    }
   }
 
 
+/*
+  @Test
+  public void makeRepBlockDump () throws Exception {
+    RepeteableRetriever spyRet = spy(dr);
+    List<Object[]> mockRS;
+    String header;
+    // mockRS = getMockedRS("sec10-repblocks-prj.txt");
+    // header = sec10Hdr
+    mockRS = getMockedRS("sec8-repblocks.txt");
+    header = sec8Hdr1;
+
+    when(spyRet.buildRepBlockHeader(anyString(),anyInt(),anyInt(),anyInt())).
+      thenReturn(header);
+    when(spyRet.getAnswersForRepBlock(anyString(), anyInt(), anyInt(), anyInt(),anyInt())).
+      thenReturn(mockRS);
+
+    // String header = spyRet.buildRepBlockHeader("1", 1, 1, 1);
+    // assertThat(header, equalTo(sec10Hdr));
+    spyRet.buildupRepBlockDump("1", 1, 1, 1, 1);
+
+  }
+*/
+
+  @Test
+  public void makeSecRepBlockDump () throws Exception {
+    dr.buildupSectionRepblocksDump(prjCode, Integer.parseInt(intrvId),
+      null, orderSec);
+  }
+
+
+  private List<Object[]> getMockedRS (String filename) throws Exception {
+
+    reader = new BufferedReader(new FileReader(resourcesPath+"/"+filename));
+    List<Object[]> mockedRS = new ArrayList<Object[]>();
+    String line = reader.readLine();
+    while (line != null) {
+      Object[] row = line.split("\\|");
+      mockedRS.add(row);
+      line = reader.readLine();
+    }
+    reader.close();
+    return mockedRS;
+  }
 }
