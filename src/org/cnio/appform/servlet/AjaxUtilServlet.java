@@ -86,23 +86,25 @@ import java.net.URLEncoder;
 		String what = request.getParameter("what");
 		String usrId = request.getParameter("usrid");
 		String jsonResp = "";
-		List<Interview> intrvs = null;
-		List<Section> sections = null;
-		
-		List<AppGroup> groups = null;
-		List<Project> prjs = null;
-		List<Role> roles = null;
+
+		List<Interview> intrvs;
+		List<Section> sections;
+		List<AppGroup> groups;
+		List<Project> prjs;
+		List<Role> roles;
 		boolean nothing = false;
-		
+
+    what = (what==null)? "": what;
+
 		// set Content Types
 		if (what.equals(AjaxUtilServlet.DBDUMP))
 			response.setHeader("Content-type", "text/x-csv");
-		else
+    else
 			response.setHeader("Content-type", "application/json");
 		 
 		response.setCharacterEncoding("UTF-8");
 				
-		PrintWriter out = response.getWriter();
+		PrintWriter out;
 		Session hibSes = HibernateUtil.getSessionFactory().openSession();
 			
 		AppUser theUsr = null;
@@ -111,40 +113,62 @@ import java.net.URLEncoder;
 		
 		AppUserCtrl usrCtrl = new AppUserCtrl (hibSes);
 		IntrvController intrvCtrl = new IntrvController(hibSes);
-		what = (what==null)? "": what;
-		
+
+    System.out.println("AjaxUtilServlet pathInfo: "+request.getPathInfo());
 // DBDUMP issue
 		if (what.equals(AjaxUtilServlet.DBDUMP)) {
-			DataRetriever dr = new DataRetriever ();
+			RepeatableRetriever dr = new RepeatableRetriever();
 			String prjCode = request.getParameter("prjid");
 			String intrvId = request.getParameter("intrvid");
 			String grpId = request.getParameter("grpid");
 			String orderSec = request.getParameter("secid"); // actually the section order
 
-      // String isAliquot = request.getParameter("aliq");
+      // Get the groups in the case a country is requested
+
+      System.out.println("the qString: "+request.getQueryString());
+
       String isRepDump = request.getParameter(AjaxUtilServlet.REPD); // rep dumps
 
-      String dumpOut;
-      if (isRepDump == null)
+      String dumpOut = "";
+      if (isRepDump == null) { // Subject per line download
+
 			  dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
-      else {
-        // RepeatableRetriever rr = new RepeatableRetriever();
+        out = response.getWriter();
+        out.print(dumpOut);
+        return;
+      }
+      else { // Repeating block per file/sheet download
         // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); // for xlsx format
-        // response.setHeader("Content-Disposition", "attachment; filename=filename.xls");
-        HSSFWorkbook workbook = new HSSFWorkbook();
+        response.setContentType("application/vnd.ms-excel");
+        String attachedFile = request.getPathInfo();
+        attachedFile = attachedFile.substring(1, attachedFile.length());
+        response.setHeader("Content-Disposition", "attachment; filename="+attachedFile);
+
+        AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
+        groups = HibernateUtil.getSecondaryGroups(hibSes, group);
+        String grpIds = "";
+        if (!groups.isEmpty()) {
+          for (int i=0; i < groups.size(); i++)
+            grpIds += grpIds+groups.get(i).getId()+",";
+
+          grpIds = grpIds.substring(0, grpIds.length()-1);
+        }
+        else
+          grpIds = grpId;
+
+        dr.getRepBlocksDump(prjCode, intrvId, grpIds, Integer.parseInt(orderSec));
+        dr.getExcelWb().write(response.getOutputStream());
+        return;
         // workbook = dr.getRepBlocksDump (prjCode, intrvId, grpId, Integer.parseInt(orderSec));
         // workbook.write(response.getOutputStream());
         // workbook.close();
         // dumpOut = dr.getTransposedDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
-        dumpOut = "";
-      }
 
-			out.print(dumpOut);
-			return;
+      }
 		}
 		
-		
 // GET GROUPS
+    out = response.getWriter();
 		if (what.equals(AjaxUtilServlet.GRPS)) {
 			groups = (theUsr == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(theUsr);
 			if (groups.size() == 0){
@@ -160,7 +184,6 @@ import java.net.URLEncoder;
 		}
 		
 		else if (what.equals(AjaxUtilServlet.HOSPITALS)) {
-			String prjId = request.getParameter("prjid");
 			String grpId = request.getParameter("grpCode");
 			
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
@@ -275,7 +298,7 @@ System.out.println("when getting subjects, hibSes is "+hibSes.isOpen());
 		
 		// gets patient codes from the part of the code (autocomplete oriented)
 		else if (what.equals(AjaxUtilServlet.PATS_FROM_TEXT)) {
-			String patCode = (String)request.getParameter("q");
+			String patCode = request.getParameter("q");
 			List<String> pats = HibernateUtil.getPatientsFromCode(hibSes, patCode);
 			
 			String[] patCodes = new String[pats.size()];
@@ -520,7 +543,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 		String quesId = request.getParameter("q");
 		String paramVal = request.getParameter("val");
 		paramVal = URLDecoder.decode (paramVal, "UTF-8");
-		paramVal = (paramVal == "")? org.cnio.appform.util.RenderEng.MISSING_ANSWER:
+		paramVal = (paramVal.equalsIgnoreCase(""))? org.cnio.appform.util.RenderEng.MISSING_ANSWER:
 																paramVal;
 		
 		String ansParams[] = quesId.split("-"); // i have {145,1,2,g2}
@@ -636,7 +659,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 	 	
 /**
  * Private method to manage the clon management requests
- * @param req, 
+ * @param req the servlet request
  * @return a json String ready to be sent back to server
  */
 	private String doClon (HttpServletRequest req) {

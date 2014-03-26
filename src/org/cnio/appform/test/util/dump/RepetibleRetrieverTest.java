@@ -22,6 +22,7 @@ public class RepetibleRetrieverTest {
   protected String intrvId = "50";
   protected String aliqIntrvid = "4202";
   protected String grpId = "400"; // 400 12Octubre, 304 01HospitalDelMar, 401 Cajal
+  protected String countryGrpId = "4";
   protected Integer orderSec = 8; // 12;
   protected RepeatableRetriever dr;
 
@@ -130,9 +131,9 @@ public class RepetibleRetrieverTest {
   }
 
 
-
+  /*
   @Test
-  public void xlsxDumpHeader () throws Exception {
+  public void xlsxDumpSimplesHeader () throws Exception {
 
     // Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, orderSec);
     XSSFWorkbook wb = new XSSFWorkbook();
@@ -150,21 +151,27 @@ public class RepetibleRetrieverTest {
     File f = new File(xlsxFilename);
     assertThat(f.exists(), equalTo(true));
   }
+  */
 
 
   @Test
   public void xlsxSimmpleAnswersDump () throws Exception {
 
     // Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, orderSec);
-    XSSFWorkbook wb = new XSSFWorkbook();
-    XSSFSheet sheet = wb.createSheet("one");
+    // XSSFWorkbook wb = new XSSFWorkbook();
+    // XSSFSheet sheet = wb.createSheet("one");
+    /*
     String noRepIds = dr.buildHeaderSimpleItems(prjCode, Integer.parseInt(intrvId), orderSec);
     sheet = dr.writeOutHeader(noRepIds.split("\\|"), sheet);
+    */
 
-    sheet = dr.xlsxSimpleAnswersDump(prjCode, Integer.parseInt(intrvId),
-                                    Integer.parseInt(grpId), orderSec, sheet);
-
+    //dr.xlsxSimpleAnswersDump(prjCode, Integer.parseInt(intrvId),
+      //                              Integer.parseInt(grpId), orderSec);
+    dr.xlsxAnswerDump(prjCode, Integer.parseInt(intrvId),
+                      grpId, orderSec, null);
+    Workbook wb = dr.getExcelWb();
     assertThat(wb.getNumberOfSheets(), equalTo(1));
+    assertThat(wb.getSheetAt(0).getRow(0).getCell(0).getStringCellValue(), equalToIgnoringCase("subject"));
 //    assertThat(sheet.getLastRowNum(), greaterThan(100));
 
     FileOutputStream fos = new FileOutputStream(xlsxFilename);
@@ -180,7 +187,7 @@ public class RepetibleRetrieverTest {
   public void xlsxBlockDump () throws Exception {
 
     dr.composeXlsxSectionRepBlocks(prjCode, Integer.parseInt(intrvId),
-                                  Integer.parseInt(grpId), 12);
+                                  grpId, 12);
 
     Workbook wb = dr.getExcelWb();
 
@@ -197,6 +204,9 @@ public class RepetibleRetrieverTest {
   public void xlsxSectionDump () throws Exception {
 
     Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, 12);
+    FileOutputStream fileOut = new FileOutputStream("resources/workbook.xlsx");
+    wb.write(fileOut);
+    fileOut.close();
 
     File f = new File("resources/workbook.xlsx");
     assertThat(f.exists(), equalTo(true));
@@ -207,8 +217,26 @@ public class RepetibleRetrieverTest {
 
 
   @Test
+  public void xlsxSeciontDump4Country () throws Exception {
+    grpId = "4";
+    Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, 12);
+    FileOutputStream fileOut = new FileOutputStream("resources/workbook.xlsx");
+    wb.write(fileOut);
+    fileOut.close();
+
+    File f = new File("resources/workbook.xlsx");
+    assertThat(f.exists(), equalTo(true));
+
+    assertThat(wb.getNumberOfSheets(), equalTo(4));
+  }
+
+
+  @Test
   public void xlsxSectionNoReps () throws Exception {
     Workbook wb = dr.getRepBlocksDump(prjCode, aliqIntrvid, grpId, 2);
+    FileOutputStream fileOut = new FileOutputStream("resources/workbook.xlsx");
+    wb.write(fileOut);
+    fileOut.close();
 
     File f = new File("resources/workbook.xlsx");
     assertThat(f.exists(), equalTo(true));
@@ -221,12 +249,34 @@ public class RepetibleRetrieverTest {
   public void xlsxSectionNoSimples () throws Exception {
     Workbook wb = dr.getRepBlocksDump(prjCode, aliqIntrvid, grpId, 3);
 
+    FileOutputStream fileOut = new FileOutputStream("resources/workbook.xlsx");
+    wb.write(fileOut);
+    fileOut.close();
+
     File f = new File("resources/workbook.xlsx");
     assertThat(f.exists(), equalTo(true));
 
     assertThat(wb.getNumberOfSheets(), equalTo(1));
   }
 
+
+  @Test
+  public void xlsxDump4Country () throws Exception {
+    String grpIds = "1,2,3,304";
+
+    Workbook wb = dr.getRepBlocksDump(prjCode, aliqIntrvid, grpIds, 3);
+
+    FileOutputStream fileOut = new FileOutputStream("resources/workbook.xlsx");
+    wb.write(fileOut);
+    fileOut.close();
+
+    File f = new File("resources/workbook.xlsx");
+    assertThat(f.exists(), equalTo(true));
+
+    assertThat(wb.getNumberOfSheets(), equalTo(1));
+
+
+  }
 
 /*
   @Test

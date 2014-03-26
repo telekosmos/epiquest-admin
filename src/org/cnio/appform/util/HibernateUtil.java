@@ -1112,7 +1112,50 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 		
 		return (Project)ctSec.uniqueResult();
 	}
-	
+
+
+  /**
+   * This method returns all secondary groups bound to the user represented by
+   * the user entity
+   * @param user, the user entity
+   * @return
+   */
+  public static List<AppGroup> getSecondaryGroups(Session hibSes, AppGroup mainGrp) {
+    List lGrps = null;
+    String hql = "select a from AppGroup a where "
+      + "a.container=:maingrp order by a.name";
+
+    Transaction tx = null;
+    Query qry;
+    try {
+      boolean doCommit = false;
+      tx = hibSes.getTransaction();
+      if ((tx == null) || (!(tx.isActive()))) {
+        tx = hibSes.beginTransaction();
+        doCommit = true;
+      }
+
+      qry = hibSes.createQuery(hql);
+      qry.setEntity("maingrp", mainGrp);
+      lGrps = qry.list();
+
+      if (doCommit)
+        tx.commit();
+    }
+    catch (HibernateException ex) {
+      if (tx != null) {
+        tx.rollback();
+      }
+      LogFile.getLogger().error(ex.getLocalizedMessage());
+      StackTraceElement[] stElems = ex.getStackTrace();
+      LogFile.logStackTrace(stElems);
+
+      return null;
+    }
+
+    return lGrps;
+  }
+
 	
 	
 /**
