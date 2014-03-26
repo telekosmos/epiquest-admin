@@ -1,27 +1,29 @@
 package org.cnio.appform.test.util.dump;
 
-import org.cnio.appform.util.dump.RepeteableRetriever;
-import org.hamcrest.Matchers;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.cnio.appform.util.dump.RepeatableRetriever;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.spy;
 
 public class RepetibleRetrieverTest {
   protected String prjCode = "157";
   protected String intrvId = "50";
+  protected String aliqIntrvid = "4202";
   protected String grpId = "400"; // 400 12Octubre, 304 01HospitalDelMar, 401 Cajal
   protected Integer orderSec = 8; // 12;
-  protected RepeteableRetriever dr;
+  protected RepeatableRetriever dr;
 
   protected Integer[] repeatableParents8 = {1469,1470,1603,1617};
   protected Integer[] repeatableParents10 = {1713, 2209, 2224};
@@ -30,10 +32,13 @@ public class RepetibleRetrieverTest {
   protected BufferedReader reader;
   protected String sec10Hdr = "Subject|Project|Questionnaire|Section|I1A_1|I1B_1|I1C_1|I1C_2|I1C_3|I1D_1|I1D_2|I1D_3|I1E_1|I1E_2|I1E_3|I1F_1|I1F_2|I1F_3|I1G_1|I1G_2|I1G_3|I1H_1|I1H_2|I1H_3";
   protected String sec8Hdr1 = "Subject|Project|Questionnaire|Section|G41A_1|G41_1_1";
+
+  protected String xlsxFilename = "resources/workbooktest.xlsx";
+
+
   @Before
   public void setUp() throws Exception {
-    dr = new RepeteableRetriever();
-
+    dr = new RepeatableRetriever();
   }
 
   @After
@@ -71,8 +76,7 @@ public class RepetibleRetrieverTest {
   @Test
   public void buildHeader4RepBlock () throws Exception {
     Integer parentId = repeatableParents8[0];
-    String header = dr.buildRepBlockHeader(prjCode, Integer.parseInt(intrvId),
-                          orderSec, parentId);
+    String header = dr.buildRepBlockHeader(parentId);
 
     assertThat(header, notNullValue());
     assertThat(header.split("\\|"), not(emptyArray()));
@@ -81,21 +85,18 @@ public class RepetibleRetrieverTest {
 
     // no repeats this time
     parentId = repeatableParents8[1];
-    header = dr.buildRepBlockHeader(prjCode, Integer.parseInt(intrvId),
-                          orderSec, parentId);
+    header = dr.buildRepBlockHeader(parentId);
     assertThat(header, nullValue());
 
     parentId = repeatableParents10[0];
-    header = dr.buildRepBlockHeader(prjCode, Integer.parseInt(intrvId),
-                          orderSec, parentId);
+    header = dr.buildRepBlockHeader(parentId);
 
     assertThat(header, notNullValue());
-    List listHdr = Arrays.asList(header.split("\\|"));
-    List headerItems = listHdr.subList(3, listHdr.size());
+    // List listHdr = Arrays.asList(header.split("\\|"));
+    // List headerItems = listHdr.subList(3, listHdr.size());
 
     assertThat(header.split("\\|"), arrayWithSize(greaterThan(3)));
     // assertThat(headerItems, contains(anyOf(Matchers.endsWith("1"), Matchers.endsWith("2"))));
-    // assertThat(headerItems, contains(Matchers.startsWith("I")));
   }
 
 
@@ -106,8 +107,7 @@ public class RepetibleRetrieverTest {
     orderSec = 10;
     Integer parentItem = 1713;
     List<Object[]> rs = dr.getAnswersForRepBlock(prjCode, Integer.parseInt(intrvId), null, orderSec, parentItem);
-    String header = dr.buildRepBlockHeader(prjCode, Integer.parseInt(intrvId),
-                                orderSec, parentItem);
+    String header = dr.buildRepBlockHeader(parentItem);
     System.out.println(header);
     assertThat(header, notNullValue());
     String[] headerArr = header.split("\\|");
@@ -119,10 +119,119 @@ public class RepetibleRetrieverTest {
   }
 
 
+  @Test
+  public void simpleItemsHeader () throws Exception {
+    String noRepIds = dr.buildHeaderSimpleItems(prjCode, Integer.parseInt(intrvId), 6);
+
+    assertThat(noRepIds, not(isEmptyOrNullString()));
+    String[] noRepIdsArr = noRepIds.split("\\|");
+    assertThat(noRepIdsArr.length, greaterThan(3));
+    System.out.println(noRepIds);
+  }
+
+
+
+  @Test
+  public void xlsxDumpHeader () throws Exception {
+
+    // Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, orderSec);
+    XSSFWorkbook wb = new XSSFWorkbook();
+    XSSFSheet sheet = wb.createSheet("one");
+    String noRepIds = dr.buildHeaderSimpleItems(prjCode, Integer.parseInt(intrvId), orderSec);
+    sheet = dr.writeOutHeader(noRepIds.split("\\|"), sheet);
+
+    assertThat(wb.getNumberOfSheets(), equalTo(1));
+    assertThat(sheet.getLastRowNum(), equalTo(0));
+
+    FileOutputStream fos = new FileOutputStream(xlsxFilename);
+    wb.write(fos);
+    fos.close();
+
+    File f = new File(xlsxFilename);
+    assertThat(f.exists(), equalTo(true));
+  }
+
+
+  @Test
+  public void xlsxSimmpleAnswersDump () throws Exception {
+
+    // Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, orderSec);
+    XSSFWorkbook wb = new XSSFWorkbook();
+    XSSFSheet sheet = wb.createSheet("one");
+    String noRepIds = dr.buildHeaderSimpleItems(prjCode, Integer.parseInt(intrvId), orderSec);
+    sheet = dr.writeOutHeader(noRepIds.split("\\|"), sheet);
+
+    sheet = dr.xlsxSimpleAnswersDump(prjCode, Integer.parseInt(intrvId),
+                                    Integer.parseInt(grpId), orderSec, sheet);
+
+    assertThat(wb.getNumberOfSheets(), equalTo(1));
+//    assertThat(sheet.getLastRowNum(), greaterThan(100));
+
+    FileOutputStream fos = new FileOutputStream(xlsxFilename);
+    wb.write(fos);
+    fos.close();
+
+    File f = new File(xlsxFilename);
+    assertThat(f.exists(), equalTo(true));
+  }
+
+
+  @Test
+  public void xlsxBlockDump () throws Exception {
+
+    dr.composeXlsxSectionRepBlocks(prjCode, Integer.parseInt(intrvId),
+                                  Integer.parseInt(grpId), 12);
+
+    Workbook wb = dr.getExcelWb();
+
+    FileOutputStream fos = new FileOutputStream(xlsxFilename);
+    wb.write(fos);
+    fos.close();
+
+    File f = new File(xlsxFilename);
+    assertThat(f.exists(), equalTo(true));
+  }
+
+
+  @Test
+  public void xlsxSectionDump () throws Exception {
+
+    Workbook wb = dr.getRepBlocksDump(prjCode, intrvId, grpId, 12);
+
+    File f = new File("resources/workbook.xlsx");
+    assertThat(f.exists(), equalTo(true));
+
+    assertThat(wb.getNumberOfSheets(), equalTo(4));
+
+  }
+
+
+  @Test
+  public void xlsxSectionNoReps () throws Exception {
+    Workbook wb = dr.getRepBlocksDump(prjCode, aliqIntrvid, grpId, 2);
+
+    File f = new File("resources/workbook.xlsx");
+    assertThat(f.exists(), equalTo(true));
+
+    assertThat(wb.getNumberOfSheets(), equalTo(1));
+  }
+
+
+  @Test
+  public void xlsxSectionNoSimples () throws Exception {
+    Workbook wb = dr.getRepBlocksDump(prjCode, aliqIntrvid, grpId, 3);
+
+    File f = new File("resources/workbook.xlsx");
+    assertThat(f.exists(), equalTo(true));
+
+    assertThat(wb.getNumberOfSheets(), equalTo(1));
+  }
+
+
 /*
   @Test
   public void makeRepBlockDump () throws Exception {
-    RepeteableRetriever spyRet = spy(dr);
+    RepeatableRetriever spyRet = spy(dr);
     List<Object[]> mockRS;
     String header;
     // mockRS = getMockedRS("sec10-repblocks-prj.txt");
@@ -144,7 +253,8 @@ public class RepetibleRetrieverTest {
 
   @Test
   public void makeSecRepBlockDump () throws Exception {
-    dr.buildupSectionRepblocksDump(prjCode, Integer.parseInt(intrvId),
+    System.out.println(prjCode+", "+intrvId+", null, "+orderSec);
+    dr.printoutSectionRepblocksDump(prjCode, Integer.parseInt(intrvId),
       null, orderSec);
   }
 

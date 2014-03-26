@@ -1,5 +1,6 @@
 package org.cnio.appform.servlet;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.inb.dbtask.*;
 import org.inb.util.*;
 
@@ -49,6 +50,7 @@ import java.net.URLEncoder;
    static final String PATS_FROM_TEXT = "pats";
    
    static final String DBDUMP = "dump";
+   static final String REPD = "repd";
    
    private String dbUser;
    private String dbPasswd;
@@ -119,14 +121,24 @@ import java.net.URLEncoder;
 			String grpId = request.getParameter("grpid");
 			String orderSec = request.getParameter("secid"); // actually the section order
 
-      String isAliquot = request.getParameter("aliq");
+      // String isAliquot = request.getParameter("aliq");
+      String isRepDump = request.getParameter(AjaxUtilServlet.REPD); // rep dumps
 
       String dumpOut;
-      if (isAliquot == null)
+      if (isRepDump == null)
 			  dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
-      else
-        dumpOut = dr.getTransposedDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
-			
+      else {
+        // RepeatableRetriever rr = new RepeatableRetriever();
+        // response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); // for xlsx format
+        // response.setHeader("Content-Disposition", "attachment; filename=filename.xls");
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        // workbook = dr.getRepBlocksDump (prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+        // workbook.write(response.getOutputStream());
+        // workbook.close();
+        // dumpOut = dr.getTransposedDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+        dumpOut = "";
+      }
+
 			out.print(dumpOut);
 			return;
 		}

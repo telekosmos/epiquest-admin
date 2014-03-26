@@ -16,17 +16,19 @@ public class SqlDataRetriever {
 	
 	private Connection conn;
 	private Statement stmt;
+
+
 	
 /**
- * Retrieves the resultset for the query	
+ * Retrieves the full resultset in order to retrive all answers for a section and group
  * @param prjCode, the project code
  * @param intrvId, the database interview id
  * @param grpId, the database groupId
  * @param secOrder, the section order
  * @return a java.sql.ResultSet object with ALL queried rows
  */
-	public ResultSet getResultSet (String prjCode, Integer intrvId, Integer grpId,
-			                          Integer secOrder) {
+	public ResultSet getFullResultSet(String prjCode, Integer intrvId, Integer grpId,
+                                    Integer secOrder) {
 		
 		try {
 			this.conn = this.getConnection ();
@@ -77,7 +79,10 @@ public class SqlDataRetriever {
 		}
 	}
 
-	
+
+
+
+
 	
 	
 	public void closeConn () throws SQLException {

@@ -338,8 +338,8 @@ System.out.println();
 	  	String fileHeader = (mapVarNames == null)? dw.writeHeader(listMap):
 	  																					dw.writeMappedHdr (listMap, mapVarNames);
 // ver si lo que saca con var names y con codes es lo mismo
-// primero s—lo con la cabecera y 
-// luego probar con varias secciones y pa’ses
+// primero sï¿½lo con la cabecera y 
+// luego probar con varias secciones y paï¿½ses
 			if (fileHeader == null) {
 				System.out.println("An error was found when getting variable names from file");
 				System.out.println("Try again without supplying a variable names file");
@@ -426,7 +426,7 @@ System.out.println();
 	  	TreeMap <String,String> list = getHeader (prjCode, grpId, intrvId, secOrder);
 	  	System.out.println(dw.writeHeader(list));
 	  		
-	  	List<Object[]> resultSet = getResultSet ("157", 50, 304, 8);
+	  	List<Object[]> resultSet = getFullResultSet ("157", 50, 304, 8);
 	  	dw.buildResultSet(list, resultSet, null);
 	  	
 	  }

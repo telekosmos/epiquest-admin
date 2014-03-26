@@ -1,8 +1,6 @@
 package org.cnio.appform.util.dump;
 
-import java.sql.SQLException;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -11,8 +9,8 @@ import java.io.File;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.spi.CharsetProvider;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.cnio.appform.entity.AppGroup;
 import org.cnio.appform.entity.Interview;
 import org.cnio.appform.entity.Project;
@@ -104,9 +102,52 @@ public class DataRetriever {
 
     return rows;
   }
-  
-  
-  
+
+
+  /**
+   * Get the ids of the items which are single items in the questionnaire
+   * @param prjCode, the project code
+   * @param intrvId, the database id of the interview
+   * @param secOrder, the order of the section inside the interview
+   * @param repeatIds a comma separated list of ids for the repeating items in the section
+   * @return a string of comma-separated item ids
+   */
+  public String getNoRepeatableItems (String prjCode, Integer intrvId,
+                                      Integer secOrder, String repeatIds) {
+
+    String theIds = "";
+    String secOrderConstraint = secOrder == null? "and 1 = 1 ":
+      "and s.section_order = "+secOrder +" ";
+
+    repeatIds = (repeatIds == null || repeatIds.equalsIgnoreCase(""))?
+                          getRepeatableItems(prjCode, intrvId, secOrder): repeatIds;
+
+    String qry =
+      "select it.iditem, it.content, s.section_order, it.item_order "+
+        "from interview i, section s, item it, project prj "+
+        "where prj.project_code = '"+prjCode+"' "+
+        "and prj.idprj = i.codprj " +
+        "and s.codinterview = i.idinterview "+
+        "and i.idinterview in ("+intrvId+") "+
+        "and it.idsection = s.idsection "  +
+        secOrderConstraint +
+        "and it.\"repeatable\" = 0 "+
+        "and (it.ite_iditem is null or it.ite_iditem not in ("+repeatIds+")) "+
+        "order by 3, 4;";
+
+    List<Object[]> ids = execQuery (qry, -1, -1);
+    for (Object[] id: ids) {
+      Integer myId = (Integer)id[0];
+      theIds += myId.toString()+",";
+    }
+
+    if (theIds.length() > 0)
+      theIds = theIds.substring(0, theIds.length()-1);
+
+    return theIds;
+  }
+
+
   
  /**
   * Gets the ids of the repeteable items in the questionnaire intrvId.
@@ -854,9 +895,9 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	 * @param sortOrder the section defined by its order in the questionnaire
 	 * @param fileName, the name of the file output
 	 */
-	  public void getDump (String prjCode, Integer intrvId, Integer grpId, 
+	  public void getDump (String prjCode, Integer intrvId, Integer grpId,
 	  						        Integer orderSec, Integer sortOrder, String fileName)
-	  										throws java.io.FileNotFoundException, java.io.IOException {
+	  										throws java.io.IOException {
 
 	  	BufferedWriter fileOut = new BufferedWriter (
 	          new OutputStreamWriter (new FileOutputStream (fileName), Charset.forName("UTF-8")));
@@ -873,6 +914,7 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 				System.out.println("Try again without supplying a variable names file");
 			}
 			else {
+        System.out.println("Output to "+fileName);
 				System.out.println ("Writing file header as:");
 				System.out.println(fileHeader);
 				
@@ -885,11 +927,11 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 		  	int maxRows = DataRetriever.MAX_ROWS, offset = 0, rowsProcessed;
 
 ////////////////////////////////////////////////////
-//		  	resultSet = getResultSet (prjCode, intrvId, grpId, orderSec, -1, -1);
+//		  	resultSet = getFullResultSet (prjCode, intrvId, grpId, orderSec, -1, -1);
 //		  	dw.buildResult (patients, listMapHdr, resultSet, fileOut);
 
 		  	SqlDataRetriever sqldr = new SqlDataRetriever();
-		  	java.sql.ResultSet rs = sqldr.getResultSet(prjCode, intrvId, grpId, orderSec);
+		  	java.sql.ResultSet rs = sqldr.getFullResultSet(prjCode, intrvId, grpId, orderSec);
 		  	
 		  	try {
 		  		if (patients.size() > 0)
@@ -897,30 +939,22 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 		  	}
 		  	catch (Exception ex) {
 		  		ex.printStackTrace();
-		  	}		  	
-/*
-		  	while (moreResults) {
-		  		resultSet = getResultSet (prjCode, intrvId, grpId, orderSec, offset, maxRows);
-		  		rowsProcessed = dw.buildResult(patients, listMapHdr, resultSet, resultsetSize, fileOut);
-		  		
-System.out.println ("num of results: "+resultSet.size());
-//					offset += maxRows+1;
-					offset += rowsProcessed;
-		  		moreResults = resultSet.size() > offset;
-		  		
-		  		resultSet.clear();
-		  	}		  	
-//		  	List<Object[]> resultSet = getResultSet (prjCode, intrvId, grpId, orderSec);
-		  	
-//		  	dw.buildResultSet (listMapHdr, resultSet, fileOut);
-//		  	dw.buildResult(patients, listMapHdr, resultSet, fileOut);
- */
+		  	}
 			}
 	    fileOut.close(); 
 	  }
-  
-	  
-	  
+
+
+
+  /**
+   * Interfaz method to download a dump from the web admin. Based in the legacy
+   * dump methods to get dumps in regular files via command line.
+   * @param prjCode, the project code
+   * @param intrvId, the interview id (can be redundant...)
+   * @param grpId, the group the interviews are going to belong to
+   * @param orderSec the section defined by its order in the questionnaire
+   * @return the download data as a string object
+   */
 	  public String getAdminDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
 	  	
 	  	long timestamp = (new java.util.Date()).getTime();
@@ -959,7 +993,7 @@ System.out.println ("num of results: "+resultSet.size());
    * @param grpId, the group database id
    * @param orderSec, the number of the section
    * @return an String which will be returned to the client as the result of the dump
-   */
+   *//*
     public String getTransposedDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
       TransposedDataRetriever tdr;
 
@@ -981,9 +1015,9 @@ System.out.println ("num of results: "+resultSet.size());
       }
 
     }
-	  
-	  
-	  
+  */
+
+
   
   /**
    * Interface method to get a dump from project, interview, group names, not ids
@@ -1067,7 +1101,7 @@ System.out.println("getDump("+prjCode+", "+intrvId+", "+grpId+", "+orderSec+", "
 	  	TreeMap <String,String> list = getHeader (prjCode, grpId, intrvId, secOrder);
 	  	System.out.println(dw.writeHeader(list));
 	  		
-	  	List<Object[]> resultSet = getResultSet ("157", 50, 304, 8);
+	  	List<Object[]> resultSet = getFullResultSet ("157", 50, 304, 8);
 	  	dw.buildResultSet(list, resultSet, null);
 	  	
 	  }
