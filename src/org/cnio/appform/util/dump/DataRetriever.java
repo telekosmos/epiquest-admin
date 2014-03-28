@@ -967,7 +967,8 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	  	try {
 	  		// this.getDump(prjCode, intrvId, grpId, orderSec, null, filename);
 // System.out.println("this.getDump("+prjCode+", "+Integer.parseInt(intrvId)+", null, "+orderSec+", 0, "+filename+")");
-	  		this.getDump(prjCode, Integer.parseInt(intrvId), null, orderSec, 0, filename);
+	  		this.getDump(prjCode, Integer.parseInt(intrvId), Integer.parseInt(grpId),
+                      orderSec, 0, filename);
 	  		
 	  		FileInputStream fis = new FileInputStream (filename);
 	  		java.util.Scanner scanner = new java.util.Scanner(fis, "UTF-8");

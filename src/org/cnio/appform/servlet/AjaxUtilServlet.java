@@ -1,6 +1,7 @@
 package org.cnio.appform.servlet;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.cnio.appform.util.*;
 import org.inb.dbtask.*;
 import org.inb.util.*;
 
@@ -13,11 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.cnio.appform.entity.*;
-import org.cnio.appform.util.AppUserCtrl;
-import org.cnio.appform.util.HibernateUtil;
-import org.cnio.appform.util.IntrvFormCtrl;
-import org.cnio.appform.util.IntrvController;
-import org.cnio.appform.util.Singleton;
 
 import org.cnio.appform.util.dump.*;
 
@@ -46,6 +42,7 @@ import java.net.URLEncoder;
    static final String INTRV = "intrvs";
    static final String SECTION = "secs";
    static final String HOSPITALS = "hosp";
+   static final String DEPARTMENT = "hosp"; // just to generalize the term
    static final String SUBJECT = "subj";
    
    static final String PATS_FROM_TEXT = "pats";
@@ -85,7 +82,8 @@ import java.net.URLEncoder;
  */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String what = request.getParameter("what");
-		String usrId = request.getParameter("usrid");
+		// String usrId = request.getParameter("usrid");
+    String usrId = request.getSession().getAttribute("usrid").toString();
 		String jsonResp = "";
 
 		List<Interview> intrvs;
@@ -189,12 +187,13 @@ import java.net.URLEncoder;
 												"\",\"id\":"+grp.getId()+", \"type\":"+grp.getType().getId()+"},";
 			}
 		}
-		
+// SECONDARY GROUPS
 		else if (what.equals(AjaxUtilServlet.HOSPITALS)) {
-			String grpId = request.getParameter("grpCode");
+			String grpId = request.getParameter("grpid"); // ("grpCode");
 			
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
-			groups = group.getContainees();
+			// groups = group.getContainees();
+      groups = usrCtrl.getSecondaryGroups(theUsr, group);
 			
 			if (groups.size() == 0){
 				nothing = true;
@@ -220,7 +219,7 @@ import java.net.URLEncoder;
 				for (Project prj: prjs) 
 					jsonResp += "{\"name\":\""+URLEncoder.encode(prj.getName(), "UTF-8")+
 											"\",\"id\":"+prj.getId()+
-											",\"code\":\""+URLEncoder.encode(prj.getProjectCode(),"UTF-8")+"\"},";
+											",\"code\":\""+URLEncoder.encode(prj.getProjectCode(), "UTF-8")+"\"},";
 			}
 		}
 
@@ -261,12 +260,13 @@ import java.net.URLEncoder;
 			}
 		}
 		
-		
+// SECTIONS for a interview/questionnaire
 		else if (what.equals(AjaxUtilServlet.SECTION)) {
 			String intrvId = request.getParameter("intrvid");
 			// String grpId = request.getParameter("grpid");
 			Interview intrv = (Interview)hibSes.get(Interview.class, Integer.parseInt(intrvId));
-			sections = intrv.getSections();
+			// sections = intrv.getSections();
+      sections = HibController.SectionCtrl.getSectionsFromIntrv(hibSes, intrv);
 			
 			if (sections.size() == 0) {
 				nothing = true;
@@ -286,7 +286,7 @@ import java.net.URLEncoder;
 			String hospCode = request.getParameter("grpCode");
 			String typeCode = request.getParameter("subjType"); // "", 1, 2 or 3
 			
-System.out.println("when getting subjects, hibSes is "+hibSes.isOpen());
+System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
 			List<Patient> pats = 
 						HibernateUtil.getPatiens4ProjsGrps(hibSes, prjCode, hospCode, typeCode);
 			

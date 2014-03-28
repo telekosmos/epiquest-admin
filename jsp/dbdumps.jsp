@@ -30,6 +30,9 @@ System.out.println("Principal's name: "+user);
 
 	userCtrl = new AppUserCtrl(hibSes);
 	roleList = userCtrl.getAllRoles();
+
+  Integer userId = (Integer)request.getSession().getAttribute("usrid");
+
 /*	
 	List<String> activeUsrs = Singleton.getInstance().getLoggedUsers();
 	activeUsrs.remove(user);
@@ -148,6 +151,7 @@ System.out.println("Principal's name: "+user);
 
   <!-- Admins -->
   <form class="form-horizontal" id="frmDump" name="frmDump">
+  <input type="hidden" id="frmUsrid" name="frmUsrid" value="<%= userId %>"/>
   <div class="row-fluid" style="padding-top: 3em;">
     <div class="span2 offset1">
       <label>Project</label>
@@ -164,18 +168,25 @@ System.out.println("Principal's name: "+user);
     </div>
   
     <div class="span2">  
-      <label>Group/Country</label>
-      <select class="input-medium" id="frmGroup" name="frmGroup">
+      <label>Country</label>
+      <select class="input-medium" id="frmCountry" name="frmCountry">
         <option value="-1" selected="selected">Choose</option>
         <%
-				List<AppGroup> primaryGrps = userCtrl.getPrimaryGroups();
-				for (AppGroup group : primaryGrps) {
+				List<AppGroup> primaryGrps;
+        primaryGrps = userId == null? userCtrl.getPrimaryGroups():
+                                      userCtrl.getPrimaryGroups(userId);
+
+        for (AppGroup group : primaryGrps) {
 					out.println("<option value=\"" + group.getId() + "\"" + 
 							" onmouseover=\"Tip('"+ group.getName() + "');\" onmouseout=\"UnTip();\">" + 
 							group.getName()
 							+ "</option>");
 				}
 				%>
+      </select>
+      <label>Group</label>
+      <select class="input-medium" id="frmGroup" name="frmGroup" disabled="disabled">
+        <option value="-1" selected="selected">Choose</option>
       </select>
     </div>
       
