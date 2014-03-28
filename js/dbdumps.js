@@ -5,7 +5,7 @@ var DBDumpFormCtrl = function () {
 
   var ajaxResp;
   var txtNewName;
-  var comboProj, comboGrp, comboIntrv, comboSec;
+  var comboProj, comboGrp, comboIntrv, comboSec, repeatingCheck;
   var theForm;
 
 
@@ -105,6 +105,7 @@ var DBDumpFormCtrl = function () {
     comboGrp = $("#frmGroup");
     comboIntrv = $("#frmQuestionnaire");
     comboSec = $("#frmSection");
+    repeatingCheck = $("#frmRepCheck");
 
     theForm = $('#frmDump');
 
@@ -122,6 +123,7 @@ var DBDumpFormCtrl = function () {
       var grpid = $(comboGrp).val();
       var intrvid = $(comboIntrv).val();
       var secOrder = $(comboSec).val();
+      var repeatingDump = repeatingCheck.prop('checked');
 
       grpid = grpid == -1 ? '' : grpid;
       var dumpUrl = APP_ROOT + '/servlet/AjaxUtilServlet?what=dump&prjid=' + prjid + '&grpid=';
@@ -129,9 +131,14 @@ var DBDumpFormCtrl = function () {
 
       var questionaireName = $('#frmQuestionnaire option:selected').text();
       questionaireName = questionaireName.replace(/ /g, '_');
-      var fileName = $('#frmProject option:selected').text()+'-'+questionaireName+'-sec'+secOrder+'.xlsx';
+      var fileName = $('#frmProject option:selected').text()+'-'+questionaireName+'-sec'+secOrder;
+      var fileExt = repeatingDump? '.xlsx': '.csv';
+      fileName += fileExt;
+
       dumpUrl = APP_ROOT + '/datadump/'+fileName+'?what=dump&prjid=' + prjid + '&grpid=';
       dumpUrl += grpid + '&intrvid=' + intrvid + '&secid=' + secOrder;
+      if (repeatingDump)
+        dumpUrl += '&repd=1';
 
       document.location.href = dumpUrl;
       $(theForm)[0].reset();

@@ -25,6 +25,7 @@ import org.hibernate.Session;
 
 import org.json.simple.*;
 
+import java.sql.SQLException;
 import java.util.*;
 
 import java.io.PrintWriter;
@@ -149,15 +150,21 @@ import java.net.URLEncoder;
         String grpIds = "";
         if (!groups.isEmpty()) {
           for (int i=0; i < groups.size(); i++)
-            grpIds += grpIds+groups.get(i).getId()+",";
+            grpIds += groups.get(i).getId()+",";
 
           grpIds = grpIds.substring(0, grpIds.length()-1);
         }
         else
           grpIds = grpId;
 
-        dr.getRepBlocksDump(prjCode, intrvId, grpIds, Integer.parseInt(orderSec));
-        dr.getExcelWb().write(response.getOutputStream());
+        try {
+          dr.getRepBlocksDump(prjCode, intrvId, grpIds, Integer.parseInt(orderSec));
+          dr.getExcelWb().write(response.getOutputStream());
+        }
+        catch (SQLException sqlEx) {
+          return; // should have to manage an error
+        }
+
         return;
         // workbook = dr.getRepBlocksDump (prjCode, intrvId, grpId, Integer.parseInt(orderSec));
         // workbook.write(response.getOutputStream());

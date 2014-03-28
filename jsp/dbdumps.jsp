@@ -48,6 +48,7 @@ System.out.println("Principal's name: "+user);
   <!-- Le styles -->
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+  <link href="../css/admintool.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {
@@ -68,19 +69,12 @@ System.out.println("Principal's name: "+user);
       #wrap {
         min-height: 100%;
         height: auto !important;
-        height: 100%;
         /* Negative indent footer by it's height */
         margin: 0 auto -60px;
       }
 
       /* Set the fixed height of the footer here */
       #push,
-      #footer {
-        height: 60px;
-      }
-      #footer {
-        background-color: #f5f5f5;
-      }
 
       /* Lastly, apply responsive CSS fixes as necessary */
       @media (max-width: 767px) {
@@ -154,10 +148,10 @@ System.out.println("Principal's name: "+user);
 
   <!-- Admins -->
   <form class="form-horizontal" id="frmDump" name="frmDump">
-  <div class="row-fluid" style="padding-top: 3%;">
-    <div class="span2 offset1" style="margin-left: 12%">
+  <div class="row-fluid" style="padding-top: 3em;">
+    <div class="span2 offset1">
       <label>Project</label>
-      <select class="input-large" id="frmProject" name="frmProject">
+      <select class="input-medium" id="frmProject" name="frmProject">
       	<option value="-1" selected="selected">Choose</option>
         <%
 					List<Project> projectList = userCtrl.getAllProjects();
@@ -171,7 +165,7 @@ System.out.println("Principal's name: "+user);
   
     <div class="span2">  
       <label>Group/Country</label>
-      <select class="input-large" id="frmGroup" name="frmGroup">
+      <select class="input-medium" id="frmGroup" name="frmGroup">
         <option value="-1" selected="selected">Choose</option>
         <%
 				List<AppGroup> primaryGrps = userCtrl.getPrimaryGroups();
@@ -187,7 +181,7 @@ System.out.println("Principal's name: "+user);
       
     <div class="span2">
       <label>Questionnaire</label>
-      <select class="input-large" id="frmQuestionnaire" name="frmQuestionnaire">
+      <select class="input-medium" id="frmQuestionnaire" name="frmQuestionnaire">
         <option value="-1" selected="selected">Choose</option>
         <!-- 
         <option value="-1">QES Español</option>
@@ -197,7 +191,7 @@ System.out.println("Principal's name: "+user);
     </div>
     <div class="span2">
       <label>Section</label>
-      <select class="input-large" id="frmSection" name="frmSection">
+      <select class="input-medium" id="frmSection" name="frmSection">
         <option value="-1" selected="selected">Choose</option>
         <!-- 
         <option value="-1">Introducción</option>
@@ -205,8 +199,17 @@ System.out.println("Principal's name: "+user);
        	-->
       </select>
     </div>
+    <div class="span2" style="padding-top: 1em;">
+      <label class="checkbox">
+        <input type="checkbox" id="frmRepCheck" value="1">Check for downloading in separated repeats
+      </label>
+    </div>
 
-    <div class="span2" style="padding-left:2%;">
+  </div> <!-- EO row-fluid -->
+
+  <div class="row-fluid">
+
+    <div class="span2 offset9">
       <button class="btn btn-small btn-primary" id="btnSend" type="button" style="margin-top:17%">Send</button>
       <button class="btn btn-small btn-primary" id="btnReset" type="reset" style="margin-top:17%">Reset</button>
     </div>

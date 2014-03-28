@@ -2,31 +2,54 @@ package org.cnio.appform.util.dump;
 
 
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 import org.cnio.appform.entity.AppGroup;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
 public class RepeatableRetriever extends  DataRetriever {
 
-  protected XSSFWorkbook wb;
-  protected static final int firstFieldIndex = 4;
+  protected SXSSFWorkbook wb;
+  protected final int FIRST_FIELD_INDEX = 4;
+
+  /**
+   * MAX_QUERY_SIZE is the max number of rows to retrieve in one query
+   */
+  private final int MAX_QUERY_SIZE = 30000;
+  /**
+   * queryTimes is the number of times the query for rows was called. This is
+   * necessary in order to get the next set of rows, which will has an offset
+   * MAX_QUERY_SIZE*queryTimes
+   */
+  private int queryTimes = 0;
+
+  // counter for blocks, used to name the sheets in the excel
+  private int blockCount = 0;
+
+
+  protected SqlDataRetriever sdr;
 
   // retrieve items in a repeatable wrapped by the parent item. for header
   protected String repBlockItemsQry =
     "select it.iditem, it.item_order,qai.answer_order, q.codquestion, it.content, ait.idansitem, s.\"name\" " +
-    "from item it, question q, answer_item ait, question_ansitem qai, section s " +
-    "where it.ite_iditem = xxx " +
-    "  and q.idquestion = it.iditem" +
-    "  and ait.idansitem = qai.codansitem" +
-    "  and it.idsection = s.idsection" +
-    "  and q.idquestion = qai.codquestion " +
-    "order by 2, 3;";
+      "from item it, question q, answer_item ait, question_ansitem qai, section s " +
+      "where it.ite_iditem = xxx " +
+      "  and q.idquestion = it.iditem" +
+      "  and ait.idansitem = qai.codansitem" +
+      "  and it.idsection = s.idsection" +
+      "  and q.idquestion = qai.codquestion " +
+      "order by 2, 3;";
 
 
   protected String noRepeatItemsQry =
@@ -49,24 +72,25 @@ public class RepeatableRetriever extends  DataRetriever {
     "select p.codpatient, pj.\"name\" as prjname, g.name as grpname, i.name as intrvname, " +
       "s.name as secname, q.codquestion as codq, a.thevalue, s.section_order, " +
       "it.item_order, pga.answer_number, pga.answer_order, it.repeatable as itrep " +
-    "from patient p, pat_gives_answer2ques pga, appgroup g,performance pf, " +
-    " question q, answer a, interview i, item it, section s, project pj " +
-    "where gggg " +
-    "and i.idinterview = iiii " +
-    "and pj.project_code = 'pppp' " +
-    "and pj.idprj = i.codprj " +
-    "and pf.codinterview = i.idinterview " +
-    "and pf.codgroup = g.idgroup " +
-    "and s.codinterview = i.idinterview " +
-    "and pf.codpat = p.idpat " +
-    "and pga.codpat = p.idpat " +
-    "and pga.codquestion = q.idquestion " +
-    "and pga.codanswer = a.idanswer " +
-    "and q.idquestion = it.iditem " +
-    "and it.ite_iditem = hhhh " +
-    "and it.idsection = s.idsection  " +
-    "and s.section_order =  ssss " +
-    " order by 1, 8, 10, 9, 11 ";
+      "from patient p, pat_gives_answer2ques pga, appgroup g,performance pf, " +
+      " question q, answer a, interview i, item it, section s, project pj " +
+      "where gggg " +
+      "and i.idinterview = iiii " +
+      "and pj.project_code = 'pppp' " +
+      "and pj.idprj = i.codprj " +
+      "and pf.codinterview = i.idinterview " +
+      "and pf.codgroup = g.idgroup " +
+      "and s.codinterview = i.idinterview " +
+      "and pf.codpat = p.idpat " +
+      "and pga.codpat = p.idpat " +
+      "and pga.codquestion = q.idquestion " +
+      "and pga.codanswer = a.idanswer " +
+      "and q.idquestion = it.iditem " +
+      "and it.ite_iditem = hhhh " +
+      "and it.idsection = s.idsection  " +
+      "and s.section_order =  ssss " +
+      " order by 1, 8, 10, 9, 11 ";
+  // " limit "+this.MAX_QUERY_SIZE;
 
 
   protected String simpleAnswersQry = "select p.codpatient, pj.\"name\" as prjname, g.name as grpname, i.name as intrvname, s.name as secname, " +
@@ -99,13 +123,15 @@ public class RepeatableRetriever extends  DataRetriever {
   public RepeatableRetriever(String path, Hashtable map) {
     super (path, map);
 
-    wb = new XSSFWorkbook();
+    wb = new SXSSFWorkbook(100);
   }
 
 
   public RepeatableRetriever() {
-    wb = new XSSFWorkbook();
+    wb = new SXSSFWorkbook(100);
     repIds = "";
+
+    sdr = new SqlDataRetriever();
   }
 
 
@@ -126,11 +152,11 @@ public class RepeatableRetriever extends  DataRetriever {
   public String buildHeaderSimpleItems (String prjCode, Integer intrvId,
                                         Integer secOrder) {
 
-    repIds = repIds.equalsIgnoreCase("")?
-                getRepeatableItems(prjCode, intrvId, secOrder): repIds;
+    this.repIds = this.repIds.equalsIgnoreCase("")?
+      getRepeatableItems(prjCode, intrvId, secOrder): this.repIds;
 
-    String repIdsQry = repIds.equalsIgnoreCase("")? "":
-                "or it.ite_iditem not in ("+repIds+") ";
+    String repIdsQry = this.repIds.equalsIgnoreCase("")? "":
+      "or it.ite_iditem not in ("+this.repIds+") ";
 
     String qry = noRepeatItemsQry;
     qry = qry.replaceAll("pppp", prjCode);
@@ -192,21 +218,27 @@ public class RepeatableRetriever extends  DataRetriever {
    * @param parentItem the item which is the parent for the repeatable block
    * @return a list of Object[] with the resultset content
    */
-  public List<Object[]> getAnswersForRepBlock (String prjCode, Integer intrvId,
-                                               String grpId, Integer secOrder, Integer parentItem) {
+  public ResultSet getAnswersForRepBlock (String prjCode, Integer intrvId,
+                                          String grpId, Integer secOrder, Integer parentItem)
+    throws SQLException {
 
     String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
     String grpParam = (grpId == null? "1=1 ": "g.idgroup in ("+grpId.toString()+")");
     String qry = repBlockAnswersQry;
     qry = qry.replaceAll("ssss", secParam)
-              .replaceAll("gggg", grpParam)
-              .replaceAll("pppp", prjCode)
-              .replaceAll("hhhh", parentItem.toString())
-              .replaceAll("iiii", intrvId.toString());
+      .replaceAll("gggg", grpParam)
+      .replaceAll("pppp", prjCode)
+      .replaceAll("hhhh", parentItem.toString())
+      .replaceAll("iiii", intrvId.toString());
+    // qry += " offset "+ (MAX_QUERY_SIZE*queryTimes)+";";
+    System.out.println(this.queryTimes+": "+qry);
+    // List<Object[]> rs = execQuery(qry, MAX_QUERY_SIZE*queryTimes, MAX_QUERY_SIZE);
 
-    List<Object[]> rs = execQuery(qry, -1, -1);
+    ResultSet scrollRs = this.sdr.getScrollableRS(qry);
+    // List <Object[]> rs = execQuery(qry, -1, -1);
+    System.out.println("Qry done!");
 
-    return rs;
+    return scrollRs;
   }
 
 
@@ -220,17 +252,17 @@ public class RepeatableRetriever extends  DataRetriever {
    * @param secOrder the number of section in the questionnaire
    * @return a list with the retrieved answers
    */
-  public List<Object[]> getAnswers4SimpleItems (String prjCode, Integer intrvId,
-                                                String grpId, Integer secOrder) {
+  public ResultSet getAnswers4SimpleItems (String prjCode, Integer intrvId,
+                                           String grpId, Integer secOrder) {
 
     String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
     String grpParam = (grpId == null? "1=1 ": "g.idgroup in ("+grpId.toString()+")");
 
-    repIds = repIds.equalsIgnoreCase("")?
+    this.repIds = this.repIds.equalsIgnoreCase("")?
       getRepeatableItems(prjCode, intrvId, secOrder):
-      repIds;
-    String repIdsQry = repIds.equalsIgnoreCase("")? "":
-      "or it.ite_iditem not in ("+repIds+") ";
+      this.repIds;
+    String repIdsQry = this.repIds.equalsIgnoreCase("")? "":
+      "or it.ite_iditem not in ("+this.repIds+") ";
 
     String qry = simpleAnswersQry;
     qry = qry.replaceAll("ssss", secParam)
@@ -239,105 +271,12 @@ public class RepeatableRetriever extends  DataRetriever {
       .replaceAll("iiii", intrvId.toString())
       .replaceAll("rrrr", repIdsQry);
 
-    List<Object[]> rs = execQuery(qry, -1, -1);
-
-    return rs;
-
-  }
-
-
-
-
-  /**
-   * Yields a dump for a repeatable block. To do this:
-   * - one block per entry in the dumpfile
-   * - answers are one answer per row in the resultset
-   * - one repeat finishes in the rs when answer_number changes but pat is the same
-   * - on new repeat, subject-project-questionnaire-section has to be filled
-   * - on each row, value has to be added
-   * @param prjCode the project code
-   * @param intrvId the database questionnaire id
-   * @param grpId the database group id or a comma separated list of group ids
-   * @param secOrder the number of section in the questionnaire
-   * @param parentItem the item which is the parent for the repeatable block
-   */
-  public void printOutRepBlockDump (String prjCode, Integer intrvId, String grpId,
-                                   Integer secOrder, Integer parentItem) {
-
-    String header = buildRepBlockHeader(parentItem);
-    if (header == null)
-      return;
-
-    // String[] headerArr = header.split("\\|");
-    // String firstFieldCode = headerArr[RepeatableRetriever.firstFieldIndex];
-    // XSSFSheet sheet = (XSSFSheet)wb.createSheet(firstFieldCode);
-    // sheet = writeOutHeader(headerArr, sheet);
-    System.out.println(header);
-    List<Object[]> rs = getAnswersForRepBlock(prjCode, intrvId, grpId, secOrder, parentItem);
-    Iterator<Object[]> itRs = rs.iterator();
-
-    int oldItemOrder = 9999, newItemOrder;
-    // StringBuffer line = new StringBuffer();
-    StringBuilder line = new StringBuilder();
-
-    // int lineCount = 1;
-    // Row xlsRow = sheet.createRow(lineCount);
-    // how to add elements according the header
-    // i. as queries are ordered, don't have to do anything
-    // ii. keeping a data structure in memory to enforce matching header<->answers
-    while (itRs.hasNext()) {
-      Object[] row = itRs.next();
-      if (row[8] instanceof Integer)
-        newItemOrder = ((Integer)row[8]);
-      else
-        newItemOrder = Integer.parseInt((String)row[8]);
-
-      if (newItemOrder < oldItemOrder) { // start new repeating block
-        if (line.length() > 0) {
-          System.out.println(line.toString());
-          line.delete(0, line.length()); // reset/clear line
-        }
-        // Initialize the new record with the fixed fields
-        line.append(row[0].toString()).append("|").append(row[1].toString()).
-          append("|").append(row[3].toString()).append("|").append(row[4].toString());
-
-        // line.append("|"+row[6].toString());
-      }
-
-      line.append("|").append(row[6].toString());
-      oldItemOrder = newItemOrder;
-    }
-    System.out.println(line.toString());
+    // List<Object[]> rs = execQuery(qry, MAX_QUERY_SIZE*queryTimes, MAX_QUERY_SIZE);
+    ResultSet scrollRs = this.sdr.getScrollableRS(qry);
+    return scrollRs;
 
   }
 
-
-
-  /**
-   * Builds up all repeating blocks dumps for a section.
-   * Yields a xlsx excel file, one sheet for each block.
-   *
-   * @param prjCode the project code
-   * @param intrvId the database questionnaire id
-   * @param grpId the database group id or a comma separated list of group ids
-   * @param secOrder the number of section in the questionnaire
-   */
-  public void printoutSectionRepblocksDump (String prjCode, Integer intrvId,
-                                            String grpId, Integer secOrder) {
-
-    repIds = repIds.equalsIgnoreCase("")?
-      getRepeatableItems(prjCode, intrvId, secOrder):
-      repIds;
-
-    if (repIds.length() > 0) {
-      String[] blockParents = repIds.split(",");
-
-      for (int i=0; i<blockParents.length; i++) {
-        Integer parentItem = Integer.parseInt(blockParents[i]);
-        printOutRepBlockDump(prjCode, intrvId, grpId, secOrder, parentItem);
-      }
-    }
-  }
 
 
 
@@ -351,46 +290,59 @@ public class RepeatableRetriever extends  DataRetriever {
    * @param parentItem the item which is the parent for the repeatable block
    * @return a xlsx sheet with all rows for the repeatable block
    */
-  public XSSFSheet xlsxAnswerDump (String prjCode, Integer intrvId,
-                                   String grpId, Integer secOrder, Integer parentItem) {
+  public Sheet xlsxAnswerDump (String prjCode, Integer intrvId,
+                               String grpId, Integer secOrder, Integer parentItem)
+    throws SQLException {
 
+    String sheetName;
     // first, the header
     String headerStr;
-    if (parentItem == null)
+    if (parentItem == null) {
       headerStr = buildHeaderSimpleItems(prjCode, intrvId, secOrder);
-    else
+      sheetName = "Simples";
+    }
+    else {
       headerStr = buildRepBlockHeader(parentItem);
-
+      this.blockCount++;
+      sheetName = "Block_"+this.blockCount;
+    }
     if (headerStr == null || headerStr.length() == 0)
       return null;
 
     String[] header = {};
     header = headerStr.split("\\|");
-    XSSFSheet sheet = this.wb.createSheet();
+    // XSSFSheet sheet = this.wb.createSheet(sheetName);
+    Sheet sheet = this.wb.createSheet(sheetName);
     sheet = writeOutHeader(header, sheet);
 
     // Then, dump all answers for the items
-    List<Object[]> rs;
-    if (parentItem == null)
-      rs = getAnswers4SimpleItems(prjCode, intrvId, grpId, secOrder);
-    else
-      rs = getAnswersForRepBlock(prjCode, intrvId, grpId, secOrder, parentItem);
-
-    Iterator<Object[]> itRs = rs.iterator();
-
+    // Queries retrieve
     int oldItemOrder = 9999, newItemOrder;
     int lineCount = 1;
     Row xlsRow = sheet.createRow(lineCount);
+
+    ResultSet scrollRs;
+    Object[] row;
+    boolean moreResults = true;
+    // this.queryTimes = 0;
+
+    if (parentItem == null)
+      scrollRs = getAnswers4SimpleItems(prjCode, intrvId, grpId, secOrder);
+    else
+      scrollRs = getAnswersForRepBlock(prjCode, intrvId, grpId, secOrder, parentItem);
+
     // how to add elements according the header
     // i. as queries are ordered, don't have to do anything
     // ii. keeping a data structure in memory to enforce matching header<->answers
 
-    while (itRs.hasNext()) {
-      Object[] row = itRs.next();
-      if (row[8] instanceof Integer)
-        newItemOrder = ((Integer)row[8]);
+    // Object[] row;
+    long ini = new Date().getTime();
+    while (scrollRs.next()) {
+      // row = rs.remove(0);
+      if (scrollRs.getObject(9) instanceof Integer)
+        newItemOrder = scrollRs.getInt(9);
       else
-        newItemOrder = Integer.parseInt((String)row[8]);
+        newItemOrder = Integer.parseInt(scrollRs.getString(9));
 
       if (newItemOrder < oldItemOrder) { // start new subject
         if (xlsRow.getLastCellNum()-1 > 0) {
@@ -398,14 +350,18 @@ public class RepeatableRetriever extends  DataRetriever {
           xlsRow = sheet.createRow(lineCount);
         }
         // Initialize the new record with the fixed fields
-        xlsRow = writeOutItem((String)row[0], xlsRow);
-        xlsRow = writeOutItem((String)row[1], xlsRow);
-        xlsRow = writeOutItem((String)row[3], xlsRow);
-        xlsRow = writeOutItem((String)row[4], xlsRow);
+        xlsRow = writeOutItem(scrollRs.getString(1), xlsRow);
+        xlsRow = writeOutItem(scrollRs.getString(2), xlsRow);
+        xlsRow = writeOutItem(scrollRs.getString(4), xlsRow);
+        xlsRow = writeOutItem(scrollRs.getString(5), xlsRow);
       }
-      xlsRow = writeOutItem((String)row[6], xlsRow);
+      // xlsRow = writeOutItem((String)row[6], xlsRow);
+      xlsRow = writeOutItem(scrollRs.getString(7), xlsRow);
       oldItemOrder = newItemOrder;
+      this.queryTimes++;
     }
+    long end = new Date().getTime();
+    System.out.println("Time processing resultset: "+(end-ini)+" ms");
 
     return sheet;
   }
@@ -420,20 +376,20 @@ public class RepeatableRetriever extends  DataRetriever {
    * @param secOrder the number of section in the questionnaire
    */
   public void composeXlsxSectionRepBlocks (String prjCode, Integer intrvId,
-                                           String grpId, Integer secOrder) {
+                                           String grpId, Integer secOrder)
+    throws SQLException {
+    this.repIds = this.repIds.equalsIgnoreCase("")?
+      getRepeatableItems(prjCode, intrvId, secOrder):
+      this.repIds;
 
-    repIds = repIds.equalsIgnoreCase("")?
-              getRepeatableItems(prjCode, intrvId, secOrder):
-              repIds;
-
-    if (repIds.length() > 0) {
-      String[] blockParents = repIds.split(",");
+    if (this.repIds.length() > 0) {
+      String[] blockParents = this.repIds.split(",");
 
       for (int i=0; i<blockParents.length; i++) {
         Integer parentItem = Integer.parseInt(blockParents[i]);
         // The next method creates a sheet for a block, header included
         // XSSFSheet sheet = xlsxRepBlockDump(prjCode, intrvId, grpId, secOrder, parentItem);
-        XSSFSheet sheet = xlsxAnswerDump(prjCode, intrvId, grpId, secOrder, parentItem);
+        xlsxAnswerDump(prjCode, intrvId, grpId, secOrder, parentItem);
       }
     }
   }
@@ -450,20 +406,21 @@ public class RepeatableRetriever extends  DataRetriever {
    * @param grpId the database group id or a comma separated list of group ids
    * @param orderSec, the number of the section
    */
-  public XSSFWorkbook getRepBlocksDump (String prjCode, String intrvId,
-                                        String grpId, Integer orderSec)
-                                      throws IOException {
+  public SXSSFWorkbook getRepBlocksDump (String prjCode, String intrvId,
+                                         String grpId, Integer orderSec)
+    throws IOException, SQLException {
 
     // First, get the not-repeating items
     // xlsxSimpleAnswersDump(prjCode, Integer.parseInt(intrvId),
-       //                 Integer.parseInt(grpId), orderSec);
+    //                 Integer.parseInt(grpId), orderSec);
     xlsxAnswerDump(prjCode, Integer.parseInt(intrvId),
-                    grpId, orderSec, null);
+      grpId, orderSec, null);
 
     // Then, get the remainder items (repeating blocks) to add to the excel
     // For each block, HEADER + ANSWERS = xlsx sheet
     composeXlsxSectionRepBlocks(prjCode, Integer.parseInt(intrvId),
-                                grpId, orderSec);
+      grpId, orderSec);
+    this.sdr.closeConn();
 
     return this.wb;
   }
@@ -477,7 +434,7 @@ public class RepeatableRetriever extends  DataRetriever {
    * @param sheet, the xlsx sheet to set the header
    * @return the modified/filled sheet
    */
-  protected XSSFSheet writeOutHeader (String[] header, XSSFSheet sheet) {
+  protected Sheet writeOutHeader (String[] header, Sheet sheet) {
 
     if (sheet == null)
       System.out.println(header);

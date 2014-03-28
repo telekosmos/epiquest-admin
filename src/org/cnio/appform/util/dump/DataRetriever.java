@@ -83,9 +83,11 @@ public class DataRetriever {
        if (offset > 0)
       	 sqlQry.setFirstResult(offset);
        
-       if (maxRows > 0)
+       if (maxRows > 0) {
       	 sqlQry.setMaxResults(maxRows);
-      
+         sqlQry.setFetchSize(5000);
+       }
+
       rows = sqlQry.list();
       tx.commit();
     }
