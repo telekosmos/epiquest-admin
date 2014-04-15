@@ -2,6 +2,8 @@ package org.cnio.appform.servlet;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.cnio.appform.util.*;
+import org.hibernate.HibernateException;
+import org.hibernate.Transaction;
 import org.inb.dbtask.*;
 import org.inb.util.*;
 
@@ -22,6 +24,7 @@ import org.hibernate.Session;
 import org.json.simple.*;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.*;
 
 import java.io.PrintWriter;
@@ -55,14 +58,16 @@ import java.net.URLEncoder;
    private String dbName;
    private String dbHost;
    private String dbPort;
-   
-   
+
+   private AppDBLogger dbLog;
+
+
     /* (non-Java-doc)
 	 * @see javax.servlet.http.HttpServlet#HttpServlet()
 	 */
 	public AjaxUtilServlet() {
 		super();
-	}   	
+	}
 	
 	
 	public void init (ServletConfig config) throws ServletException {
@@ -92,9 +97,9 @@ import java.net.URLEncoder;
 		List<Project> prjs;
 		List<Role> roles;
 		boolean nothing = false;
+    String logMsg = "";
 
     what = (what==null)? "": what;
-
 		// set Content Types
 		if (what.equals(AjaxUtilServlet.DBDUMP))
 			response.setHeader("Content-type", "text/x-csv");
@@ -105,7 +110,6 @@ import java.net.URLEncoder;
 				
 		PrintWriter out;
 		Session hibSes = HibernateUtil.getSessionFactory().openSession();
-			
 		AppUser theUsr = null;
 		if (usrId != null)
 			theUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
@@ -113,7 +117,6 @@ import java.net.URLEncoder;
 		AppUserCtrl usrCtrl = new AppUserCtrl (hibSes);
 		IntrvController intrvCtrl = new IntrvController(hibSes);
 
-    System.out.println("AjaxUtilServlet pathInfo: "+request.getPathInfo());
 // DBDUMP issue
 		if (what.equals(AjaxUtilServlet.DBDUMP)) {
 			RepeatableRetriever dr = new RepeatableRetriever();
@@ -130,8 +133,13 @@ import java.net.URLEncoder;
 
       String dumpOut = "";
       if (isRepDump == null) { // Subject per line download
+        dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
 
-			  dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+        logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
+        logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
+        // logMsg += theUsr == null? "": " by user '"+theUsr.getUsername()+"'";
+        this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
+
         out = response.getWriter();
         out.print(dumpOut);
         return;
@@ -160,15 +168,19 @@ import java.net.URLEncoder;
           dr.getExcelWb().write(response.getOutputStream());
         }
         catch (SQLException sqlEx) {
+          logMsg = "There was a error while trying to request a data download.";
+          logMsg = DateFormat.getDateTimeInstance().format(new Date())+": "+logMsg;
+          logMsg += "User id: "+usrId;
+          LogFile.error(logMsg);
           return; // should have to manage an error
         }
 
-        return;
-        // workbook = dr.getRepBlocksDump (prjCode, intrvId, grpId, Integer.parseInt(orderSec));
-        // workbook.write(response.getOutputStream());
-        // workbook.close();
-        // dumpOut = dr.getTransposedDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+        logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
+        logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
+        // logMsg += theUsr == null? "": " by user '"+theUsr.getUsername()+"'";
+        this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
 
+        return;
       }
 		}
 		
@@ -186,14 +198,21 @@ import java.net.URLEncoder;
 					jsonResp += "{\"name\":\""+ grp.getName() +
 												"\",\"id\":"+grp.getId()+", \"type\":"+grp.getType().getId()+"},";
 			}
+
+      logMsg = "Request to retrieve groups";
+      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
 		}
 // SECONDARY GROUPS
 		else if (what.equals(AjaxUtilServlet.HOSPITALS)) {
-			String grpId = request.getParameter("grpid"); // ("grpCode");
+			String grpId = request.getParameter("grpCode"); // ("grpCode");
+      grpId = grpId != null? grpId: request.getParameter("grpid");
 			
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
 			// groups = group.getContainees();
-      groups = usrCtrl.getSecondaryGroups(theUsr, group);
+      if (theUsr != null)
+        groups = usrCtrl.getSecondaryGroups(theUsr, group);
+      else
+        groups = group.getContainees();
 			
 			if (groups.size() == 0){
 				nothing = true;
@@ -205,6 +224,8 @@ import java.net.URLEncoder;
 					jsonResp += "{\"name\":\""+grp.getName() +
 												"\",\"id\":"+grp.getId()+", \"code\":\""+grp.getCodgroup()+"\"},";
 			}
+      logMsg = "Request to retrieve secondary groups";
+      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
 		}
 		
 // GET PROJECTS
@@ -221,6 +242,8 @@ import java.net.URLEncoder;
 											"\",\"id\":"+prj.getId()+
 											",\"code\":\""+URLEncoder.encode(prj.getProjectCode(), "UTF-8")+"\"},";
 			}
+      logMsg = "Request to retrieve projects";
+      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
 		}
 
 // GET ROLES		
@@ -236,6 +259,8 @@ import java.net.URLEncoder;
 					jsonResp += "{\"name\":\""+URLEncoder.encode(role.getName(), "UTF-8")+
 												"\",\"id\":"+role.getId()+"},";
 			}
+      logMsg = "Request to retrieve roles";
+      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
 		}
 
 // INTERVIEWS BASED on a prjid and a grpId 		
@@ -246,7 +271,8 @@ import java.net.URLEncoder;
 			Project prj = HibernateUtil.getProjectByCode(hibSes, prjCode);
 			Integer prjId = prj.getId();
 			Integer grpIdInt = (grpId != null && grpId.equals("") == false)? Integer.parseInt(grpId): null;
-			
+			AppGroup grp = (AppGroup)hibSes.get(AppGroup.class, grpIdInt);
+
 			intrvs = intrvCtrl.getInterviews(prjId, grpIdInt);
 			if (intrvs.size() == 0) {
 				nothing = true;
@@ -258,6 +284,9 @@ import java.net.URLEncoder;
 					jsonResp += "{\"name\":\""+intrv.getName()+
 											"\",\"id\":"+intrv.getId()+"},";
 			}
+      logMsg = "Request to retrieve questionnaires for project '"+prj.getName()+"'";
+      logMsg += (grp != null)? " and group '"+grp.getName()+"'": "";
+      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
 		}
 		
 // SECTIONS for a interview/questionnaire
@@ -278,6 +307,7 @@ import java.net.URLEncoder;
 					jsonResp += "{\"name\":\""+sec.getName()+
 											"\",\"id\":"+sec.getId()+", \"order\":"+sec.getSectionOrder()+"},";
 			}
+      logMsg = "Request to retrieve sections for the questionnaire '"+intrv.getName()+"'";
 		}
 		
 		
@@ -286,7 +316,7 @@ import java.net.URLEncoder;
 			String hospCode = request.getParameter("grpCode");
 			String typeCode = request.getParameter("subjType"); // "", 1, 2 or 3
 			
-System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
+// System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
 			List<Patient> pats = 
 						HibernateUtil.getPatiens4ProjsGrps(hibSes, prjCode, hospCode, typeCode);
 			
@@ -300,6 +330,8 @@ System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
 					jsonResp += "{\"codpatient\":\""+pat.getCodpatient()+
 											"\",\"id\":"+pat.getId()+"},";
 			}
+      logMsg = "Request to retrieve subjects based on the project with code '"+prjCode;
+      logMsg += "' and the center with code '"+hospCode+"'";
 		}
 		
 		
@@ -321,8 +353,9 @@ System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
 			doPost (request, response);
 			if (hibSes.isOpen())
 				hibSes.close();
-			
-			return;
+
+      // this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
+      return;
 		}
 		
 // this is to remove session attributes from the performance side
@@ -359,7 +392,8 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 		
 		if (hibSes.isOpen())
 			hibSes.close();
-		
+
+    this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
 		out.print (jsonResp);
 	}  	
 	
@@ -670,7 +704,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
  * @return a json String ready to be sent back to server
  */
 	private String doClon (HttpServletRequest req) {
-		String jsonStr = "";
+		String jsonStr = "", logMsg = "";
 		String action = req.getParameter("action");
 		Session hibSes = HibernateUtil.getSessionFactory().openSession();
 		IntrvController intrvCtrl = new IntrvController (hibSes);
@@ -706,10 +740,13 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			Integer intrvId = Integer.decode(intrv), grpId = Integer.decode(grp),
 				prjId = Integer.decode(prj);
 				
-			AppGroup trgGrp = (AppGroup)hibSes.get(AppGroup.class, grpId);
+      Interview intrv4Name = (Interview)hibSes.get(Interview.class, intrvId);
+      Project prj4Name = (Project)hibSes.get(Project.class, prjId);
+
+      AppGroup trgGrp = (AppGroup)hibSes.get(AppGroup.class, grpId);
 			Project trgPrj = (Project)hibSes.get(Project.class, prjId);
 			Interview newIntrv = intrvCtrl.replicateIntrv(intrvId, trgGrp, trgPrj, newName);
-			
+
 			JSONObject out = new JSONObject ();
 			if (newIntrv != null) {
 				out.put("res", 1);
@@ -721,16 +758,55 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 				out.put("msg", "Interview could not be created. Check the logs to get more information");
 			}
 			jsonStr = out.toJSONString();
+      logMsg = "Request to clone the interview '"+intrv4Name.getName()+"'";
+      logMsg += (prj4Name != null)? " from project '"+prj4Name.getName()+"'": "";
+      logMsg += " into a new one named '"+newName+"' for project '"+trgPrj.getName()+"'";
 		}
-		
+
+    // LOGGING
+    this.logRequest(hibSes, req.getSession().getAttribute("usrid").toString(),
+                    req.getSession().toString(), logMsg, req.getRemoteAddr());
 		
 		return jsonStr;
 	}
-	
-	
-	
-		
-	
+
+
+  /**
+   * Handy method to log the request through this servlet into the database log
+   * @param theSess, the hibernate session
+   * @param userId, the user database id
+   * @param sessionId, the session id
+   * @param msgLog, the message to log in the database
+   * @param ipAddr, the ipAddr
+   */
+  private void logRequest (Session theSess, String userId, String sessionId,
+                           String msgLog, String ipAddr) {
+
+    Transaction tx = null;
+    try {
+      tx = theSess.beginTransaction();
+      dbLog = new AppDBLogger();
+      dbLog.setUserId(Integer.parseInt(userId));
+      dbLog.setSessionId(sessionId);
+      dbLog.setMessage(msgLog);
+      dbLog.setLastIp(ipAddr);
+
+
+      theSess.save(dbLog);
+      tx.commit();
+    }
+    catch (HibernateException ex) {
+      if (tx != null) {
+        tx.rollback();
+      }
+      LogFile.error("Fail to log user session init:\t");
+      LogFile.error("userId=" + userId + "; sessionId=" + sessionId);
+      LogFile.error(ex.getLocalizedMessage());
+      StackTraceElement[] stack = ex.getStackTrace();
+      LogFile.logStackTrace(stack);
+    }
+  }
+
 	 	
 	
 /* (non-Javadoc)

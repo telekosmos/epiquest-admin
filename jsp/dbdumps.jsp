@@ -147,7 +147,7 @@ System.out.println("Principal's name: "+user);
     </p>
     </div>
   </div>
-  <hr>
+  <hr style="margin-top: 30px;">
 
   <!-- Admins -->
   <form class="form-horizontal" id="frmDump" name="frmDump">
@@ -228,6 +228,14 @@ System.out.println("Principal's name: "+user);
   </div> <!-- EO row-fluid -->
   </form>
 </div> <!-- EO container -->
+
+  <!--
+  <div class="row-fluid" style="padding-top: 3em;">
+    <div class="span4 offset8">
+      <h5>Generating file download...</h5>
+    </div>
+  </div>
+  -->
 
 </div> <!-- EO wrap -->
 

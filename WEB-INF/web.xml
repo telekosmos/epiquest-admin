@@ -39,7 +39,7 @@
 	<context-param>
     <description>Database server port</description>
     <param-name>dbPort</param-name>
-    <param-value>4321</param-value>
+    <param-value>5432</param-value>
   </context-param>
   
   <context-param>

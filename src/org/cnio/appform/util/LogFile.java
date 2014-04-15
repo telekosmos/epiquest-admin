@@ -2,11 +2,6 @@
 package org.cnio.appform.util;
 
 
-/**
- * User: willy
- * Date: 31-may-2007
- * Time: 18:06:29
- */
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Appender;
@@ -16,6 +11,8 @@ import org.apache.log4j.SimpleLayout;
 // import org.cnio.appform.entity.AppDBLogger;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
 
 public class LogFile {
 //    private static Logger logger = Logger.getLogger(LogClass.class);
@@ -73,10 +70,13 @@ public class LogFile {
     		logMsg += "\t at "+elem.getClassName()+"."+elem.getMethodName()+":"+
     						elem.getLineNumber()+"\n";
     	}
-    	logger.error(logMsg);
+    	logger.error("["+LogFile.formattedDate()+"]: "+logMsg);
     }
     
-    
+
+    public static String formattedDate () {
+      return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(new Date());
+    }
     
     public static Logger getLogger () {
     	return logger;
@@ -84,17 +84,17 @@ public class LogFile {
     
     
     public static void debug (String data) {
-        logger.debug(data);
+        logger.debug("["+LogFile.formattedDate()+"]: "+data);
     }
 
     
     public static void info (String data) {
-        logger.info(data);
+        logger.info("["+LogFile.formattedDate()+"]: "+data);
     }
 
 
     public static void error (String data) {
-        logger.error(data.toUpperCase());
+        logger.error("["+LogFile.formattedDate()+"]: "+data.toUpperCase());
     }
 
 
@@ -134,16 +134,16 @@ public class LogFile {
 */
     
     public static void stderr (String msg) {
-    	System.err.println(msg);
+    	System.err.println("["+LogFile.formattedDate()+"]: "+msg);
     }
     
     public static void stdout (String msg) {
-    	System.out.println(msg);
+    	System.out.println("["+LogFile.formattedDate()+"]: "+msg);
 //    	logger.info("stdout: "+msg);
     }
     
     public static void display (String msg) {
-    	System.out.println(msg.toUpperCase());
+    	System.out.println("["+LogFile.formattedDate()+"]: "+msg.toUpperCase());
 //    	logger.info(msg.toUpperCase());
     }
 }
