@@ -60,7 +60,7 @@ public class IntrvController {
 		if (grpid != null)
 			hql += " and r.appgroup=:grp";
 		
-		hql += " order by i.name";
+		hql += " order by i.name asc";
 		Transaction tx = null;
 		
 		try {

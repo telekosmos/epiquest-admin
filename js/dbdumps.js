@@ -5,8 +5,29 @@ var DBDumpFormCtrl = function () {
 
   var ajaxResp;
   var txtNewName;
-  var comboProj, comboGrp, comboIntrv, comboSec;
+  var comboProj, comboCountry, comboGrp, comboIntrv, comboSec, repeatingCheck;
+  var usrId;
   var theForm;
+
+
+
+  var fillSecondaryGroups = function () {
+    var xReq = new AjaxReq();
+    var postData = "what=hosp";
+
+    var grpid = $(comboCountry).val();
+    grpid = grpid == -1 ? '' : grpid;
+    var prjid = comboProj.val();
+
+    if (grpid != '') {
+      postData += "&grpid=" + grpid + "&prjid=" + prjid;
+      xReq.setUrl(APP_ROOT + "/servlet/AjaxUtilServlet");
+      xReq.setMethod("GET");
+      xReq.setPostdata(postData);
+      xReq.setCallback(ajaxResp.onGetSecondaryGroups, ajaxResp.onFail, ajaxResp, null);
+      xReq.startReq();
+    }
+  }
 
 
   /**
@@ -16,7 +37,7 @@ var DBDumpFormCtrl = function () {
     var xReq = new AjaxReq();
     var postData = "what=intrvs";
 
-    var grpid = $(comboGrp).val();
+    var grpid = $(comboCountry).val();
     grpid = grpid == -1 ? '' : grpid;
     var prjid = $(comboProj).val();
 
@@ -28,13 +49,7 @@ var DBDumpFormCtrl = function () {
       xReq.setCallback(ajaxResp.onGetIntrvs, ajaxResp.onFail, ajaxResp, null);
       xReq.startReq();
     }
-    /*
-     else {
-     $(txtNewName).attr("disabled", "disabled");
-     $(trgPrj).attr("disabled", "disabled");
-     $(trgGrp).attr("disabled", "disabled");
-     }
-     */
+
   }
 
 
@@ -102,14 +117,22 @@ var DBDumpFormCtrl = function () {
     ajaxResp = new DBDumpAjaxResponse();
 
     comboProj = $("#frmProject");
+    comboCountry = $("#frmCountry");
     comboGrp = $("#frmGroup");
     comboIntrv = $("#frmQuestionnaire");
     comboSec = $("#frmSection");
+    repeatingCheck = $("#frmRepCheck");
 
     theForm = $('#frmDump');
 
-
-    $(comboProj).change(fillIntrvs);
+    var me = this;
+    // $(comboProj).change(fillIntrvs);
+    // $(comboCountry).change(fillSecondaryGroups);
+    // $(comboCountry).change(fillIntrvs);
+    $(comboCountry).change(function () {
+      me.fillSecondaryGroups();
+      me.fillIntrvs();
+    })
     $(comboGrp).change(fillIntrvs);
     $(comboIntrv).change(fillSections);
 
@@ -119,19 +142,26 @@ var DBDumpFormCtrl = function () {
     $("#btnSend").click(function (ev) {
       // getDump();
       var prjid = $(comboProj).val();
-      var grpid = $(comboGrp).val();
+      var secondaryGrp = $(comboGrp).val();
+      var mainGrp = $(comboCountry).val();
       var intrvid = $(comboIntrv).val();
       var secOrder = $(comboSec).val();
+      var repeatingDump = repeatingCheck.prop('checked');
 
-      grpid = grpid == -1 ? '' : grpid;
+      var grpid = secondaryGrp == -1? (mainGrp == -1? '': mainGrp): secondaryGrp;
       var dumpUrl = APP_ROOT + '/servlet/AjaxUtilServlet?what=dump&prjid=' + prjid + '&grpid=';
       dumpUrl += grpid + '&intrvid=' + intrvid + '&secid=' + secOrder;
 
       var questionaireName = $('#frmQuestionnaire option:selected').text();
       questionaireName = questionaireName.replace(/ /g, '_');
-      var fileName = $('#frmProject option:selected').text()+'-'+questionaireName+'-sec'+secOrder+'.xlsx';
+      var fileName = $('#frmProject option:selected').text()+'-'+questionaireName+'-sec'+secOrder;
+      var fileExt = repeatingDump? '.xlsx': '.csv';
+      fileName += fileExt;
+
       dumpUrl = APP_ROOT + '/datadump/'+fileName+'?what=dump&prjid=' + prjid + '&grpid=';
       dumpUrl += grpid + '&intrvid=' + intrvid + '&secid=' + secOrder;
+      if (repeatingDump)
+        dumpUrl += '&repd=1';
 
       document.location.href = dumpUrl;
       $(theForm)[0].reset();
@@ -149,6 +179,7 @@ var DBDumpFormCtrl = function () {
   return {
     fillIntrvs: fillIntrvs,
     fillSections: fillSections,
+    fillSecondaryGroups: fillSecondaryGroups,
 //		createClone: createClone,
 //		enableTarget: enableTarget,
 

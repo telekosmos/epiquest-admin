@@ -50,6 +50,7 @@ System.out.println("Principal's name: "+user);
   
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+  <link href="../css/admintool.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {
@@ -77,12 +78,6 @@ System.out.println("Principal's name: "+user);
 
       /* Set the fixed height of the footer here */
       #push,
-      #footer {
-        height: 60px;
-      }
-      #footer {
-        background-color: #f5f5f5;
-      }
 
       /* Lastly, apply responsive CSS fixes as necessary */
       @media (max-width: 767px) {

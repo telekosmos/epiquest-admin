@@ -666,7 +666,12 @@ public class AppUserCtrl {
 		return activeGrp;
 	}
 
-	public AppGroup getSecondaryGroup(AppUser user) {
+  /**
+   * Get the a secondary grou for an user
+   * @param user the user
+   * @return a group
+   */
+  public AppGroup getSecondaryGroup(AppUser user) {
 		List groups = getGroups(user);
 		List aux = null;
 		String hqlGrps = "from AppGroup g where g in (:groups) and g.type.name='HOSPITAL'";

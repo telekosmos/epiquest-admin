@@ -41,8 +41,8 @@ public class TransposedDataRetriever extends DataRetriever {
   public ResultSet getResultSetBy (String prjCode, String intrvId,
                                       String grpId, Integer orderSec) {
     SqlDataRetriever sqldr = new SqlDataRetriever();
-    java.sql.ResultSet rs = sqldr.getResultSet(prjCode, Integer.parseInt(intrvId),
-                                              Integer.parseInt(grpId), orderSec);
+    java.sql.ResultSet rs = sqldr.getFullResultSet(prjCode, Integer.parseInt(intrvId),
+      Integer.parseInt(grpId), orderSec);
 
     return rs;
   }

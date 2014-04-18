@@ -39,7 +39,7 @@
 	<context-param>
     <description>Database server port</description>
     <param-name>dbPort</param-name>
-    <param-value>4321</param-value>
+    <param-value>5432</param-value>
   </context-param>
   
   <context-param>
@@ -137,25 +137,6 @@
     </init-param>
 	</servlet>
 
-  <!--
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>/servlet/AxisServlet</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>*.jws</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>/services/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>AdminServlet</servlet-name>
-		<url-pattern>/servlet/AdminServlet</url-pattern>
-	</servlet-mapping>
-  -->
   <servlet-mapping>
     <servlet-name>JaasServlet</servlet-name>
     <url-pattern>/servlet/JaasServlet</url-pattern>
