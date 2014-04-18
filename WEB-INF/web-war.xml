@@ -41,24 +41,37 @@
     <param-value>5432</param-value>
   </context-param>
 
+  <context-param>
+    <description>Max number of login attempts</description>
+    <param-name>max_login_attempts</param-name>
+    <param-value>5</param-value>
+  </context-param>
+
+  <filter>
+    <filter-name>AuthenticationFilter</filter-name>
+    <display-name>AuthenticationFilter</display-name>
+    <description></description>
+    <filter-class>
+      org.cnio.appform.servlet.filter.AuthenticationFilter
+    </filter-class>
+
+    <init-param>
+      <param-name>docroot</param-name>
+      <param-value>/jsp/index.jsp</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>AuthenticationFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
 	<listener>
     <listener-class>
     org.cnio.appform.audit.AppSessionListener
     </listener-class>
 	</listener>
 
-	<servlet>
-		<display-name>Apache-Axis Servlet</display-name>
-		<servlet-name>AxisServlet</servlet-name>
-		<servlet-class>org.apache.axis.transport.http.AxisServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<display-name>Axis Admin Servlet</display-name>
-		<servlet-name>AdminServlet</servlet-name>
-		<servlet-class>org.apache.axis.transport.http.AdminServlet</servlet-class>
-		<load-on-startup>100</load-on-startup>
-	</servlet>
-	
 	<servlet>
 		<servlet-name>AjaxUtilServlet</servlet-name>
 		<servlet-class>org.cnio.appform.servlet.AjaxUtilServlet</servlet-class>
@@ -87,12 +100,12 @@
 	
 <!-- JAAS SERVLET AND INIT PARAM -->
 	<servlet>
-		<display-name>JAAS Login SErvlet</display-name>
+		<display-name>JAAS Login Servlet</display-name>
 		<servlet-name>JaasServlet</servlet-name>
 		<servlet-class>org.cnio.appform.servlet.JaasServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
-		<url-pattern>/servlet/JaasServlet</url-pattern>
-		<!--
+		<!-- <url-pattern>/servlet/JaasServlet</url-pattern>
+
 		<init-param> 
 			<param-name>java.security.auth.login.config</param-name> 
 			<param-value>/jaas.config</param-value> 
@@ -103,28 +116,27 @@
 			<param-value>admtool.props</param-value>
 		</init-param>
 	</servlet>
-	
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>/servlet/AxisServlet</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>*.jws</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>/services/*</url-pattern>
-	</servlet-mapping>
+<!--
 	<servlet-mapping>
 		<servlet-name>AdminServlet</servlet-name>
 		<url-pattern>/servlet/AdminServlet</url-pattern>
 	</servlet-mapping>
-	
+-->
+
+  <servlet-mapping>
+    <servlet-name>JaasServlet</servlet-name>
+    <url-pattern>/servlet/JaasServlet</url-pattern>
+  </servlet-mapping>
+
 	<servlet-mapping>
 		<servlet-name>AjaxUtilServlet</servlet-name>
 		<url-pattern>/servlet/AjaxUtilServlet</url-pattern>
 	</servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>AjaxUtilServlet</servlet-name>
+    <url-pattern>/datadump/*</url-pattern>
+  </servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>qryservlet</servlet-name>
@@ -140,22 +152,8 @@
 		<servlet-name>MngUsersServlet</servlet-name>
 		<url-pattern>/servlet/mngusers</url-pattern>
 	</servlet-mapping>
-	
 
-	<filter>
-    <filter-name>AuthenticationFilter</filter-name>
-    <display-name>AuthenticationFilter</display-name>
-    <description></description>
-    <filter-class>
-    	org.cnio.appform.servlet.filter.AuthenticationFilter
-		</filter-class>
- 	</filter>
 
-	
-	<filter-mapping>
-    <filter-name>AuthenticationFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 		<welcome-file>index.htm</welcome-file>

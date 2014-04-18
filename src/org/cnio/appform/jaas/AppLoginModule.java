@@ -163,7 +163,6 @@ public class AppLoginModule implements LoginModule {
  * @return true always, since this <code>LoginModule</code>
  *      should not be ignored.
  *
- * @exception FailedLoginException if the authentication fails. <p>
  *
  * @exception LoginException if this <code>LoginModule</code>
  *      is unable to perform the authentication.

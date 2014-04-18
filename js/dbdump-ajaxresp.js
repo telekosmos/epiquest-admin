@@ -56,21 +56,49 @@ var DBDumpAjaxResponse = function () {
 
 */
 
-var clearIntrvCombo = function () {
-	var intrvSel = $("#frmQuestionnaire");
-	
-	$(intrvSel).empty();
-}
+  var clearIntrvCombo = function (theElemId) {
+    var intrvSel = $("#"+theElemId);
+
+    $(intrvSel).empty();
+  }
 
 
 
-var addOption = function (id, name) {
-	var intrvSel = $("#frmQuestionnaire");
-	
-	$(intrvSel).append ("<option value=\""+id+"\">"+name+"</option>");
-}
-	
-	
+  var addOption = function (elemId, id, name) {
+    // var intrvSel = $("#frmQuestionnaire");
+    var elemSel = $("#"+elemId);
+    $(elemSel).append ("<option value=\""+id+"\">"+name+"</option>");
+  }
+
+
+
+  var onGetSecondaryGroups = function (o) {
+    overlay.hide ();
+    try {
+      var jResponse = YAHOO.lang.JSON.parse(o.responseText);
+      var arrGroups = jResponse.groups;
+      var res = arrGroups.length > 0;
+      if (res) {
+        clearIntrvCombo ("frmGroup");
+        $("#frmGroup").append('<option value="-1">Choose...</option>');
+
+        for (var i=0; i<arrGroups.length; i++) {
+          var grp = arrGroups[i];
+          var name = grp.name;
+          var id = grp.id;
+
+          addOption("frmGroup", id, decodeURIComponent(name));
+        }
+        $("#frmGroup").prop("disabled", false);
+      }
+    }
+    catch (exp) {
+      alert ("JSON Parse failed: "+exp);
+      return;
+    }
+
+  }
+
 	
 /**
  * Get the interviews for the current group and the current project and fills
@@ -86,15 +114,15 @@ var addOption = function (id, name) {
 			var arrIntrvs = jResponse.intrvs;
 			var res = arrIntrvs.length > 0;
 			if (res) {
-				clearIntrvCombo ();
+				clearIntrvCombo ("frmQuestionnaire");
 				$("#frmQuestionnaire").append('<option value="-1">Choose...</option>');
 				
-				for (i=0; i<arrIntrvs.length; i++) {
+				for (var i=0; i<arrIntrvs.length; i++) {
 					var intrv = arrIntrvs[i];
 					var name = intrv.name;
 					var id = intrv.id;
 					
-					addOption(id, decodeURIComponent(name));
+					addOption("frmQuestionnaire", id, decodeURIComponent(name));
 				}
 			}
 		}
@@ -125,7 +153,7 @@ var addOption = function (id, name) {
 			if (res) {
 				$(sectionSel).append('<option value="-1">Choose...</option>');
 				// addOption (-1, "Choose a questionnaire");
-				for (i=0; i<arrSections.length; i++) {
+				for (var i=0; i<arrSections.length; i++) {
 					var sec = arrSections[i];
 					var name = sec.name;
 					var id = sec.id;
@@ -150,6 +178,7 @@ var addOption = function (id, name) {
 
 	return {
 		onGetIntrvs: onGetIntrvs,
+    onGetSecondaryGroups: onGetSecondaryGroups,
 		onGetSections: onGetSecs		
 	}
 	

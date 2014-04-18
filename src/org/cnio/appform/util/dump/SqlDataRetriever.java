@@ -16,17 +16,19 @@ public class SqlDataRetriever {
 	
 	private Connection conn;
 	private Statement stmt;
+
+
 	
 /**
- * Retrieves the resultset for the query	
+ * Retrieves the full resultset in order to retrive all answers for a section and group
  * @param prjCode, the project code
  * @param intrvId, the database interview id
  * @param grpId, the database groupId
  * @param secOrder, the section order
  * @return a java.sql.ResultSet object with ALL queried rows
  */
-	public ResultSet getResultSet (String prjCode, Integer intrvId, Integer grpId,
-			                          Integer secOrder) {
+	public ResultSet getFullResultSet(String prjCode, Integer intrvId, Integer grpId,
+                                    Integer secOrder) {
 		
 		try {
 			this.conn = this.getConnection ();
@@ -58,7 +60,7 @@ public class SqlDataRetriever {
 	      " order by 1, 7, 10, 8, 5, 9";
 
       System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);
-      ResultSet rs = stmt.executeQuery(sqlqry);
+      ResultSet rs = this.stmt.executeQuery(sqlqry);
       
       return rs;
 		}
@@ -77,7 +79,38 @@ public class SqlDataRetriever {
 		}
 	}
 
-	
+
+
+
+  public ResultSet getScrollableRS (String qry) {
+
+    try {
+      if (this.conn == null)
+        this.conn = this.getConnection();
+
+      this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      ResultSet rs = this.stmt.executeQuery(qry);
+
+      return rs;
+    }
+    catch (ClassNotFoundException cnfe) {
+      System.out.println("SqlDataRetriever::getScrollableRS: Couldn't find the driver!");
+      System.out.println("SqlDataRetriever::getScrollableRS: Let's print a stack trace, and exit.");
+      cnfe.printStackTrace();
+
+      return null;
+    }
+    catch (SQLException sqlEx) {
+      System.out.println ("SqlDataRetriever::getScrollableRS: Err getting conncection or querying...");
+      sqlEx.printStackTrace();
+
+      return null;
+    }
+  }
+
+
+
+
 	
 	
 	public void closeConn () throws SQLException {

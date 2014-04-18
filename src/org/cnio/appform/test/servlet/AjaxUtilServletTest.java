@@ -1,5 +1,6 @@
 package org.cnio.appform.test.servlet;
 
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.cnio.appform.servlet.AjaxUtilServlet;
@@ -8,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -20,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
+
+
 
 public class AjaxUtilServletTest {
 
@@ -41,6 +45,7 @@ public class AjaxUtilServletTest {
     request = mock(HttpServletRequest.class);
     response = mock(HttpServletResponse.class);
 
+    // overwritten below
     when(request.getParameter("prjid")).thenReturn(prjCode);
     when(request.getParameter("grpid")).thenReturn(grpId);
     when(request.getParameter("intrvid")).thenReturn(intrvId);
@@ -48,6 +53,7 @@ public class AjaxUtilServletTest {
     writer = new PrintWriter("ajaxutilservlet.txt");
     when(response.getWriter()).thenReturn(writer);
   }
+
 
 
   @Test
@@ -111,5 +117,24 @@ public class AjaxUtilServletTest {
       assertThat(line, containsString("|"));
       assertThat(Arrays.asList(line.split("\\|")), hasSize(3));
     }
+  }
+
+
+  @Test
+  public void dumpServlet () throws IOException, ServletException {
+    when(request.getParameter("what")).thenReturn("dump");
+    when(request.getParameter("prjid")).thenReturn("188");
+    when(request.getParameter("grpid")).thenReturn("4");
+    when(request.getParameter("intrvid")).thenReturn("4250");
+    when(request.getParameter("secid")).thenReturn("2");
+
+    writer = new PrintWriter("testdump.txt");
+    when(response.getWriter()).thenReturn(writer);
+    new AjaxUtilServlet().doGet(request, response);
+    writer.flush();
+
+    File f = new File ("testdump.txt");
+    assertThat(f, notNullValue());
+
   }
 }

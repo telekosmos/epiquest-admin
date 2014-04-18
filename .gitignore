@@ -8,3 +8,5 @@ code-backup.sh
 .svn
 *.class
 *.tmp
+resources
+logs
