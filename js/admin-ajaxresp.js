@@ -225,8 +225,39 @@ var groupSecondary = 2
 	    return;
 		}
 	};
-  
-	
+
+
+  /**
+   * Callback method on responding to the enabling or disabling of an user.
+   * @param {Object} o
+   */
+  var onUserDisable = function(o) {
+    overlay.hide();
+    try {
+      var jResponse = YAHOO.lang.JSON.parse(o.responseText);
+
+      if (jResponse) {
+        var msg = jResponse.msg;
+        var success = jResponse.res == 1;
+        var action = jResponse.action;
+
+        if (action.toLowerCase().indexOf('disable') != -1) {
+          alert(msg);
+          $('#userRemove').text('Enable');
+          $('#userRemove').css('color', 'green');
+        }
+        else { // enable
+          alert(msg);
+          $('#userRemove').text('Disable');
+          $('#userRemove').css('color', 'red');
+        }
+      }
+    }
+    catch (exp) {
+      alert("JSON Parse failed!: "+o.responseText);
+      return;
+    }
+  }
   
 /**
  * Callback method on responding to the addition of a new project.
@@ -383,13 +414,23 @@ user: geruser, pass:germany, roles:[100], groups:[4,300], prjs:[50]
 					var selIndex = $("#listUsrs").attr('selectedIndex');
 					selIndex = (selIndex == -1)? selIndex: selIndex - 1;
 					if (jResp.disable == 1) {
-						$('#spanDis').css("visibility", "visible");
-						$("#btnSwitchUsr").val(" Enable ");
+            $('#userRemove').text('Enable').css('color', 'green');
 					}
 					else {
-						$('#spanDis').css("visibility", "hidden");
-						$("#btnSwitchUsr").val(" Disable ");
+            $('#userRemove').text('Disable').css('color', 'red');
 					}
+          /*
+          var disabled = opt.getAttribute('disabled');
+          var strDis = "";
+          if (disabled == null || disabled == 0) { // user is enabled
+            // $("#btnSwitchUsr").val(" Enable ");
+            disableField.text('Disable').css('color', 'red');
+          }
+          else {
+            // $("#btnSwitchUsr").val(" Disable ");
+            disableField.text('Enable').css('color', 'green');
+          }
+          */
 	
 // UPDATE THE ROLES LIST
 					var roleStore = $('#registered_role');
@@ -622,6 +663,7 @@ user: geruser, pass:germany, roles:[100], groups:[4,300], prjs:[50]
     onSwitchUser: onSwitchUser,
 		onNewRole: onNewRole,
 		onResetPasswd: onResetPasswd,
+    onUserDisable: onUserDisable,
 		
 		onRmvUser: onRmvUser,
 		

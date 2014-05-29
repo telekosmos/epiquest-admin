@@ -50,101 +50,102 @@ System.out.println("Principal's name: "+user);
   
   <link href="../css/bootstrap.min.css" rel="stylesheet">
   <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+
   <style type="text/css">
-  /*
+    html,
     body {
-      padding-top: 160px;
-      padding-bottom: 40px;
+      height: 100%;
+      /* The html and body elements cannot have any padding or margin. */
     }
-*/
-    /* Sticky footer styles
-      -------------------------------------------------- */
 
-      html,
-      body {
-        height: 100%;
-        /* The html and body elements cannot have any padding or margin. */
-      }
+    /* Wrapper for page content to push down footer */
+    #wrap {
+      min-height: 100%;
+      height: auto !important;
+      height: 100%;
+      /* Negative indent footer by it's height */
+      margin: 0 auto -60px;
+    }
 
-      /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
-        height: 100%;
-        /* Negative indent footer by it's height */
-        margin: 0 auto -60px;
-      }
+    /* Set the fixed height of the footer here */
+    #push,
+    #footer {
+      height: 60px;
+      background-color: #f5f5f5;
+      margin-top: 5%;
+      border-top: 1px solid darkgray;
+    }
 
-      /* Set the fixed height of the footer here */
-      #push,
+    /* Lastly, apply responsive CSS fixes as necessary */
+    @media (max-width: 767px) {
       #footer {
-        height: 60px;
+        margin-left: -20px;
+        margin-right: -20px;
+        padding-left: 20px;
+        padding-right: 20px;
       }
-      #footer {
-        background-color: #f5f5f5;
-        margin-top: 5%;
-        border-top: 1px solid darkgray;
-      }
+    }
 
-      /* Lastly, apply responsive CSS fixes as necessary */
-      @media (max-width: 767px) {
-        #footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
-        }
-      }
+    /* Custom page CSS
+    -------------------------------------------------- */
+    /* Not required for template or sticky footer method. */
 
-      /* Custom page CSS
-      -------------------------------------------------- */
-      /* Not required for template or sticky footer method. */
+    #wrap > .container {
+      padding-top: 100px;
+    }
 
-      #wrap > .container {
-        padding-top: 100px;
-      }
+    #wrap > .container-fluid  {
+      padding-top: 5%;
 
-      #wrap > .container-fluid  {
-        padding-top: 5%;
+    }
 
-      }
+    .container-fluid > hr {
+      margin: 30px 0;
+    }
 
-      .container-fluid > hr {
-        margin: 30px 0;
-      }
+    .container-fluid .intro-description {
+      padding: 1% 3%;
+      /* font-size: 24px; */
+      line-height: 1.25;
+    }
 
-      .container-fluid .intro-description {
-        padding: 1% 3%;
-        /* font-size: 24px; */
-        line-height: 1.25;
-      }
+    .page-title {
+      padding-left: 2%;
+      text-align: center;
+    }
 
-      .page-title {
-        padding-left: 2%;
-        text-align: center;
-      }
+    .page-title h1 {
+      font-size: 42px
+    }
 
-      .page-title h1 {
-        font-size: 42px
-      }
+    .section-row {
+      padding-left: 12.5%;
+    }
 
-      .section-row {
-        padding-left: 12.5%;
-      }
+    .title-row {
+      padding-left: 5%;
+    }
 
-      .title-row {
-        padding-left: 5%;
-      }
+    form .controls {
+      padding: 1% 0%;
+    }
 
-      form .controls {
-        padding: 1% 0%;
-      }
+    form select {
+      padding: 1% 0%;
+    }
 
-      form select {
-        padding: 1% 0%;
-      }
-      
+
+    .disable-user {
+      font-family: Arial;
+      font-size: 12px;
+      font-variant: small-caps;
+      margin-left: 1em;
+    }
+    .disable-user:hover {
+      cursor: pointer;
+    }
   </style>
+
   
   <title>EPIQUEST Admin</title>
 </head>
@@ -290,7 +291,9 @@ System.out.println("Principal's name: "+user);
       <div class="span7" style="border-left: 1px solid darkgray;">
         <!-- div class="container-fluid" -->
         <div class="row-fluid" style="padding-left: 5%;">
-          <p class="lead" style="xmargin-left: 5%">Selected user</p>
+          <p class="lead" style="xmargin-left: 5%">Selected user
+            <span id="userRemove" class="disable-user"></span>
+          </p>
           <div class="control-group">
           <div class="span6">
             <label class="control-label" for="username">Username</label>
@@ -314,7 +317,7 @@ System.out.println("Principal's name: "+user);
             
             <label class="control-label" for="firstname">First name</label>
             <div class="controls">
-            <input type="password" id="firstname">
+            <input type="text" id="firstname">
             </div>
 
             <label class="control-label" for="lastname">Last Name</label>
@@ -441,12 +444,15 @@ System.out.println("Principal's name: "+user);
           </div>
         </div> <!-- EO list - buttons - list -->
 
+        <!-- project creation -->
         <div class="row-fluid section-row">
           <div class="span12" style="padding-top: 1%;">
             <input class="input-medium" type="text" id="frmPrjName" name="frmPrjName" placeholder="Project name"/>
             <input class="input-large" type="text" id="frmPrjDesc" name="frmPrjDesc" placeholder="Project description"/>
             <input class="input-medium" type="text" id="frmPrjCode" name="frmPrjCode" placeholder="Project code"/>
-            <button class="btn btn-small btn-primary" type="button" style="margin-left: 1%;">New</button>
+            <button class="btn btn-small btn-primary" type="button" id="btnNewPrj"
+                    name="btnNewPrj" onclick="admCtrl.newProject();"
+                    style="margin-left:1%">New</button>
           </div>
         </div>
         <!-- /div -->

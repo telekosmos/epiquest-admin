@@ -12,13 +12,14 @@ var AdmFormCtrl = function () {
   var prjStore, grpStore;
   
   var listUsers;
+  var disableField;
   
 // This is a switch to checke if the user data is ok.
 // It will be true if, when pushed register or update, the user has
 // all minimun parameters; false otherwise
 // It comes from the need of avoid resetting form after pushing send button
 	var userDataOk = false;
-	
+	var currentUserId;
 	
 // This member holds the form state either for update or create a new user
 // When updating, all fields can be changed EXCEPT the username
@@ -394,7 +395,24 @@ var AdmFormCtrl = function () {
 		$('input#btnSend').val("register");
 		changeState (MODE_CREATE)
   };
-  
+
+
+  /**
+   * Disable (if parameter is evaluated to false) or enable (if param is true) the
+   * currently selected user
+   * @param enable {boolean} true to enable the user; false to disable
+   */
+  var disableUser = function(disable) {
+    var postdata = 'what=user&disable='+(disable? 1: 0)+'&usrid='+currentUserId;
+
+    var xReqPrjs = new AjaxReq ();
+    xReqPrjs.setUrl(APP_ROOT+"/servlet/AjaxUtilServlet");
+    xReqPrjs.setMethod("POST");
+    xReqPrjs.setPostdata(postdata);
+    xReqPrjs.setCallback(ajaxResp.onUserDisable, ajaxResp.onFail, ajaxResp, null);
+    xReqPrjs.startReq();
+    console.log('/servlet/AjaxUtilServlet:POST?'+postdata);
+  }
 	
 	
   
@@ -407,6 +425,7 @@ var AdmFormCtrl = function () {
   var displayUsr = function (opt) {
     var postData;
 		var usrId = opt.value;
+    currentUserId = opt.value;
     postData = "what=usr&frmid="+usrId;
     
 		$('#listUsrs > option').each (function () {
@@ -415,15 +434,7 @@ var AdmFormCtrl = function () {
 		
 // Disable some components if the user is disabled. This can be changed
 //		var disabled = $("#listUsrs > option['value="+usrId+"']").attr("disabled");
-		var disabled = opt.getAttribute ('disabled');
-		var strDis = "";
-		if (disabled != null) {
-//			$("input").attr("disabled", "disabled");
-			$("#btnSwitchUsr").val(" Enable ");
-		}
-		else 
-			$("#btnSwitchUsr").val(" Disable ");
-			
+
 		var xReqPrjs = new AjaxReq ();
 		xReqPrjs.setUrl(APP_ROOT+"/servlet/AjaxUtilServlet");
     xReqPrjs.setMethod("GET");
@@ -530,7 +541,7 @@ alert ("postData: "+postData);
 	
   var init = function () {
     ajaxResp = new AjaxResponse ();
-    
+
     txtUsrName = document.getElementById('username');
     txtPass1 = document.getElementById('password');
     txtPass2 = document.getElementById('re-password');
@@ -552,7 +563,16 @@ alert ("postData: "+postData);
 //			switchBtn ();
 			displayUsr(opt);
 //			sayHello ($(opt)[0].text);
-		})
+		});
+
+    var me = this;
+    disableField = $('#userRemove');
+    disableField.bind('click', function(ev) {
+      if ($(this).text().toLowerCase().indexOf('disable') != -1)
+        me.disableUsr(true); // enable the user
+      else
+        me.disableUsr(false); // disable the user
+    });
 		
 		/*
 		$('input#btnSend').click(function(ev) {
@@ -592,6 +612,7 @@ alert ("postData: "+postData);
     newProject: newProject,
     resetRegisterForm: resetRegisterForm,
     displayUsr: displayUsr,
+    disableUsr: disableUser,
     switchUsr: switchUsr,
 		resetPasswd: resetPasswd,
 		changeState: changeState,
