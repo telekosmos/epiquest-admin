@@ -296,6 +296,9 @@ public class RepetibleRetrieverTest {
       grpIds = grpId;
 
     hibSes.close();
+    this.prjCode = "188";
+    this.aliqIntrvid = "4100";
+
     SXSSFWorkbook wb = dr.getRepBlocksDump(prjCode, aliqIntrvid, grpIds, 3);
 
     FileOutputStream fileOut = new FileOutputStream("resources/aliq-workbook.xlsx");

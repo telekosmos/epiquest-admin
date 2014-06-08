@@ -304,14 +304,19 @@ public class AppUserCtrl {
 		}
 		return null;
 	}
-	
-	
-	
 
+
+  /**
+   * Get the groups which are related to a user. Note: if usr has admin role all
+   * groups will be returned
+   * @param usr the application user
+   * @return a list with the retrieved groups
+   * @throws HibernateException
+   */
 	public List<AppGroup> getGroups(AppUser usr) throws HibernateException {
 		String hql = "from RelGrpAppuser r where r.appuser=:user";
-		String hqlAdm = "from AppGroup";
-		String superhql = "select a from AppGroup a join a.relGrpAppusrs r where r.appuser=:user";
+		String hqlAdm = "from AppGroup g order by g.name";
+		String superhql = "select a from AppGroup a join a.relGrpAppusrs r where r.appuser=:user order by a.name";
 
 		Transaction tx = null;
 		Query qry = null;
@@ -324,24 +329,24 @@ public class AppUserCtrl {
 				tx = this.theSess.beginTransaction();
 				doCommit = true;
 			}
-			/*
-			 if (usr.isAdmin()) {
-			 qry = this.theSess.createQuery(hqlAdm);
-			 aux = qry.list();
 
-			 if (doCommit)
-			 tx.commit();
-			 }
-			 else
-			 {*/
-			qry = this.theSess.createQuery(superhql);
-			qry.setEntity("user", usr);
+      // if the user is an admin, get all groups!!
+		  if (usr.isAdmin()) {
+        qry = this.theSess.createQuery(hqlAdm);
+        aux = qry.list();
 
-			aux = qry.list();
-			if (doCommit) {
-				tx.commit();
+        if (doCommit)
+          tx.commit();
 			}
-			//     }
+      else {
+        qry = this.theSess.createQuery(superhql);
+        qry.setEntity("user", usr);
+
+        aux = qry.list();
+        if (doCommit) {
+          tx.commit();
+			  }
+			}
 		}
 		catch (HibernateException ex) {
 			if (tx != null) {
@@ -359,6 +364,9 @@ public class AppUserCtrl {
 
 		return aux;
 	}
+
+
+
 
 	public List<AppGroup> getPrimaryGroups() {
 		String hql = "from AppGroup g where UPPER(g.type.name)='COUNTRY'";
@@ -387,6 +395,7 @@ public class AppUserCtrl {
 		List lGrp = q.list();
 		tx.commit();
 
+    System.out.println("Getting allGroups: "+lGrp.size());
 		return lGrp;
 	}
 	
@@ -1246,8 +1255,46 @@ ex.printStackTrace(System.err);
   	
   	return true;
   }
-  
-	
+
+
+  /**
+   * Enable or disabled an user
+   * @param user {AppUser} the user to be disabled/enabled
+   * @param enable {boolean} if true, user is enabled; otherwise disabled
+   * @return true on successful completion; otherwise returns false
+   */
+  public boolean setUserDisabled(AppUser user, boolean disable) {
+    Transaction tx = null;
+    try {
+      tx = theSess.beginTransaction();
+      user.setRemoved(disable? 1: 0);
+      theSess.saveOrUpdate(user);
+
+      AppDBLogger sessionLog = new AppDBLogger ();
+      String msgLog = "User '"+user.getUsername()+"' was "+(disable? "enabled": "disabled");
+      sessionLog.setMessage(msgLog);
+      sessionLog.setUserId(user.getId());
+      sessionLog.setSessionId("");
+      sessionLog.setLastIp("");
+      theSess.save(sessionLog);
+
+      tx.commit();
+    }
+    catch (HibernateException hibEx) {
+      if (tx != null)
+        tx.rollback();
+
+      String msg = "Fail to "+(disable? "enable": "disable")+" user '";
+      msg += user.getUsername() + "' ("+user.getId()+")";
+      LogFile.error(msg);
+      LogFile.error(hibEx.getLocalizedMessage());
+      StackTraceElement[] stack = hibEx.getStackTrace();
+      LogFile.logStackTrace(stack);
+
+      return false;
+    }
+    return true;
+  }
 	
 	
 	

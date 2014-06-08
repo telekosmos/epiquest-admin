@@ -1,11 +1,9 @@
 package org.cnio.appform.servlet;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.cnio.appform.util.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 import org.inb.dbtask.*;
-import org.inb.util.*;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -187,13 +185,14 @@ import java.net.URLEncoder;
 // GET GROUPS
     out = response.getWriter();
 		if (what.equals(AjaxUtilServlet.GRPS)) {
+      System.out.println("Before getting groups..."+(theUsr != null? theUsr.getUsername(): " no user"));
 			groups = (theUsr == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(theUsr);
 			if (groups.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"groups\":[]}";
 			}
 			else {
-				jsonResp = "{\"totalCount\": 0, \"groups\":[";
+				jsonResp = "{\"totalCount\": "+groups.size()+", \"groups\":[";
 				for (AppGroup grp: groups) 
 					jsonResp += "{\"name\":\""+ grp.getName() +
 												"\",\"id\":"+grp.getId()+", \"type\":"+grp.getType().getId()+"},";
@@ -516,6 +515,38 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			
 			return;
 		}
+
+    else if (what.equals("user")) {
+      String disableParam = request.getParameter("disable");
+      boolean forDisabling = disableParam != null;
+
+      Session ses = HibernateUtil.getSessionFactory().openSession();
+      AppUserCtrl usrCtrl = new AppUserCtrl(ses);
+
+      if (forDisabling) {
+        String usrId = request.getParameter("usrid");
+        AppUser theUser = (AppUser)ses.get(AppUser.class, Integer.parseInt(usrId));
+        boolean res = usrCtrl.setUserDisabled(theUser, (disableParam.equals("1") ? true : false));
+
+        String msg, jsonOut;
+        if (res) {
+          msg = "User '"+theUser.getUsername()+"' ("+theUser.getId()+") was ";
+          msg += disableParam.equals("0")? "enabled": "disabled";
+        }
+        else {
+          msg = "Unable to "+(disableParam.equals("0")? "enable": "disable");
+          msg += " user '"+theUser.getUsername()+"' ("+theUser.getId()+")";
+        }
+        jsonOut = "{\"msg\": \""+msg+"\", \"res\": 1, \"action\": \"";
+        jsonOut += (disableParam.equals("0")? "enabled": "disabled")+"\"}";
+
+        System.out.println(jsonOut);
+        pwr.print(jsonOut);
+        ses.close();
+        return;
+      }
+
+    }
 			
 		/*
 		if (what.equals("dp")) { // delete patients

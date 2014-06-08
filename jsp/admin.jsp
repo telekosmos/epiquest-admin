@@ -236,8 +236,9 @@ if( hException.isEmpty()) // Error getting input
 		String theGroups = "";
 // adding groups
 		tx.begin();
+    System.out.println("Start to add groups for user admin? "+theUser.isAdmin());
 		if (theUser.isAdmin()) {
-			if (usrGroups == null || 
+			if (usrGroups == null ||
 					usrGroups.size() < usrCtrl.getAllGroups().size()) { // to avoid duplicates on update
 				List<AppGroup> allGroups = usrCtrl.getAllGroups();
 				for (AppGroup aGrp: allGroups) {

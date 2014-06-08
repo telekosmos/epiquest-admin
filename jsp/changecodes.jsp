@@ -44,9 +44,11 @@ System.out.println("Principal's name: "+user);
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <!-- Le styles -->
+  <!-- Le styles -
   <link href="../css/bootstrap.min.css" rel="stylesheet">
-  <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+  <link href="../css/bootstrap-responsive.min.css" rel="stylesheet"> -->
+  <link href="../css/jasny-bootstrap.css" rel="stylesheet">
+  <link href="../css/jasny-bootstrap-responsive.css" rel="stylesheet">
   
   <link href="../css/overlay.css" rel="stylesheet">
   <style type="text/css">
@@ -94,66 +96,212 @@ System.out.println("Principal's name: "+user);
         }
       }
 
-      /* Custom page CSS
-      -------------------------------------------------- */
-      /* Not required for template or sticky footer method. */
-
+      /* Custom page CSS */
       #wrap > .container {
         padding-top: 100px;
       }
-
       #wrap > .container-fluid  {
-        padding-top: 5%;
+        padding-top: 2em;
+      }
+      .container-fluid > hr {
+        margin: 60px 0;
+      }
+      .container-fluid .intro-description {
+        padding: 1% 3%;
+        font-size: 24px;
+        line-height: 1.25;
       }
 
-      .container .credit {
-        margin: 20px 0;
+      .container-fluid .adminrow {
+        /* padding-left: 5%; */
       }
 
-      .container-fluid .credit {
-        margin: 2% 0%;
+      .page-header {
+        margin: 20px 0 10px;
       }
-
       .page-title {
         padding-left: 2%;
+        text-align: center;
       }
-
-      .description-list {
-        padding-left: 2%;
-      }
-
-      .box-form {
-        background-color: #EEEEEE;
-        padding: 1%;
-        border-radius:5px;
-      }
-
-      code {
-        font-size: 80%;
+      .page-title h1 {
+        font-size: 42px
       }
   </style>
   
   <title>EPIQUEST Admin</title>
 </head>
+
 <body>
 <div id="wrap">
 
 <%@include file="inc/navbar.jsp" %>
 
 <div class="container-fluid">
-  <div class="container-fluid">
-    <div class="page-header page-title text-center" >
-      <h1>EPIQUEST admin tool  - Change patient codes</h1>
+  <div class="page-header page-title">
+    <h1>Change subjects code</h1>
+  </div>
+  <div class="row-fluid">
+    <div class="span6 description-list">
+      <span class="text-error">Mind what you are doing: changing code patients means the old ones only can be retrieved from backup and it takes a bit</span><br/>
+
+      <h4>Two options to change subjects code:</h4>
+      <ul><strong>Upload a file</strong>
+        <li>Create a text file with one line for each subject you want to change</li>
+        <li>Each line must be as <code>old_subject_code:new_subject_code</code></li>
+        <li>Then upload the file and click the <strong>Process</strong> button</li>
+      </ul>
+      <ul><strong>Use the form</strong>
+        <li>Filter the patients you want to delete by choosing project, groups and types</li>
+        <li>Then choose the filtered patients from the list just below the combo boxes</li>
+        <li>When a subject is selected, you can change the code in the textbox</li>
+        <li>Click the <strong>GO!</strong> button to change that code only</li>
+      </ul>
     </div>
-    <!-- Intro -->
-    <div class="row-fluid" style="padding-top: 10%;">
-      <div class="span12">
-        <h3 style="text-align:center;">Work in progress</h3>
+    <div class="span6 well" style="overflow-y: auto;height:240px;" id="responseDiv">
+      No previous operation message
+    </div>
+  </div>
+</div> <!-- EO container -->
+
+<hr/>
+
+<!-- upload file -->
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="offset2 span2" style="text-align: right;">
+      <h4 style="line-height: 10px;">Upload a file</h4>
+    </div>
+
+    <div class="span4">
+      <div class="fileupload fileupload-new" data-provides="fileupload">
+        <div class="input-append">
+
+          <div class="uneditable-input span3">
+            <i class="icon-file fileupload-exists"></i>
+            <span class="fileupload-preview"></span>
+          </div>
+          <span class="btn btn-file">
+            <span class="fileupload-new">Select file</span>
+            <span class="fileupload-exists">Change</span><input type="file" />
+          </span>
+          <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+        </div>
       </div>
     </div>
-  </div> <!-- EO container -->
+
+    <div class="span1">
+      <button class="btn btn-inverse" type="button" id="btnUpl" name="btnUpl">Process</button>
+    </div>
+  </div>
 </div>
 
+<hr/>
+<!-- form container fluid -->
+<div class="container-fluid">
+  <form name="frmPatsDeletion" id="frmPatsDeletion">
+    <input type="hidden" name="what" value="dp" />
+
+    <div class="row-fluid">
+      <div class="offset2 span2">
+        <label>Project</label>
+        <select class="input-block-level" id="frmPrj" name="frmPrj">
+          <option value="-1" selected="selected">Choose</option>
+          <%
+            List<Project> projectList = userCtrl.getAllProjects();
+            for (Project project : projectList) {
+              out.println("<option value='" + project.getProjectCode() + "'>"
+                + project.getName() + "</option>");
+            }
+          %>
+        </select>
+      </div>
+
+      <div class="span2">
+        <label>Group/Country</label>
+        <select class="input-block-level" id="frmCountry" name="frmCountry">
+          <option value="-1" selected="selected">Choose</option>
+          <%
+            List<AppGroup> primaryGrps = userCtrl.getPrimaryGroups();
+            for (AppGroup group : primaryGrps) {
+              out.println("<option value=\"" + group.getId() + "\"" +
+                " onmouseover=\"Tip('"+ group.getName() + "');\" onmouseout=\"UnTip();\">" +
+                group.getName()
+                + "</option>");
+            }
+          %>
+        </select>
+      </div>
+
+      <div class="span2">
+        <label>Group/Hospital</label>
+        <select class="input-block-level" id="frmHospital" name="frmHospital">
+          <option value="-1" selected="selected">Choose</option>
+        </select>
+      </div>
+
+      <div class="span2">
+        <label>Case/Control</label>
+        <select class="input-block-level" id="frmSubjType" name="frmSubjType">
+          <option value="-1">All</option>
+          <option value="1">Case</option>
+          <option value="2">Control</option>
+          <option value="3">Familiar</option>
+        </select>
+      </div>
+    </div> <!-- EO row-fluid for combo boxes -->
+
+    <div class="row-fluid">
+      <div class="offset2 span8 well">
+
+        <div class="span5" style="margin-left:4%">
+          <label>Retrieved subjects</label>
+          <select size="8" class="input-block-level" id="frmListPats" name="frmListPats" multiple="multiple">
+          </select>
+        </div>
+        <!--
+        <div class="span1" style="padding: 5% 0%;"></div>
+        -->
+        <div class="span6">
+          <label>Selected subjects (for deletion)</label>
+          <input type="text" placeholder="Selected subject"
+                 name="selSubject" id="selSubject" style="margin-bottom: 0"/>
+          <button class="btn btn-inverse" type="button">Change</button>
+        </div>
+        <!--
+        <div class="span1">
+          <button class="btn btn-inverse" type="button">Change</button>
+        </div>
+        -->
+      </div>
+    </div> <!-- EO row-fluid for listOfRetreived - buttons - listOfSelected -->
+
+    <div class="row-fluid">
+      <div class="offset2 span2">
+        <button type="button" class="btn btn-inverse" id="btnReset"><i class="icon-refresh icon-white"></i> Reset</button>
+      </div>
+
+      <div class="offset2 span3" style="text-align: right;">
+        <label class="checkbox inline" style="padding-right:2%">
+          <input type="checkbox" id="chkSimulation" checked="checked"> Simulation
+        </label>
+        <button type="button" class="btn btn-inverse" id="btnSend"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
+      </div>
+      <div class="span2">
+        <button type="button" class="btn btn-inverse" id="btnClr"><i class="icon-repeat icon-white"></i> Clear</button>
+      </div>
+
+    </div> <!-- EO row-fluid list patients -->
+
+  </form>
+</div> <!-- container fluid -->
+
+<div id="footer">
+  <div class="container">
+    <p class="muted credit">
+      &copy; INB, CNIO - Epidemiology Group
+    </p>
+  </div>
+</div>
 
 </div> <!-- EO wrap -->
 
@@ -169,18 +317,28 @@ System.out.println("Principal's name: "+user);
 </div>
 
 
-<div id="footer">
-  <div class="container">
-    <p class="muted credit">
-      &copy; INB, CNIO - Epidemiology Group
-    </p>
-  </div>
-</div>
 
-<script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
+
+
+<script type="text/javascript" src="../js/admin-cfg.js"></script>
+
+<script type="text/javascript" src="../js/yahoo/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../js/yahoo/connection-debug.js"></script>
+<script type="text/javascript" src="../js/yahoo/json-debug.js"></script>
+
+<script type="text/javascript" src="../js/overlay.js"></script>
+<script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
+<script type="text/javascript" src="../js/mixed2b.js"></script>
+
+<script type="text/javascript" src="../js/lib/twitter.widgets.js"></script>
+<script type="text/javascript" src="../js/lib/jquery-jasny-1.9.1.js"></script>
+<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
+<script type="text/javascript" src="../js/lib/bootstrap-fileupload.js"></script>
+
 <script type="text/javascript" src="../js/overlay.js"></script>
 
-<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
+<script type="text/javascript" src="../js/changecodes-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/changecodes.js"></script>
 
 </body>
 </html>

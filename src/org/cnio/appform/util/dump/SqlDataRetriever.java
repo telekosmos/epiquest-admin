@@ -88,7 +88,9 @@ public class SqlDataRetriever {
       if (this.conn == null)
         this.conn = this.getConnection();
 
-      this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      this.conn.setAutoCommit(false);
+      this.stmt = conn.createStatement();
+      this.stmt.setFetchSize(5000);
       ResultSet rs = this.stmt.executeQuery(qry);
 
       return rs;
@@ -108,17 +110,10 @@ public class SqlDataRetriever {
     }
   }
 
-
-
-
-	
-	
 	public void closeConn () throws SQLException {
 		this.stmt.close();
 		this.conn.close();
 	}
-	
-	
 	
 	
 	public void printResultsetOut (ResultSet rs) {
