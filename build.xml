@@ -64,8 +64,9 @@
 		<delete dir="${temp.dir.web-inf}" />
 	</target>
 
-	<!-- make directories to use in build time -->
-	<target name="prepare" depends="clean">
+	<!-- make directories to use in build time -
+	<target name="prepare" depends="clean"> -->
+  <target name="prepare">
 		<echo>=== PREPARING OUTPUT DIRECTORIES ===</echo>
 		<mkdir dir="${dest.dir}" />
 		<mkdir dir="${temp.dir}" />

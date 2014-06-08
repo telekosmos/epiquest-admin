@@ -273,15 +273,6 @@ System.out.println("Principal's name: "+user);
       <div class="span5">
         <label>Selected subjects (for deletion)</label>
         <select size="8" class="input-block-level" id="frmDelPats" name="frmDelPats" multiple="multiple">
-        <!-- 
-          <option value="100">selected</option>
-          <option value="100">selected</option>
-          <option value="100">selected</option>
-          <option value="100">selected</option>
-          <option value="100">selected</option>
-          <option value="100">selected</option>
-          <option value="100">selected</option>
-        -->
         </select>
       </div>
       
@@ -293,7 +284,7 @@ System.out.println("Principal's name: "+user);
       <button type="button" class="btn btn-inverse" id="btnReset"><i class="icon-refresh icon-white"></i> Reset</button>
     </div>
 
-    <div class="offset3 span2" style="text-align: right;"> 
+    <div class="offset2 span3" style="text-align: right;">
     	<label class="checkbox inline" style="padding-right:2%">
 				<input type="checkbox" id="chkSimulation" checked="checked"> Simulation
 			</label>

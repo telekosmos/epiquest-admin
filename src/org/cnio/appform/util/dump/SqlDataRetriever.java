@@ -110,17 +110,10 @@ public class SqlDataRetriever {
     }
   }
 
-
-
-
-	
-	
 	public void closeConn () throws SQLException {
 		this.stmt.close();
 		this.conn.close();
 	}
-	
-	
 	
 	
 	public void printResultsetOut (ResultSet rs) {
