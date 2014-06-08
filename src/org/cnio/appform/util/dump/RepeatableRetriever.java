@@ -18,6 +18,13 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * This class yields an xlsx file based on repeatable blocks for the section. Each
+ * repeatable block dump will be a sheet in the workbook file, and there will be
+ * an additional sheet for the non-repeatable questions. Within those workbooks,
+ * every row will be a repeatable block for the patient. In such a way, curating gets
+ * easier than doing it in the 'normal' dump format.
+ */
 public class RepeatableRetriever extends  DataRetriever {
 
   protected SXSSFWorkbook wb;
@@ -369,7 +376,7 @@ public class RepeatableRetriever extends  DataRetriever {
 
 
   /**
-   * It yields (num repeatable blocks + 1) sheets.
+   * It yields (num repeatable blocks) sheets.
    * @param prjCode the project code
    * @param intrvId the database questionnaire id
    * @param grpId the database group id or a comma separated list of group ids
@@ -400,7 +407,8 @@ public class RepeatableRetriever extends  DataRetriever {
    * Builds up a dump by slicing the section in different files (or excel sheets)
    * containing the data belonging to repeatable blocks plus and additional file
    * with data from simple questions (no repeatables). This is the main method to
-   * yield the final dump file
+   * yield the final dump file and, currently, it yields a Excel workbook object
+   * containing (num-of-rep-blocks + 1) excel sheets
    * @param prjCode, the project code
    * @param intrvId, the interview database id
    * @param grpId the database group id or a comma separated list of group ids
