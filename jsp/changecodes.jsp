@@ -126,6 +126,10 @@ System.out.println("Principal's name: "+user);
       .page-title h1 {
         font-size: 42px
       }
+
+      .border-separator {
+        border-bottom: 1px solid #eeeeee;
+      }
   </style>
   
   <title>EPIQUEST Admin</title>
@@ -140,7 +144,7 @@ System.out.println("Principal's name: "+user);
   <div class="page-header page-title">
     <h1>Change subjects code</h1>
   </div>
-  <div class="row-fluid">
+  <div class="row-fluid border-separator">
     <div class="span6 description-list">
       <span class="text-error">Mind what you are doing: changing code patients means the old ones only can be retrieved from backup and it takes a bit</span><br/>
 
@@ -163,16 +167,16 @@ System.out.println("Principal's name: "+user);
   </div>
 </div> <!-- EO container -->
 
-<hr/>
 
 <!-- upload file -->
 <div class="container-fluid">
-  <div class="row-fluid">
+  <div class="row-fluid border-separator">
     <div class="offset2 span2" style="text-align: right;">
       <h4 style="line-height: 10px;">Upload a file</h4>
     </div>
 
     <div class="span4">
+      <form id="uploadform" enctype="multipart/form-data">
       <div class="fileupload fileupload-new" data-provides="fileupload">
         <div class="input-append">
 
@@ -187,6 +191,7 @@ System.out.println("Principal's name: "+user);
           <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
         </div>
       </div>
+      </form>
     </div>
 
     <div class="span1">
@@ -195,7 +200,7 @@ System.out.println("Principal's name: "+user);
   </div>
 </div>
 
-<hr/>
+
 <!-- form container fluid -->
 <div class="container-fluid">
   <form name="frmPatsDeletion" id="frmPatsDeletion">
@@ -250,7 +255,7 @@ System.out.println("Principal's name: "+user);
       </div>
     </div> <!-- EO row-fluid for combo boxes -->
 
-    <div class="row-fluid">
+    <div class="row-fluid border-separator">
       <div class="offset2 span8 well">
 
         <div class="span5" style="margin-left:4%">
@@ -275,21 +280,16 @@ System.out.println("Principal's name: "+user);
       </div>
     </div> <!-- EO row-fluid for listOfRetreived - buttons - listOfSelected -->
 
-    <div class="row-fluid">
+    <div class="row-fluid" style="margin-top: 1em;">
       <div class="offset2 span2">
         <button type="button" class="btn btn-inverse" id="btnReset"><i class="icon-refresh icon-white"></i> Reset</button>
       </div>
 
-      <div class="offset2 span3" style="text-align: right;">
+      <div class="offset3 span3" style="text-align: right;">
         <label class="checkbox inline" style="padding-right:2%">
           <input type="checkbox" id="chkSimulation" checked="checked"> Simulation
         </label>
-        <button type="button" class="btn btn-inverse" id="btnSend"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
       </div>
-      <div class="span2">
-        <button type="button" class="btn btn-inverse" id="btnClr"><i class="icon-repeat icon-white"></i> Clear</button>
-      </div>
-
     </div> <!-- EO row-fluid list patients -->
 
   </form>
@@ -337,6 +337,8 @@ System.out.println("Principal's name: "+user);
 
 <script type="text/javascript" src="../js/overlay.js"></script>
 
+<script type="text/javascript" src="../js/uploadfile-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/uploadfile.js"></script>
 <script type="text/javascript" src="../js/changecodes-ajaxresp.js"></script>
 <script type="text/javascript" src="../js/changecodes.js"></script>
 
