@@ -7,7 +7,7 @@
  * CRUD OPERATIONS
  */
 
-var DelPatsAjaxResponse = function () {
+var ChangeCodesAjaxResponse = function () {
 
   var clearIntrvCombo = function () {
     var intrvSel = $("#frmListPats");
@@ -47,7 +47,6 @@ var DelPatsAjaxResponse = function () {
       alert ("JSON Parse failed: "+exp);
       return;
     }
-
   }
 
 
@@ -84,12 +83,24 @@ var DelPatsAjaxResponse = function () {
       alert ("JSON Parse failed: "+exp);
       return;
     }
-
   }
+
+  var onFail = function (o) {
+// Access the response object's properties in the
+// same manner as listed in responseSuccess( ).
+// Please see the Failure Case section and
+// Communication Error sub-section for more details on the
+// response object's properties.
+    var msg = o.responseText;
+
+//		document.getElementById("body").appendChild(document.createTextNode(msg));
+    console.error(msg);
+  };
 
   return {
     onGetSubjects: onGetSubjects,
-    onGetHospitals: onGetHospitals
+    onGetHospitals: onGetHospitals,
+    onFail: onFail
   }
 
 };

@@ -293,7 +293,7 @@ System.out.println("Principal's name: "+user);
     <div class="span2">
       <button type="button" class="btn btn-inverse" id="btnClr"><i class="icon-repeat icon-white"></i> Clear</button>
     </div>
- 
+
   </div> <!-- EO row-fluid list patients -->
   
 	</form>
