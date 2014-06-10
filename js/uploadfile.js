@@ -14,6 +14,9 @@ var UploadFileCtrl = function() {
 
     // Create a formdata object and add the files
     var data = new FormData();
+    if (files.length == 0)
+      return;
+
     $.each(files, function(key, value) {
       data.append(key, value);
     });

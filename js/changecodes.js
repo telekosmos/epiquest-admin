@@ -67,6 +67,27 @@ var ChangeCodesCtrl = function() {
   }
 
 
+  /**
+   * It makes an ajax request to change the subject code of the subject currently
+   * selected on the list of subjects
+   */
+  var changeSingleSubject = function() {
+    var oldSubject = listPats.val();
+    var newSubject = $("#selSubject").val();
+    if (!oldSubject && !newSubject)
+      return;
+
+    console.log("Change "+oldSubject+" to "+newSubject);
+
+    var postData = "old="+oldSubject+"&new="+newSubject+"&sim="+simulation;
+    var xReq = new AjaxReq();
+    xReq.setPostdata(postData);
+    xReq.setMethod('POST');
+    xReq.setUrl(APP_ROOT+'/servlet/ChangeCodesServlet');
+    xReq.setCallback(ajaxResp.onSubjectChange, ajaxResp.onFail, ajaxResp, null);
+    xReq.startReq();
+  }
+
 
   var init = function() {
     var that = this;
@@ -104,12 +125,18 @@ var ChangeCodesCtrl = function() {
     // $('input[type="file"]').attr('name', 'filecodes');
     // $('input[type="file"]').on('change', prepareUpload);
     // $('form').on('submit', uploadFiles);
-    $("#btnUpl").bind('click', uploadFileCtrl.test);
     $("#btnReset").click(function (ev) {
       $("#frmPatsDeletion")[0].reset();
       $("#uploadform")[0].reset();
       $(listPats).empty();
-    })
+    });
+
+    listPats.change(function() {
+      console.log("patient selected: ");
+      $("#selSubject").val($(this).val());
+    });
+    $("#btnChange").bind('click', changeSingleSubject);
+
   }
 
   return {

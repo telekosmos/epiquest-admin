@@ -209,7 +209,7 @@ import java.net.URLEncoder;
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
 			// groups = group.getContainees();
       if (theUsr != null)
-        groups = usrCtrl.getSecondaryGroups(theUsr, group);
+        groups = usrCtrl.getSecondaryGroups(theUsr, group); // have to update the jar file
       else
         groups = group.getContainees();
 			

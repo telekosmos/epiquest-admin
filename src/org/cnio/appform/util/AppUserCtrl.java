@@ -731,17 +731,38 @@ public class AppUserCtrl {
 		return getSecondaryGroups(myUsr, grp);
 	}
 
+
+
+
 	/**
 	 * This method returns all secondary groups bound to the user represented by
-	 * the user entity 
+	 * the user entity. If user.isAdmin, just return all groups belonging to mainGrp
 	 * @param user, the user entity
 	 * @return
 	 */
 	public List<AppGroup> getSecondaryGroups(AppUser user, AppGroup mainGrp) {
 		List lGrps = null;
-		String hql = "select a from AppGroup a join a.relGrpAppusrs r where "
-				+ "a.type.name='HOSPITAL' and r.appuser=:user "
-				+ "and a.container=:maingrp order by a.name";
+    List<Role> userRoles = this.getRoleFromUser(user);
+    boolean isAdmin = false;
+    for (int i=0; i<userRoles.size(); i++) {
+      Role role = userRoles.get(i);
+      if (role.getName().indexOf("admin") != -1) {
+        isAdmin = true;
+        break;
+      }
+    }
+
+    String hql;
+		if (!isAdmin) {
+      hql = "select a from AppGroup a join a.relGrpAppusrs r where "
+          + "a.type.name='HOSPITAL' and r.appuser=:user "
+          + "and a.container=:maingrp order by a.name";
+    }
+    else {
+      hql = "select a from AppGroup a where "
+        + "a.type.name='HOSPITAL' "
+        + "and a.container=:maingrp order by a.name";
+    }
 
 		Transaction tx = null;
 		AppGroup group = null;
@@ -755,7 +776,8 @@ public class AppUserCtrl {
 			}
 
 			qry = this.theSess.createQuery(hql);
-			qry.setEntity("user", user);
+      if (!isAdmin)
+        qry.setEntity("user", user);
 			qry.setEntity("maingrp", mainGrp);
 			lGrps = qry.list();
 
