@@ -152,13 +152,13 @@ System.out.println("Principal's name: "+user);
       <ul><strong>Upload a file</strong>
         <li>Create a text file with one line for each subject you want to change</li>
         <li>Each line must be as <code>old_subject_code:new_subject_code</code></li>
-        <li>Then upload the file and click the <strong>Process</strong> button</li>
+        <li>Then <strong>Select file</strong> and click the <strong>Process</strong> button</li>
       </ul>
       <ul><strong>Use the form</strong>
         <li>Filter the patients you want to delete by choosing project, groups and types</li>
         <li>Then choose the filtered patients from the list just below the combo boxes</li>
         <li>When a subject is selected, you can change the code in the textbox</li>
-        <li>Click the <strong>GO!</strong> button to change that code only</li>
+        <li>Click the <strong>Change</strong> button to change that code only</li>
       </ul>
     </div>
     <div class="span6 well" style="overflow-y: auto;height:240px;" id="responseDiv">
@@ -260,23 +260,18 @@ System.out.println("Principal's name: "+user);
 
         <div class="span5" style="margin-left:4%">
           <label>Retrieved subjects</label>
-          <select size="8" class="input-block-level" id="frmListPats" name="frmListPats" multiple="multiple">
+          <select size="8" class="input-block-level" id="frmListPats" name="frmListPats">
           </select>
         </div>
         <!--
         <div class="span1" style="padding: 5% 0%;"></div>
         -->
         <div class="span6">
-          <label>Selected subjects (for deletion)</label>
+          <label>New code for selected subject</label>
           <input type="text" placeholder="Selected subject"
                  name="selSubject" id="selSubject" style="margin-bottom: 0"/>
-          <button class="btn btn-inverse" type="button">Change</button>
+          <button class="btn btn-inverse" type="button" id="btnChange">Change</button>
         </div>
-        <!--
-        <div class="span1">
-          <button class="btn btn-inverse" type="button">Change</button>
-        </div>
-        -->
       </div>
     </div> <!-- EO row-fluid for listOfRetreived - buttons - listOfSelected -->
 

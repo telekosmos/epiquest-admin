@@ -9,6 +9,58 @@
 
 var ChangeCodesAjaxResponse = function () {
 
+  var displayMsg = function(o) {
+    var jResponse = YAHOO.lang.JSON.parse(o.responseText);
+    var innerContent = "", count=0;
+    var subjectsChanged = jResponse.subjects;
+    $.each(subjectsChanged, function(i, pair) {
+      $.each(pair, function(key, val) {
+        innerContent += '<li>'+key+' -> '+val+'</li>';
+        count++;
+      });
+    })
+
+    innerContent = count + " subject codes found in file:<br/><ul>"+innerContent+"</ul>";
+    innerContent += "Subjects affected: "+ jResponse.rows_affected+"<br/>";
+    var subjectsWithSamples = jResponse.subjs_with_samples.join(",");
+    subjectsWithSamples = (subjectsWithSamples == "")? "None": subjectsWithSamples;
+
+    innerContent += "Subjects with samples: "+ subjectsWithSamples+"<br/>";
+    var subjectsUnchanged = jResponse.subjects_unchanged.join(",");
+    subjectsUnchanged = (subjectsUnchanged == "")? "None": subjectsUnchanged;
+    innerContent += "Subjects unchanged: " + subjectsUnchanged;
+
+    $("#responseDiv").empty();
+    // $("#responseDiv").append(innerContent);
+    $("#responseDiv").html(innerContent);
+
+    return jResponse;
+  }
+
+
+  /**
+   * Function callback for single subject code change
+   */
+  var onSubjectChange = function(o) {
+    overlay.hide();
+
+    try {
+      var parsedJson = displayMsg(o);
+      var subjectChange = parsedJson.subjects[0], oldCode, newCode;
+      $.each(subjectChange, function(key, val) {
+        oldCode = key;
+        newCode = val;
+      });
+      $("#frmListPats option:selected").val(newCode).text(newCode).css('color', 'green');
+    }
+    catch (exp) {
+      alert ("JSON Parse failed: "+exp);
+      return;
+    }
+
+  }
+
+
   var clearIntrvCombo = function () {
     var intrvSel = $("#frmListPats");
 
@@ -39,7 +91,8 @@ var ChangeCodesAjaxResponse = function () {
           var name = pat.codpatient;
           var id = pat.id;
 
-          addOption(name, name);
+          // Maybe id is better than name for option value...
+          $("#frmListPats").append("<option value=\""+name+"\">"+decodeURIComponent(name)+"</option>");
         }
       }
     }
@@ -100,6 +153,7 @@ var ChangeCodesAjaxResponse = function () {
   return {
     onGetSubjects: onGetSubjects,
     onGetHospitals: onGetHospitals,
+    onSubjectChange: onSubjectChange,
     onFail: onFail
   }
 

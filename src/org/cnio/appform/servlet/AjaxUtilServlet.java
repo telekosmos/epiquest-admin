@@ -131,7 +131,7 @@ import java.net.URLEncoder;
 
       String dumpOut = "";
       if (isRepDump == null) { // Subject per line download
-        dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+        dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.valueOf(orderSec));
 
         logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
         logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
@@ -209,7 +209,7 @@ import java.net.URLEncoder;
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
 			// groups = group.getContainees();
       if (theUsr != null)
-        groups = usrCtrl.getSecondaryGroups(theUsr, group);
+        groups = usrCtrl.getSecondaryGroups(theUsr, group); // have to update the jar file
       else
         groups = group.getContainees();
 			

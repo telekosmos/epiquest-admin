@@ -1,9 +1,11 @@
 package org.cnio.appform.test.util;
 
 import org.cnio.appform.entity.AppUser;
+import org.cnio.appform.util.HibController;
 import org.cnio.appform.util.HibernateUtil;
 import org.cnio.appform.util.AppUserCtrl;
 import org.cnio.appform.entity.AppGroup;
+import org.cnio.appform.util.IntrvController;
 import org.hibernate.Session;
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +49,26 @@ public class AppUserCtrlTest {
     assertThat(tert, isIn(groups));
     assertThat(terta, isIn(groups));
   }
+
+
+  @Test
+  public void getSecondaryGroups() {
+    AppUser user = appUsrCtrl.getUser("mmarquez");
+    AppGroup main = appUsrCtrl.getGroupFromName("SPAIN");
+    List<AppGroup> groups = appUsrCtrl.getSecondaryGroups(user, main);
+    AppGroup tert = (AppGroup)hibSes.get(AppGroup.class, 1400),
+        terta = (AppGroup)hibSes.get(AppGroup.class, 1401);
+
+    assertThat(groups, hasSize(greaterThan(10)));
+    assertThat(tert, isIn(groups));
+    assertThat(terta, isIn(groups));
+
+    user = appUsrCtrl.getUser("lpalencia");
+    groups = appUsrCtrl.getSecondaryGroups(user, main);
+    assertThat(tert, not(isIn(groups)));
+    assertThat(terta, not(isIn(groups)));
+  }
+
 
 
   @Test

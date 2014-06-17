@@ -57,11 +57,13 @@ var UploadFileAjaxResponse = function() {
 
   var onFileUpload = function(o) {
     console.log('File upload OK: '+o.filename);
+    var re = /^[a-zA-Z0-9]{3}(\d){6,9}$/g;
     for (var key in o)
-      if (key.indexOf('TER') != -1)
+      if (key.match(re) != null)
         console.log(key+':'+o[key]);
 
     displayMsg(o);
+    overlay.hide();
   }
 
   return {

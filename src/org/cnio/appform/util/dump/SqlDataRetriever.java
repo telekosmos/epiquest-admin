@@ -18,6 +18,9 @@ public class SqlDataRetriever {
 	private Statement stmt;
 
 
+  public SqlDataRetriever () {
+
+  }
 	
 /**
  * Retrieves the full resultset in order to retrive all answers for a section and group
