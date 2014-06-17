@@ -36,6 +36,7 @@ var UploadFileCtrl = function() {
       error: ajaxRespObj.onFail
 
     }); // EO ajax
+    overlay.show();
   }
 
   /*

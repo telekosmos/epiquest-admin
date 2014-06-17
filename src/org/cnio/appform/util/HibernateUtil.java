@@ -414,7 +414,7 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
  * the containers. The order is set when the elements are saved or updated, so
  * the responsibility 
  * @param session, the session to perform the query
- * @param secName, the name of the section
+ * @param secId, the name of the section
  * @return a Collection of Items or null on error
  */
 	public static List<AbstractItem> getItems4Section (Session session, 
@@ -654,7 +654,6 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
  * Gets the collection of enumerated types for all interviews. Most of them
  * will be repeated
  * @param hibSess, the session
- * @param ait, the abstract item to get the answer items
  * @return a collection of answer items, which is null
  */	
 	public static Collection<EnumType> getEnumTypes (Session hibSess) {
@@ -881,7 +880,6 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
  * type along with its pattern. The order is took into account
  * @param hibSess, the hibernate session
  * @param q, the question to be qualified by a answer type
- * @param a, the answer type to qualify the question
  * @return true on sucessfully completion; otherwise false
  */
 	public static boolean setFullAnswerType (Session hibSess, Question q, 
@@ -915,7 +913,7 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
  * Set an answertype for the question, without order or pattern
  * @param hibSess, the hibernate session
  * @param q, the question to be qualified by a answer type
- * @param a, the answer type to qualify the question
+ * @param ans, the answer type to qualify the question
  * @return true on sucessfully completion; otherwise false
  */
 	public static boolean setAnswerType (Session hibSess, Question q, 
@@ -1066,7 +1064,7 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 /**
  * Delete a project based on an id
  * @param session, the hibernate session
- * @param secId, the id of the section which is gonna be deleted
+ * @param projId, the id of the section which is gonna be deleted
  * @return true on sucessfully completion; otherwise false
  */	
 	public static boolean removeProj (Session session, Integer projId) {
@@ -1117,7 +1115,8 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
   /**
    * This method returns all secondary groups bound to the user represented by
    * the user entity
-   * @param user, the user entity
+   * @param hibSes, the user entity
+   * @param mainGrp, the parent group
    * @return
    */
   public static List<AppGroup> getSecondaryGroups(Session hibSes, AppGroup mainGrp) {

@@ -97,7 +97,15 @@
 		<servlet-name>MngUsersServlet</servlet-name>
 		<servlet-class>org.cnio.appform.servlet.MngUsersServlet</servlet-class>
 	</servlet>
-	
+
+  <servlet>
+    <description>Manages file upload and codes changes</description>
+    <display-name>ChageSubjectsCodeServlet</display-name>
+    <servlet-name>ChangeSubjectsCodeServlet</servlet-name>
+    <servlet-class>org.cnio.appform.servlet.ChangeSubjectsCodeServlet
+    </servlet-class>
+  </servlet>
+
 <!-- JAAS SERVLET AND INIT PARAM -->
 	<servlet>
 		<display-name>JAAS Login Servlet</display-name>
@@ -147,6 +155,11 @@
 		<servlet-name>MngGroupsServlet</servlet-name>
 		<url-pattern>/servlet/MngGroupsServlet</url-pattern>
 	</servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChangeSubjectsCodeServlet</servlet-name>
+    <url-pattern>/servlet/ChangeCodesServlet</url-pattern>
+  </servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>MngUsersServlet</servlet-name>

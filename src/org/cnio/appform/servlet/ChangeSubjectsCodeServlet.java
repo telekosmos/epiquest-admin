@@ -44,6 +44,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
     this.simulation = true;
   }
 
+
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     // Check that we have a file upload request
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
@@ -52,7 +53,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
     InputStream filecontent = null;
     String filename = null;
 
-    if (request.getParameter("single") != null) {
+    if (request.getParameter("single") == null) {
 
       try {
         List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
@@ -84,7 +85,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
         jsonObj.put("err", e.getLocalizedMessage());
       }
     }
-    else { // single subject code change
+    else { // got single parameter => single subject code change
       String oldCode = request.getParameter("old"),
         newCode = request.getParameter("new");
       jsonObj = changeSingleSubjectCode(oldCode, newCode);
@@ -113,13 +114,14 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
    * @return a JSONObject which will be the response to the client
    */
   private JSONObject changeSubjectsFromFile (String filename, InputStream filecontent) {
+    System.out.println("Processing uploaded file '"+filename+"'");
     FixingTasksHub fth = new FixingTasksHub(this.dbUrl, this.dbUser, this.dbPass);
     Map codes = fth.parseSubjectCodesFile(filecontent);
     JSONObject jsonObj = new JSONObject();
 
     if (codes == null) {
       jsonObj.put("result", 0);
-      jsonObj.put("msg", "Malformed subject codes file");
+      jsonObj.put("msg", filename+": Malformed subject codes file");
     }
     else {
       Set oldOnes = codes.keySet();

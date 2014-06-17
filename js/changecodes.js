@@ -80,6 +80,7 @@ var ChangeCodesCtrl = function() {
     console.log("Change "+oldSubject+" to "+newSubject);
 
     var postData = "old="+oldSubject+"&new="+newSubject+"&sim="+simulation;
+    postData += "&single=1";
     var xReq = new AjaxReq();
     xReq.setPostdata(postData);
     xReq.setMethod('POST');

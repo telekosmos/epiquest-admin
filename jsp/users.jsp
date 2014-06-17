@@ -181,6 +181,7 @@ System.out.println("Principal's name: "+user);
 
 <%@include file="inc/navbar.jsp" %>
 
+
 <div class="container-fluid">
   <div class="page-header page-title">
     <h1>EPIQUEST admin tool - User management</h1>
@@ -550,7 +551,7 @@ System.out.println("Principal's name: "+user);
 		hibSes.close();
 %>
 
-<!-- yahoo event, dom and connection files -->
+<!-- yahoo event, dom and connection files --
 <script type="text/javascript" src="../js/overlay.js"></script>
 <script type="text/javascript" src="../js/yahoo/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="../js/yahoo/connection-debug.js"></script>
@@ -561,17 +562,39 @@ System.out.println("Principal's name: "+user);
 <script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
 <script type="text/javascript" src="../js/overlay.js"></script>
 <script type="text/javascript" src="../js/mixed2b.js"></script>
+
+<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
 			
-<!-- Configuration variables file -->
+<!-- Configuration variables file --
 <script type="text/javascript" src="../js/admin-cfg.js"></script>
 			
-<!-- Admin tool scripts -->
+<!-- Admin tool scripts --
+<script type="text/javascript" src="../js/admin-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/adminctrl.js"></script>
+
+<script type="text/javascript" src="../js/wz_tooltip.js"></script>
+-->
+<script type="text/javascript" src="../js/lib/jquery-1.9.1.js"></script>
+
+<script type="text/javascript" src="../js/admin-cfg.js"></script>
+
+<script type="text/javascript" src="../js/yahoo/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../js/yahoo/connection-debug.js"></script>
+<script type="text/javascript" src="../js/yahoo/json-debug.js"></script>
+
+<script type="text/javascript" src="../js/overlay.js"></script>
+<script type="text/javascript" src="../js/yahoo/ajaxreq.js"></script>
+
+<script type="text/javascript" src="../js/mixed2b.js"></script>
+
 <script type="text/javascript" src="../js/admin-ajaxresp.js"></script>
 <script type="text/javascript" src="../js/adminctrl.js"></script>
 
 <script type="text/javascript" src="../js/wz_tooltip.js"></script>
 
-<script type="text/javascript" src="../assets/js/bootstrap.js"></script>
+<script type="text/javascript" src="../js/lib/bootstrap.js"></script>
+
+
 
 </body>
 </html>

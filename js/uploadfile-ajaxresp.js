@@ -63,6 +63,7 @@ var UploadFileAjaxResponse = function() {
         console.log(key+':'+o[key]);
 
     displayMsg(o);
+    overlay.hide();
   }
 
   return {

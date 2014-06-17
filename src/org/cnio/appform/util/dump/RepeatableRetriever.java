@@ -25,7 +25,7 @@ import java.util.List;
  * every row will be a repeatable block for the patient. In such a way, curating gets
  * easier than doing it in the 'normal' dump format.
  */
-public class RepeatableRetriever extends  DataRetriever {
+public class RepeatableRetriever extends DataRetriever {
 
   protected SXSSFWorkbook wb;
   protected final int FIRST_FIELD_INDEX = 4;
@@ -127,7 +127,7 @@ public class RepeatableRetriever extends  DataRetriever {
 
   private String repIds;
 
-  public RepeatableRetriever(String path, Hashtable map) {
+  public RepeatableRetriever (String path, Hashtable map) {
     super (path, map);
 
     wb = new SXSSFWorkbook(100);
@@ -135,6 +135,7 @@ public class RepeatableRetriever extends  DataRetriever {
 
 
   public RepeatableRetriever() {
+    super();
     wb = new SXSSFWorkbook(100);
     repIds = "";
 
@@ -198,7 +199,7 @@ public class RepeatableRetriever extends  DataRetriever {
   public String buildRepBlockHeader (Integer parentItem) {
 
     String qry = repBlockItemsQry.replaceFirst("xxx", parentItem.toString());
-    List<Object[]> rs = execQuery(qry, -1, -1);
+    List<Object[]> rs = super.execQuery(qry, -1, -1);
     String header = null;
 
     if (rs != null && rs.size() > 0) {

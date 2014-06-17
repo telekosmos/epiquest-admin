@@ -48,8 +48,8 @@ public class IntrvController {
 	
 /**
  * Get a list of interviews belongin to a project and a Group
- * @param prj, the project
- * @param grp, the group
+ * @param prjid, the project
+ * @param grpid, the group
  * @return the list of interviews or null if something was wrong
  */
 	public List<Interview> getInterviews (Integer prjid, Integer grpid) {
@@ -301,7 +301,7 @@ System.out.println("Interview assigned to group "+grp.getName());
 /**
  * Replicate the interview intrvAux for the group of users represented 
  * by grp 
- * @param intrvId, the source interview id
+ * @param intrvAux, the source interview id
  * @param grp, the target group 
  * @return, a new interview 
  */	
@@ -578,9 +578,8 @@ System.out.println("Interview assigned to group "+grp.getName());
 	
 /**
  * Add a list of Interviews to the Project proj
- * @param session
- * @param intrv
- * @param sections
+ * @param proj
+ * @param intrvs
  * @return
  */	
 	public boolean addIntr2Proj (Project proj, List<Interview> intrvs) {
@@ -612,7 +611,6 @@ System.out.println("Interview assigned to group "+grp.getName());
 
 /**
  * Creates a new interview based on name and description
- * @param hibSess
  * @param name, a String representing the name of the section
  * @param desc, a String representing some description
  * @return
@@ -724,7 +722,6 @@ String hqlIntr = "from RelIntrvGroup rig where rig.appgroup=:group and " +
  * Get the list of interviews for the project identified with prjCode and for an
  * owner identified with his/her system id. The list of interviews is the list of
  * interviews for all users in that group (actually, the country)
- * @param session
  * @param prjId
  * @param userId
  * @return
@@ -1003,8 +1000,7 @@ hibEx.printStackTrace();
 
 /**
  * Delete an interview based on an id
- * @param session, the hibernate session
- * @param secId, the id of the section which is gonna be deleted
+ * @param intrId, the id of the section which is gonna be deleted
  * @return true on sucessfully completion; otherwise false
  */	
 	public boolean removeInterview (Integer intrId) {

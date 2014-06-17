@@ -1,4 +1,4 @@
-var APP_ROOT  = "/admtool";
+var APP_ROOT  = "/admtool"; // for production
 // var APP_ROOT = "/epiquestadmin"
 
 var MODE_CREATE = 2

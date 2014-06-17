@@ -131,7 +131,7 @@ import java.net.URLEncoder;
 
       String dumpOut = "";
       if (isRepDump == null) { // Subject per line download
-        dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+        dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.valueOf(orderSec));
 
         logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
         logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
