@@ -500,7 +500,7 @@ System.out.println("AppLoginModule.commit(): "+subject.toString());
 		
 // This is to check out whether or not the user is logged in
 // 		if (user.getLoggedIn() != 0) {
-		if (Singleton.getInstance().isLogged(username)) {
+		if (Singleton.getInstance().isLogged(user.getId())) {
 			errCause = AppUserCtrl.LOGIN_CONCURRENT;
 			userId = user.getId();
 //			ctrl.logSessionInit(user.getId(), user.getUsername(), "", "", "",
@@ -529,7 +529,7 @@ System.out.println("AppLoginModule.commit(): "+subject.toString());
 				strRoles += role.getName()+",";
 			}
 			strRoles = strRoles.substring(0, strRoles.length()-1);
-			Singleton.getInstance().addUser(username);
+			Singleton.getInstance().addUser(user.getId());
 			
 /* System.out.println("LoginModule.loginValidate: "+strRoles);
 			try {

@@ -9,7 +9,8 @@ public class Singleton {
 /**
  * The list of users currently connected
  */
-	private List<String> users; 
+	// private List<String> users;
+  private List<Integer> users;
 
 	
 /**
@@ -17,7 +18,7 @@ public class Singleton {
  * won't generate a default public constructor.
  */
 	private Singleton () {  
-		users = new ArrayList<String> ();
+		users = new ArrayList<Integer> ();
 	} 
 	
 	
@@ -31,32 +32,39 @@ public class Singleton {
 	
 /**
  * Add an user to the list of logged users
- * @param username
+ * @param userid
  */
-	public void addUser (String username) {
-		users.add(username);
-System.out.println("Singleton.addUser: "+username);
+	public void addUser (Integer userid) {
+		users.add(userid);
+System.out.println("Singleton.addUser: "+userid);
 	}
 	
 	
 /**
  * Checks if username is logged
- * @param username, the user 
+ * @param userid, the user
  * @return true if the user username is logged; otherwise it returns false
  */
-	public boolean isLogged (String username) {
-System.out.println("Singleton.islogged: "+username+":"+users.contains(username));
-		return users.contains(username);
+	public boolean isLogged (Integer userid) {
+System.out.println("Singleton.islogged: "+userid+":"+users.contains(userid));
+		return users.contains(userid);
 	}
 	
 	
 /**
  * Remove an element of the list based on their content
- * @param username
+ * @param userid
  */
-	public void rmvUser (String username) {
-		users.remove(username);
-System.out.println("Singleton.rmvUser: "+username);
+	public boolean rmvUser (Integer userid) {
+    boolean removed = true;
+    if (users.contains(userid))
+		  users.remove(userid);
+    else
+      removed = false;
+
+System.out.println("Singleton.rmvUser?: "+removed+" for "+userid);
+
+    return removed;
 	}
 	
 	
@@ -71,14 +79,14 @@ System.out.println("Singleton.rmvUser: "+username);
 	
 	
 	
-	public List<String> getLoggedUsers () {
+	public List<Integer> getLoggedUsers () {
 		return users;
 	}
 	
 	
 	public void printUsrs() {
 System.out.println("Users currently logged:");
-		for (String user: users) {
+		for (Integer user: users) {
 			System.out.println(user);
 		}
 	}

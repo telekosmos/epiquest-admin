@@ -38,21 +38,37 @@ var UploadFileAjaxResponse = function() {
         innerContent += '<li>'+key+' -> '+val+'</li>';
         count++;
       });
-    })
+    });
 
-    innerContent = count + " subject codes found in file:<br/><ul>"+innerContent+"</ul>";
+    var simString = o.sim == true? '<b>Simulation</b> mode<br/>': '<b>Live</b> mode<br/>';
+    var date = new Date();
+    var timestamp = '['+date.toLocaleTimeString()+", "+date.toLocaleDateString()+']';
+    innerContent = timestamp +'<br/>'+ simString + count + " subject codes found in file:<br/><ul>"+innerContent+"</ul>";
     innerContent += "Subjects affected: "+ o.rows_affected+"<br/>";
-    var subjectsWithSamples = o.subjs_with_samples.join(",");
+
+    var subjectsWithSamples = '';
+    $.each(o.subjs_with_samples, function(i, pair) {
+      $.each(pair, function(key, val) {
+        subjectsWithSamples += '<li>'+key+'</li>';
+        count++;
+      });
+    });
     subjectsWithSamples = (subjectsWithSamples == "")? "None": subjectsWithSamples;
-
     innerContent += "Subjects with samples: "+ subjectsWithSamples+"<br/>";
-    var subjectsUnchanged = o.subjects_unchanged.join(",");
-    subjectsUnchanged = (subjectsUnchanged == "")? "None": subjectsUnchanged;
-    innerContent += "Subjects unchanged: " + subjectsUnchanged;
 
-    $("#responseDiv").empty();
-    // $("#responseDiv").append(innerContent);
-    $("#responseDiv").html(innerContent);
+    var subjectsUnchanged = '';
+    $.each(o.subjects_unchanged, function(i, pair) {
+      $.each(pair, function(key, val) {
+        subjectsUnchanged += '<li>'+key+'</li>';
+        count++;
+      });
+    })
+    subjectsUnchanged = (subjectsUnchanged == "")? "None": subjectsUnchanged;
+    innerContent += 'Subjects unchanged: <ul>' + subjectsUnchanged +'</ul><hr style="border-color: #000000">';
+
+    // $("#responseDiv").empty();
+    $("#responseDiv").append(innerContent);
+    // $("#responseDiv").html(innerContent);
   }
 
   var onFileUpload = function(o) {

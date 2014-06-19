@@ -123,8 +123,8 @@ public class AuthenticationFilter implements Filter {
 				session.setAttribute ("user", username);
 				session.setAttribute ("usrid", appUsr.getId());
 				session.setAttribute ("logged", 1);
-				if (Singleton.getInstance().isLogged(username) == false)
-					Singleton.getInstance().addUser(username);
+				if (Singleton.getInstance().isLogged(appUsr.getId()) == false)
+					Singleton.getInstance().addUser(appUsr.getId());
 				
 // System.out.println("Set user to '"+username+"' and usrid to '"+appUsr.getId()+"'");
 				
@@ -164,7 +164,7 @@ System.out.println("user: "+username+"; roles: "+strRoles);
 // This conditional, which seems to be redundant, is here as the previous snippet
 // can fail by raising an exception during database update
 //				if (session != null && appUsr.getLoggedIn() == 1) {
-				if (session != null && Singleton.getInstance().isLogged(username) == true) {
+				if (session != null && Singleton.getInstance().isLogged(appUsr.getId()) == true) {
 					userCtrl.logSessionInit(appUsr.getId(), username, strRoles, 
 																	sessionId, ipAddr, AppUserCtrl.LOGIN_SUCCESS);
 			LogFile.info("User '"+username+"' logged in with role(s) '"+strRoles+"'");

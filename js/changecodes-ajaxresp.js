@@ -20,19 +20,37 @@ var ChangeCodesAjaxResponse = function () {
       });
     })
 
-    innerContent = count + " subject codes found in file:<br/><ul>"+innerContent+"</ul>";
+    var simString = o.sim == true? '<b>Simulation</b> mode<br/>': '<b>Live</b> mode<br/>';
+    var date = new Date();
+    var timestamp = '['+date.toLocaleTimeString()+", "+date.toLocaleDateString()+']';
+    innerContent = timestamp +'<br/>'+ simString + count + " subject codes found in file:<br/><ul>"+innerContent+"</ul>";
     innerContent += "Subjects affected: "+ jResponse.rows_affected+"<br/>";
-    var subjectsWithSamples = jResponse.subjs_with_samples.join(",");
+    /*
+     subjects_unchanged":[{"TER021556":"TER521556"},{"TER021541":"TER521541"},{"TER021530":"TER521530"},{"TER021029":"TER521029"},{"TER021031":"TER521031"},{"TER021135":"TER521135"},{"TER021141":"TER521141"},{"TER021147":"TER521147"}]
+     */
+    var subjectsWithSamples = '';
+    $.each(jResponse.subjs_with_samples, function(i, pair) {
+      $.each(pair, function(key, val) {
+        subjectsWithSamples += '<li>'+key+' -> '+val+'</li>';
+        count++;
+      });
+    });
     subjectsWithSamples = (subjectsWithSamples == "")? "None": subjectsWithSamples;
-
     innerContent += "Subjects with samples: "+ subjectsWithSamples+"<br/>";
-    var subjectsUnchanged = jResponse.subjects_unchanged.join(",");
-    subjectsUnchanged = (subjectsUnchanged == "")? "None": subjectsUnchanged;
-    innerContent += "Subjects unchanged: " + subjectsUnchanged;
 
-    $("#responseDiv").empty();
-    // $("#responseDiv").append(innerContent);
-    $("#responseDiv").html(innerContent);
+    var subjectsUnchanged = '';
+    $.each(jResponse.subjects_unchanged, function(i, pair) {
+      $.each(pair, function(key, val) {
+        subjectsWithSamples += '<li>'+key+' -> '+val+'</li>';
+        count++;
+      });
+    })
+    subjectsUnchanged = (subjectsUnchanged == "")? "None": subjectsUnchanged;
+    innerContent += 'Subjects unchanged: <ul>' + subjectsUnchanged +'</ul><hr style="border-color: #000000">';
+
+    // $("#responseDiv").empty();
+    $("#responseDiv").append(innerContent);
+    // $("#responseDiv").html(innerContent);
 
     return jResponse;
   }
