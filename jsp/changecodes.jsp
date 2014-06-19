@@ -150,19 +150,19 @@ System.out.println("Principal's name: "+user);
 
       <h4>Two options to change subjects code:</h4>
       <ul><strong>Upload a file</strong>
-        <li>Create a text file with one line for each subject you want to change</li>
+        <li>Create a <strong>text file</strong> with one line for each subject you want to change</li>
         <li>Each line must be as <code>old_subject_code:new_subject_code</code></li>
         <li>Then <strong>Select file</strong> and click the <strong>Process</strong> button</li>
       </ul>
       <ul><strong>Use the form</strong>
-        <li>Filter the patients you want to delete by choosing project, groups and types</li>
+        <li>Filter the patients you want to update by choosing project, groups and types</li>
         <li>Then choose the filtered patients from the list just below the combo boxes</li>
         <li>When a subject is selected, you can change the code in the textbox</li>
         <li>Click the <strong>Change</strong> button to change that code only</li>
       </ul>
     </div>
     <div class="span6 well" style="overflow-y: auto;height:240px;" id="responseDiv">
-      No previous operation message
+      No previous operation message<hr style="border-color: black">
     </div>
   </div>
 </div> <!-- EO container -->

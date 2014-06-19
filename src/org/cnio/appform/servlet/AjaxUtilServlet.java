@@ -407,7 +407,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter pwr = response.getWriter();
 		
-		// This is to remove system users from the application or so (basically, not used!)
+		/* This is to remove system users from the application or so (basically, not used!)
 		if (what.equalsIgnoreCase("rmv")) {
 			String paramUsers = request.getParameter("users");
 			String[] users = paramUsers.split(",");
@@ -421,7 +421,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			
 			return;
 		}
-		
+		*/
 		
 		if (what.equalsIgnoreCase("clon")) {
 			jsonStr = doClon (request);
