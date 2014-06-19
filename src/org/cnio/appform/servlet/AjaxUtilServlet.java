@@ -124,11 +124,21 @@ import java.net.URLEncoder;
 			String orderSec = request.getParameter("secid"); // actually the section order
 
       // Get the groups in the case a country is requested
+      AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
+      groups = HibernateUtil.getSecondaryGroups(hibSes, group);
+      String grpIds = "";
+      if (!groups.isEmpty()) {
+        for (int i=0; i < groups.size(); i++)
+          grpIds += groups.get(i).getId()+",";
+
+        grpIds = grpIds.substring(0, grpIds.length()-1);
+      }
+      else
+        grpIds = grpId;
 
       System.out.println("the qString: "+request.getQueryString());
 
       String isRepDump = request.getParameter(AjaxUtilServlet.REPD); // rep dumps
-
       String dumpOut = "";
       if (isRepDump == null) { // Subject per line download
         dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.valueOf(orderSec));
@@ -149,17 +159,6 @@ import java.net.URLEncoder;
         attachedFile = attachedFile.substring(1, attachedFile.length());
         response.setHeader("Content-Disposition", "attachment; filename="+attachedFile);
 
-        AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
-        groups = HibernateUtil.getSecondaryGroups(hibSes, group);
-        String grpIds = "";
-        if (!groups.isEmpty()) {
-          for (int i=0; i < groups.size(); i++)
-            grpIds += groups.get(i).getId()+",";
-
-          grpIds = grpIds.substring(0, grpIds.length()-1);
-        }
-        else
-          grpIds = grpId;
 
         try {
           dr.getRepBlocksDump(prjCode, intrvId, grpIds, Integer.parseInt(orderSec));
