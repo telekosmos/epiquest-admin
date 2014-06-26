@@ -65,6 +65,11 @@ public class DataRetriever {
 	}
 
 
+  /**
+   * Checks if grpId is a country group and, if so, retrieves the set of secondary
+   * groups and use them to retrieve data from all of them
+   * @param grpId, the group id selected by user
+   */
   protected void buildGroups(String grpId) {
     Session hibSes = HibernateUtil.getSessionFactory().openSession();
     AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
@@ -986,7 +991,7 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	  	String filename = DataRetriever.DEFAULT_PATH +"/"+ DataRetriever.DEFAULT_FILENAME + 
 	  						(new Long(timestamp)).toString()+".csv";
 	  	StringBuffer fileContent = new StringBuffer();
-      this.buildGroups(grpId); // init secondary groups grpId is a country!!!
+      this.buildGroups(grpId); // init secondary groups if grpId is a country!!!
 	  	
 	  	try {
 	  		// this.getDump(prjCode, intrvId, grpId, orderSec, null, filename);

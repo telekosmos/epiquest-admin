@@ -1235,12 +1235,16 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 			patCode += type.toString();
 		
 		String likeCriteria = patCode+"%";
-		System.out.println("Shhhhhhit: hibSes.open?"+hibSes.isOpen()+"("+hibSes.toString()+")");
+		System.out.println("Shhhhhhit: hibSes.open? "+hibSes.isOpen());
+    /*
 		Criteria ctPats = hibSes.createCriteria(Patient.class).
 		 												add(like("codpatient", likeCriteria)).
 		 												addOrder(Order.asc("codpatient"));
+		*/
+    String hqlStr = "from Patient p where p.codpatient like :likeCriteria";
+    List<Patient> pats = hibSes.createQuery(hqlStr).setString("likeCriteria", likeCriteria).list();
 		
-		List<Patient> pats = ctPats.list();
+		// List<Patient> pats = ctPats.list();
 		/*
 		List<String> patCodes = new ArrayList<String>();
 		for (Patient pat: pats)
