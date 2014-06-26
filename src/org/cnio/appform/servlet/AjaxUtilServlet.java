@@ -107,7 +107,10 @@ import java.net.URLEncoder;
 		response.setCharacterEncoding("UTF-8");
 				
 		PrintWriter out;
-		Session hibSes = HibernateUtil.getSessionFactory().openSession();
+    Session hibSes = HibernateUtil.getSessionFactory().openSession();
+    // if (hibSes == null || !hibSes.isOpen())
+      // hibSes = HibernateUtil.getSessionFactory().openSession();
+
 		AppUser theUsr = null;
 		if (usrId != null)
 			theUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
@@ -124,11 +127,21 @@ import java.net.URLEncoder;
 			String orderSec = request.getParameter("secid"); // actually the section order
 
       // Get the groups in the case a country is requested
+      AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
+      groups = HibernateUtil.getSecondaryGroups(hibSes, group);
+      String grpIds = "";
+      if (!groups.isEmpty()) {
+        for (int i=0; i < groups.size(); i++)
+          grpIds += groups.get(i).getId()+",";
+
+        grpIds = grpIds.substring(0, grpIds.length()-1);
+      }
+      else
+        grpIds = grpId;
 
       System.out.println("the qString: "+request.getQueryString());
 
       String isRepDump = request.getParameter(AjaxUtilServlet.REPD); // rep dumps
-
       String dumpOut = "";
       if (isRepDump == null) { // Subject per line download
         dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.valueOf(orderSec));
@@ -149,17 +162,6 @@ import java.net.URLEncoder;
         attachedFile = attachedFile.substring(1, attachedFile.length());
         response.setHeader("Content-Disposition", "attachment; filename="+attachedFile);
 
-        AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
-        groups = HibernateUtil.getSecondaryGroups(hibSes, group);
-        String grpIds = "";
-        if (!groups.isEmpty()) {
-          for (int i=0; i < groups.size(); i++)
-            grpIds += groups.get(i).getId()+",";
-
-          grpIds = grpIds.substring(0, grpIds.length()-1);
-        }
-        else
-          grpIds = grpId;
 
         try {
           dr.getRepBlocksDump(prjCode, intrvId, grpIds, Integer.parseInt(orderSec));
@@ -315,7 +317,9 @@ import java.net.URLEncoder;
 			String hospCode = request.getParameter("grpCode");
 			String typeCode = request.getParameter("subjType"); // "", 1, 2 or 3
 			
-// System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
+      System.out.println("AjaxUtilServlet: when getting subjects, hibSes is " + hibSes.isOpen());
+      if (hibSes.isOpen() == false)
+        hibSes = HibernateUtil.getSessionFactory().openSession();
 			List<Patient> pats = 
 						HibernateUtil.getPatiens4ProjsGrps(hibSes, prjCode, hospCode, typeCode);
 			
@@ -337,6 +341,9 @@ import java.net.URLEncoder;
 		// gets patient codes from the part of the code (autocomplete oriented)
 		else if (what.equals(AjaxUtilServlet.PATS_FROM_TEXT)) {
 			String patCode = request.getParameter("q");
+      if (hibSes.isOpen() == false)
+        hibSes = HibernateUtil.getSessionFactory().openSession();
+
 			List<String> pats = HibernateUtil.getPatientsFromCode(hibSes, patCode);
 			
 			String[] patCodes = new String[pats.size()];
@@ -375,8 +382,6 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			
 			nothing = true;
 		}
-		
-		
 		else {
 			nothing = true;
 			jsonResp = jsonResp.length() > 0? jsonResp: "{\"msg\":\"Nothing to retrieve\"}";
@@ -389,11 +394,11 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			jsonResp += "]}";
 		}
 		
-		if (hibSes.isOpen())
-			hibSes.close();
-
     this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
-		out.print (jsonResp);
+    if (hibSes.isOpen())
+      hibSes.close();
+
+    out.print (jsonResp);
 	}  	
 	
 
