@@ -54,7 +54,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
     String filename = null;
 
     if (request.getParameter("single") == null) {
-
+      // File upload with codes
       try {
         List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
         for (FileItem item : items) {
@@ -66,7 +66,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
             System.out.println("Regular field: "+fieldname+" -> "+fieldvalue);
             jsonObj.put("result", 1);
             jsonObj.put(fieldname, fieldvalue);
-            if (fieldname.equalsIgnoreCase("simulation"))
+            if (fieldname.equalsIgnoreCase("sim"))
               this.simulation = Boolean.parseBoolean(fieldvalue);
           }
           else {
@@ -88,6 +88,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
     else { // got single parameter => single subject code change
       String oldCode = request.getParameter("old"),
         newCode = request.getParameter("new");
+      this.simulation = Boolean.parseBoolean(request.getParameter("sim"));
       jsonObj = changeSingleSubjectCode(oldCode, newCode);
     }
 

@@ -9,6 +9,10 @@ var UploadFileCtrl = function() {
     files = ev.target.files;
   }
 
+  var setSimulation = function (sim) {
+    simulation = sim;
+  }
+
   var uploadCodesFile = function() {
     // START A LOADING SPINNER HERE
 
@@ -20,7 +24,7 @@ var UploadFileCtrl = function() {
     $.each(files, function(key, value) {
       data.append(key, value);
     });
-    data.append("simulation", simulation);
+    data.append("sim", simulation);
 
     console.log("Starting $.ajax request");
     $.ajax({
@@ -64,11 +68,18 @@ var UploadFileCtrl = function() {
       simulation = !simulation;
     });
 
+    $("#btnReset").click(function (ev) {
+      $("#uploadform")[0].reset();
+      simulation = true;
+      $("#chkSimulation").prop('checked', true);
+    });
+
     ajaxRespObj = new UploadFileAjaxResponse();
   }
 
   return {
     init: init,
+    setSimulation: setSimulation,
     uploadCodesFile: uploadCodesFile
   }
 }
