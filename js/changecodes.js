@@ -106,6 +106,7 @@ var ChangeCodesCtrl = function() {
 
     $("#chkSimulation").change(function () {
       simulation = !simulation;
+      console.log("sim: "+simulation);
     });
 
     comboProj = $("#frmPrj");
@@ -130,6 +131,8 @@ var ChangeCodesCtrl = function() {
       $("#frmPatsDeletion")[0].reset();
       $("#uploadform")[0].reset();
       $(listPats).empty();
+      simulation = true;
+      $("#chkSimulation").prop('checked', true);
     });
 
     listPats.change(function() {

@@ -9,8 +9,8 @@
 
 var ChangeCodesAjaxResponse = function () {
 
-  var displayMsg = function(o) {
-    var jResponse = YAHOO.lang.JSON.parse(o.responseText);
+  var displayMsg = function(jResponse) {
+
     var innerContent = "", count=0;
     var subjectsChanged = jResponse.subjects;
     $.each(subjectsChanged, function(i, pair) {
@@ -20,7 +20,7 @@ var ChangeCodesAjaxResponse = function () {
       });
     })
 
-    var simString = o.sim == true? '<b>Simulation</b> mode<br/>': '<b>Live</b> mode<br/>';
+    var simString = jResponse.sim == true? '<b>Simulation</b> mode<br/>': '<b>Live</b> mode<br/>';
     var date = new Date();
     var timestamp = '['+date.toLocaleTimeString()+", "+date.toLocaleDateString()+']';
     innerContent = timestamp +'<br/>'+ simString + count + " subject codes found in file:<br/><ul>"+innerContent+"</ul>";
@@ -63,13 +63,16 @@ var ChangeCodesAjaxResponse = function () {
     overlay.hide();
 
     try {
-      var parsedJson = displayMsg(o);
+      var jResponse = YAHOO.lang.JSON.parse(o.responseText);
+      var parsedJson = displayMsg(jResponse);
       var subjectChange = parsedJson.subjects[0], oldCode, newCode;
       $.each(subjectChange, function(key, val) {
         oldCode = key;
         newCode = val;
       });
-      $("#frmListPats option:selected").val(newCode).text(newCode).css('color', 'green');
+
+      if (jResponse.sim == false) // live update
+        $("#frmListPats option:selected").val(newCode).text(newCode).css('color', 'green');
     }
     catch (exp) {
       alert ("JSON Parse failed: "+exp);
