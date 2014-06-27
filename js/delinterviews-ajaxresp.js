@@ -52,16 +52,17 @@ var DelIntrvsAjaxResponse = function () {
 			console.log ("interviews deleted...:");
 			
 			var intrvsList = jResponse.interviews_deleted;
-			var codPat = intrvsList[0].codpat;
+			var codPat = (intrvsList.length > 0)? intrvsList[0].codpat: "";
 			var samples = jResponse.samples;
 			var sim = jResponse.sim;
 			
 			
 			var innerHtml = "<p>" + sim? "(<strong>Simulation</strong> update)": "(<strong>Live</strong> update)"; 
-			innerHtml += " For patient <strong>"+codPat+"</strong></p>";
-			innerHtml += "<ul><li>Interviews deleted: ";
-			for (var i=0; i<intrvsList.length; i++)
-				innerHtml += "'<i>"+intrvsList[i].intrv+"</i>', ";
+			innerHtml += (codPat == "")? "": " For patient <strong>"+codPat+"</strong></p>";
+			innerHtml += "<ul><li>Interviews deleted: "+intrvsList.length;
+      for (var i=0; i<intrvsList.length; i++)
+        innerHtml += "'<i>"+intrvsList[i].intrv+"</i>', ";
+
 				
 			innerHtml = (intrvsList.length > 0)? innerHtml.substring(0, innerHtml.length-2): innerHtml;
 			innerHtml += "</li><li>";
@@ -73,7 +74,7 @@ var DelIntrvsAjaxResponse = function () {
 				for (var i=0; i<samples.length; i++)
 					innerHtml += "'"+samples[i]+"', ";
 					
-				innerHtml = innerHtml.substring(0, innerHtml.length-1);
+				innerHtml = innerHtml.substring(0, innerHtml.length-2);
 			}
 			innerHtml += "</li></ul>";
 			
