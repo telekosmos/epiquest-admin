@@ -703,7 +703,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
         simulation, hashMap);
 
     String jsonOut = "{\"rows_affected\": "+jsonMap.get("rows_affected").toString()+",";
-    jsonOut += "\"samples\": ";
+    jsonOut += "\"samples\": [";
 
     HashMap patSamples = (HashMap)jsonMap.get("pats_with_samples");
     List samples = new ArrayList();
@@ -715,7 +715,7 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
       jsonOut += sampleIt.next().toString()+",";
     }
     jsonOut = samples.size()>0? jsonOut.substring(0, jsonOut.length()-1): jsonOut;
-    jsonOut += ", \"interviews_deleted\":[";
+    jsonOut += "], \"interviews_deleted\":[";
 
 
     List deletedOnes = (List)jsonMap.get("interviews_deleted");

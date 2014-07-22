@@ -205,7 +205,9 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
     Iterator subjIt = subjKeys.iterator();
     while (subjIt.hasNext()) {
       String subjCode = (String)subjIt.next();
-      List samplesList = (List)subjSamples.get(subjCode);
+      // List samplesList = (List)subjSamples.get(subjCode);
+      List samplesList = new ArrayList();
+      samplesList.addAll((Collection)subjSamples.get(subjCode));
 
       JSONArray jsonArray = new JSONArray();
       jsonArray.addAll(samplesList);
