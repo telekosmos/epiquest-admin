@@ -85,7 +85,8 @@ import java.net.URLEncoder;
  */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String what = request.getParameter("what");
-		// String usrId = request.getParameter("usrid");
+		String appUsrId = request.getParameter("usrid"); // this is the user of the app
+
     String usrId = request.getSession().getAttribute("usrid").toString();
 		String jsonResp = "";
 
@@ -111,9 +112,13 @@ import java.net.URLEncoder;
     // if (hibSes == null || !hibSes.isOpen())
       // hibSes = HibernateUtil.getSessionFactory().openSession();
 
-		AppUser theUsr = null;
+		AppUser sessionUsr = null, // the user currently using the app
+            paramUser = null; // the user got through params to get info about
 		if (usrId != null)
-			theUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
+			sessionUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
+
+    if (appUsrId != null)
+      paramUser = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(appUsrId));
 		
 		AppUserCtrl usrCtrl = new AppUserCtrl (hibSes);
 		IntrvController intrvCtrl = new IntrvController(hibSes);
@@ -148,7 +153,7 @@ import java.net.URLEncoder;
 
         logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
         logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
-        // logMsg += theUsr == null? "": " by user '"+theUsr.getUsername()+"'";
+        // logMsg += sessionUsr == null? "": " by user '"+sessionUsr.getUsername()+"'";
         this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
 
         out = response.getWriter();
@@ -177,7 +182,7 @@ import java.net.URLEncoder;
 
         logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
         logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
-        // logMsg += theUsr == null? "": " by user '"+theUsr.getUsername()+"'";
+        // logMsg += sessionUsr == null? "": " by user '"+sessionUsr.getUsername()+"'";
         this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
 
         return;
@@ -187,8 +192,8 @@ import java.net.URLEncoder;
 // GET GROUPS
     out = response.getWriter();
 		if (what.equals(AjaxUtilServlet.GRPS)) {
-      System.out.println("Before getting groups..."+(theUsr != null? theUsr.getUsername(): " no user"));
-			groups = (theUsr == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(theUsr);
+      System.out.println("Before getting groups..." + (paramUser != null ? paramUser.getUsername() : " no user"));
+			groups = (paramUser == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(paramUser);
 			if (groups.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"groups\":[]}";
@@ -201,7 +206,7 @@ import java.net.URLEncoder;
 			}
 
       logMsg = "Request to retrieve groups";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 // SECONDARY GROUPS
 		else if (what.equals(AjaxUtilServlet.HOSPITALS)) {
@@ -210,8 +215,8 @@ import java.net.URLEncoder;
 			
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
 			// groups = group.getContainees();
-      if (theUsr != null)
-        groups = usrCtrl.getSecondaryGroups(theUsr, group); // have to update the jar file
+      if (paramUser != null)
+        groups = usrCtrl.getSecondaryGroups(paramUser, group); // have to update the jar file
       else
         groups = group.getContainees();
 			
@@ -226,12 +231,12 @@ import java.net.URLEncoder;
 												"\",\"id\":"+grp.getId()+", \"code\":\""+grp.getCodgroup()+"\"},";
 			}
       logMsg = "Request to retrieve secondary groups";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 		
 // GET PROJECTS
 		else if (what.equals(AjaxUtilServlet.PRJS)) {
-			prjs = (theUsr == null)? usrCtrl.getAllProjects(): usrCtrl.getProjects(theUsr);
+			prjs = (paramUser == null)? usrCtrl.getAllProjects(): usrCtrl.getProjects(paramUser);
 			if (prjs.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"prjs\":[]}";
@@ -244,12 +249,13 @@ import java.net.URLEncoder;
 											",\"code\":\""+URLEncoder.encode(prj.getProjectCode(), "UTF-8")+"\"},";
 			}
       logMsg = "Request to retrieve projects";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 
 // GET ROLES		
 		else if (what.equals(AjaxUtilServlet.ROLES)) {
-			roles = (theUsr == null)? usrCtrl.getAllRoles(): usrCtrl.getRoleFromUser(theUsr);
+			roles = (paramUser == null)? usrCtrl.getAllRoles():
+                                  usrCtrl.getRoleFromUser(paramUser);
 			if (roles.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"roles\":[]}";
@@ -261,7 +267,7 @@ import java.net.URLEncoder;
 												"\",\"id\":"+role.getId()+"},";
 			}
       logMsg = "Request to retrieve roles";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 
 // INTERVIEWS BASED on a prjid and a grpId 		
@@ -287,7 +293,7 @@ import java.net.URLEncoder;
 			}
       logMsg = "Request to retrieve questionnaires for project '"+prj.getName()+"'";
       logMsg += (grp != null)? " and group '"+grp.getName()+"'": "";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 		
 // SECTIONS for a interview/questionnaire
