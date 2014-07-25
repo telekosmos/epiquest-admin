@@ -107,12 +107,13 @@ public class AppSessionListener implements HttpSessionListener {
       }
       tx.commit();
 
-      tx.begin();
       System.out.println("sessionlistener: after tx.begin user.isLogged " +
         Singleton.getInstance().isLogged(theUser.getId()));
 
       boolean removed = Singleton.getInstance().rmvUser(theUser.getId());
       System.out.println("user "+theUser.getUsername()+" was "+(removed? "removed": "not removed"));
+
+      tx.begin();
 // set all groups belonging this user to active=0
       AppUserCtrl usrCtrl = new AppUserCtrl(hibSes);
       AppGroup primary = usrCtrl.getPrimaryActiveGroup(theUser),
