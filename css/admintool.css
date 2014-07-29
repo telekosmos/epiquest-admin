@@ -64,6 +64,11 @@ input:disabled {
 	display: block;
 }
 
+
+div#msg {
+  margin-top: 1em;
+}
+
 #footer {
   background-color: #f5f5f5;
   position: absolute;
