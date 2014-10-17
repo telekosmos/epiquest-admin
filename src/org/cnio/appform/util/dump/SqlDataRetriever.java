@@ -34,8 +34,8 @@ public class SqlDataRetriever {
                                     Integer secOrder) {
 		
 		try {
-			this.conn = this.getConnection ();
-			this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			// this.conn = this.getConnection ();
+			// this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			
 			String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
 	  	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
@@ -63,10 +63,17 @@ public class SqlDataRetriever {
 	      " order by 1, 7, 10, 8, 5, 9";
 
       System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);
-      ResultSet rs = this.stmt.executeQuery(sqlqry);
+      // ResultSet rs = this.stmt.executeQuery(sqlqry);
+      ResultSet rs = this.getScrollableRS(sqlqry);
       
       return rs;
 		}
+    catch (Exception ex) {
+      System.out.println("SqlDataRetreiver.getFullResultSet: "+ex.getMessage());
+
+      return null;
+    }
+    /*
 		catch (ClassNotFoundException cnfe) {
 	    System.out.println("Couldn't find the driver!");
 	    System.out.println("Let's print a stack trace, and exit.");
@@ -80,6 +87,7 @@ public class SqlDataRetriever {
 			
 			return null;
 		}
+		*/
 	}
 
 
@@ -96,8 +104,8 @@ public class SqlDataRetriever {
   public ResultSet getFullResultsetForCountry (String prjCode, Integer intrvId,
                                                String grpIds,  Integer secOrder) {
     try {
-      this.conn = this.getConnection ();
-      this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      // this.conn = this.getConnection ();
+      // this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
       String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
       // String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
@@ -125,20 +133,13 @@ public class SqlDataRetriever {
         "and s.section_order = " + secParam +
         " order by 1, 7, 10, 8, 5, 9";
 
-      System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);
-      ResultSet rs = this.stmt.executeQuery(sqlqry);
+      System.out.println ("\nSqlDataRetriever => getResultsetForCountry query:\n"+sqlqry);
+      ResultSet rs = this.getScrollableRS(sqlqry); // .stmt.executeQuery(sqlqry);
 
       return rs;
     }
-    catch (ClassNotFoundException cnfe) {
-      System.out.println("Couldn't find the driver!");
-      System.out.println("Let's print a stack trace, and exit.");
-      cnfe.printStackTrace();
-
-      return null;
-    }
-    catch (SQLException sqlEx) {
-      System.out.println ("Err getting conncection or querying...");
+    catch (Exception sqlEx) {
+      System.out.println ("Err getting scrollable resultset...");
       sqlEx.printStackTrace();
 
       return null;
