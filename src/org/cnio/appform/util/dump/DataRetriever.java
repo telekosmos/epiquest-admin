@@ -955,7 +955,6 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
         List<Object[]> patients = getPats4Intrv(prjCode, intrvId, grpId);
         int resultsetSize =
           this.getFullResultsetSize(prjCode, intrvId, grpId, orderSec);
-        int maxRows = DataRetriever.MAX_ROWS, offset = 0, rowsProcessed;
 
 ////////////////////////////////////////////////////
 //		  	resultSet = getFullResultSet (prjCode, intrvId, grpId, orderSec, -1, -1);
