@@ -246,7 +246,7 @@ System.out.println ("Writing out data");
 		for (Map.Entry<String, String> entry : codes.entrySet())
 			codes.put(entry.getKey(), "");
 	
-		String grpName = "", intrvName = "", secName = "";
+		String intrvName = "", secName = "";
 		Object[] patient = patients.get(countPats);
 		patRef = (String)patient[0];
 		grpRef = (String)patient[1];
@@ -334,8 +334,10 @@ System.out.println ("Writing out data");
       
       if (codes.containsKey(keyField))
       	codes.put(keyField, ansVal);
+      /*
       else
       	System.err.println("Interview '"+intrvName+"', sec. '"+secName+"': No key for question: " + keyField + "("+codq+")");
+      */
 //      out.append(ansVal+CSV_SEP);
     } // EO while (rs.next()), loop over resultset
   	
@@ -360,9 +362,7 @@ System.out.println ("\n ** Rows processed from java.sql.ResultSet: "+countRows);
   	System.out.println ("\n\nTotal subjects collected: "+countPats);
   } // EO buildResultSet
   
-  
-  
-  
+
   
   
   

@@ -326,7 +326,7 @@
 	
 	
 	
-	<!-- PACKAGE -->
+	<!-- PACKAGE -->                                              º
 	<target name="production-package" depends="compile"> <!-- depends="prepare"> -->
 		<echo>=== PRODUCTION -UBIO- PACKAGE ===</echo>
 

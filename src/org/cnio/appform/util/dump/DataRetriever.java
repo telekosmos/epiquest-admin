@@ -144,17 +144,20 @@ public class DataRetriever {
     repeatIds = (repeatIds == null || repeatIds.equalsIgnoreCase(""))?
                           getRepeatableItems(prjCode, intrvId, secOrder): repeatIds;
 
+    String repeatIdsClause = (repeatIds == null || repeatIds.equalsIgnoreCase(""))?
+          "": "and (it.ite_iditem is null or it.ite_iditem not in ("+repeatIds+")) ";
     String qry =
       "select it.iditem, it.content, s.section_order, it.item_order "+
-        "from interview i, section s, item it, project prj "+
+        "from interview i, section s, item it, question q, project prj "+
         "where prj.project_code = '"+prjCode+"' "+
         "and prj.idprj = i.codprj " +
         "and s.codinterview = i.idinterview "+
         "and i.idinterview in ("+intrvId+") "+
         "and it.idsection = s.idsection "  +
+        "and it.iditem = q.idquestion " +
         secOrderConstraint +
         "and it.\"repeatable\" = 0 "+
-        "and (it.ite_iditem is null or it.ite_iditem not in ("+repeatIds+")) "+
+        repeatIdsClause +
         "order by 3, 4;";
 
     List<Object[]> ids = execQuery (qry, -1, -1);
@@ -465,7 +468,7 @@ System.out.println();
   
   
  /**
-  * Similar to method getRepeatableHeader (...) but this method gets only the 
+  * Similar to method getRepeatableHeader (...) but this method gets ONLY the
   * questions which does not have repeatable answers
   * @param prjCode the code of the project
   * @param grpId the database id of the group
@@ -477,8 +480,10 @@ System.out.println();
       								Integer intrvId, Integer sortOrder, Integer secOrder) {
   	
   	String repids = getRepeatableItems (prjCode, intrvId, secOrder);
+    String noRepIds = getNoRepeatableItems(prjCode, intrvId, secOrder, repids);
   	String repIdsConstraint = repids.length() == 0? "and it.ite_iditem is NULL ": 
-  														"and (it.ite_iditem not in ("+repids+") or it.ite_iditem is NULL)";
+  														"and (it.ite_iditem not in ("+repids+") or it.ite_iditem is NULL) ";
+    String noRepIdsClause = noRepIds.length() == 0? "": "and it.iditem in ("+noRepIds+") ";
   						
   	String sql = "select q.codquestion as codq, it.item_order as itorder, qa.answer_order "+
   				"from interview i, section s, item it, question q, question_ansitem qa "+
@@ -488,7 +493,8 @@ System.out.println();
   				"and it.idsection = s.idsection "+
   				"and it.iditem = q.idquestion "+
 //  				"and it.\"repeatable\" = 0 "+
-  				repIdsConstraint +
+//  				repIdsConstraint +
+          noRepIdsClause +
   				"and q.idquestion = qa.codquestion "+
   				"order by 2";
 // System.out.println("getHdr:\n"+sql);
@@ -925,7 +931,7 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	  						        Integer orderSec, Integer sortOrder, String fileName)
 	  										throws java.io.IOException {
       BufferedWriter fileOut = new BufferedWriter (
-        new OutputStreamWriter (new FileOutputStream (fileName), Charset.forName("UTF-8")));
+          new OutputStreamWriter (new FileOutputStream (fileName), Charset.forName("UTF-8")));
       LinkedHashMap<String,String> listMapHdr = getHeader(prjCode, grpId, intrvId, sortOrder, orderSec);
 
 //write file header
@@ -976,7 +982,7 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 
 
   /**
-   * Interfaz method to download a dump from the web admin. Based in the legacy
+   * Interface method to download a dump from the web admin. Based in the legacy
    * dump methods to get dumps in regular files via command line.
    * @param prjCode, the project code
    * @param intrvId, the interview id (can be redundant...)
