@@ -7,6 +7,8 @@ import org.cnio.appform.jaas.AppUserValidation;
 import org.cnio.appform.util.*;
 import org.cnio.appform.audit.*;
 
+import org.cnio.appform.util.curation.DropForeignKeys;
+import org.cnio.appform.util.dump.DataRetriever;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Criteria;
@@ -17,6 +19,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.json.simple.*;
 
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,8 +114,29 @@ System.out.println("... after initializing scriptlet");
 		Interview src = (Interview)test.getHibSes().get(Interview.class, 2400); // 3700);
 		AppGroup grp = usrCtrl.getPrimaryGroup(user);
 		grp = (AppGroup)test.getHibSes().get(AppGroup.class, 4);
+
+
+    try {
+      // DataRetriever dr = new DataRetriever();
+      // REFERENCE QUESTIONNAIRES
+      // ISBLAC - Identificacion_Paciente
+      //dr.getDump("188", 3700, 304, 2, 1, "resources/test-p188-i3700-g304-s2-scroll.csv");
+      // ISBLAC - QES_Español
+      //dr.getDump("188", 4152, 304, 11, 1, "resources/test-p188-i4152-g304-s11-scroll.csv");
+      // PANGENE - QES_Español
+      //dr.getDump("157", 50, 304, 9, 1, "resources/test-p157-i50-g304-s9-scroll.csv");
+      // ISBLAC - Aliquots_SP_New
+      //dr.getDump("188", 4100, 304, 3, 1, "resources/test-p188-i4100-g304-s3-scroll.csv");
+      //dr.getDump("188", 4100, 4, 3, 1, "resources/test-p188-i4100-g4-s3-scroll.csv");
+
+      // dr.getDump("157", 50, 304, 5, 1, "resources/PanGen-Eu-QES_Español-sec5-new.csv");
+      DropForeignKeys dropForeignKeys = new DropForeignKeys();
+      dropForeignKeys.printOutDuplicates();
+    }
+    catch(Exception ioEx) {
+    }
 		
-/*		
+/*
 		List<AnswerItem> ansItems = src.getAnswerItems();
 System.out.println ("Items for interview: "+src.getName()+" ("+src.getId()+")");
 		int i = 0;
@@ -124,26 +148,7 @@ System.out.println ("Items for interview: "+src.getName()+" ("+src.getId()+")");
 			}
 		}
 */
-System.out.println ("Replicating: "+src.getName()+" for "+prj.getName()+" ("+grp.getName()+")");
-		Interview cloned = intrCtrl.replicateIntrv (2400, grp, prj, "RecogidaMuestraFAM");
 
-		
-//		test.testDelete(5050, test);
-		
-		/*		
-		Integer newIntrvId = -1;
-		newIntrvId = intrCtrl.createInterview("Kagallon", "zo", 351, usrId, false, true, false);
-		
-		if (newIntrvId != -1)
-			System.out.println ("Interview not created :-(");
-		else {
-			Interview newIntrv = (Interview)test.getHibSes().get(Interview.class, newIntrvId);
-			
-			System.out.println("New interview: "+newIntrv.getName()+" ("+newIntrv.getId()+")");
-		}
-*/
-		
-		
 /*
 		Interview idcIntrv = (Interview)test.getHibSes().get(Interview.class, 1301),
 				ispIntrv = (Interview)test.getHibSes().get(Interview.class, 1750),
@@ -152,24 +157,7 @@ System.out.println ("Replicating: "+src.getName()+" for "+prj.getName()+" ("+grp
 				engQes = (Interview)test.getHibSes().get(Interview.class, 1650),
 				ukIntrQa = (Interview)test.getHibSes().get(Interview.class, 1854);
 
-//		Patient pat = intrFormCtrl.getPatientFromCode(IntrvFormCtrl.NULL_PATIENT);
 
-
-//		List<AppGroup> userGroups = usrCtrl.getGroups(user);
-		System.out.println("*=====================================*");
-//		AppGroup grp = usrCtrl.getMainGroup(usrCtrl.getUser(ieName));
-//		intrCtrl.createInterview("TestLog Intrv", "Nothing to say", 50, 100);
-		
-		
-		Transaction tx = null;
-		AppGroup deGrp = usrCtrl.getPrimaryGroup(usrCtrl.getUser("gereditor")),
-						ukGrp = usrCtrl.getPrimaryGroup(usrCtrl.getUser("ukeditor")),
-						ieGrp = usrCtrl.getPrimaryGroup(usrCtrl.getUser("ieuser"));
-		
-		
-
-		Patient patbis = (Patient)test.getHibSes().get(Patient.class, new Integer(702));
-		AppUser userBis = (AppUser)test.getHibSes().get(AppUser.class, 503);
 *
 		try {
 			List<Interview> lInt = intrCtrl.getInterviews(50, 4);
