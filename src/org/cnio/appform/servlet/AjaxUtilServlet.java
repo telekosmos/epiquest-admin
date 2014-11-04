@@ -317,15 +317,16 @@ import java.net.URLEncoder;
       logMsg = "Request to retrieve sections for the questionnaire '"+intrv.getName()+"'";
 		}
 		
-		
+// SUBJECTS/PATIENTS
 		else if (what.equals(AjaxUtilServlet.SUBJECT)) {
 			String prjCode = request.getParameter("prjid");
 			String hospCode = request.getParameter("grpCode");
 			String typeCode = request.getParameter("subjType"); // "", 1, 2 or 3
 			
       System.out.println("AjaxUtilServlet: when getting subjects, hibSes is " + hibSes.isOpen());
-      if (hibSes.isOpen() == false)
+      // if (hibSes.isOpen() == false)
         hibSes = HibernateUtil.getSessionFactory().openSession();
+
 			List<Patient> pats = 
 						HibernateUtil.getPatiens4ProjsGrps(hibSes, prjCode, hospCode, typeCode);
 			
