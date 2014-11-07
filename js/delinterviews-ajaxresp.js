@@ -10,11 +10,58 @@
 var DelIntrvsAjaxResponse = function () {
 
 
+  var remarkDiv = function(msgDiv) {
+    msgDiv.addClass('operation-done');
+    setTimeout(function() {
+      msgDiv.removeClass('operation-done');
+    }, 500);
+  };
+
+  var displayResponse = function(jResponse) {
+    var intrvsList = jResponse.interviews_deleted;
+    var codPat = (intrvsList.length > 0)? intrvsList[0].codpat: "";
+    var samples = jResponse.samples;
+    var sim = jResponse.sim;
+
+    var date = new Date();
+    var timestamp = '['+date.toLocaleTimeString()+", "+date.toLocaleDateString()+']';
+    var innerHtml = "<p>" + timestamp +"<br/>";
+    innerHtml += (sim? "(<strong>Simulation</strong> update)": "(<strong>Live</strong> update)");
+    innerHtml += (codPat == "")? "": " For patient <strong>"+codPat+"</strong></p>";
+    innerHtml += "<ul><li>Interviews deleted: "+intrvsList.length;
+    for (var i=0; i<intrvsList.length; i++)
+      innerHtml += "'<i>"+intrvsList[i].intrv+"</i>', ";
+
+
+    innerHtml = (intrvsList.length > 0)? innerHtml.substring(0, innerHtml.length-2): innerHtml;
+    innerHtml += "</li><li>";
+    if (samples.length == 0)
+      innerHtml += "No samples for this patient";
+
+    else {
+      innerHtml += "Samples (when '<i>QES*</i>' questionnaire): ";
+      for (var i=0; i<samples.length; i++)
+        innerHtml += "'"+samples[i]+"', ";
+
+      innerHtml = innerHtml.substring(0, innerHtml.length-2);
+    }
+    innerHtml += '</li></ul><hr style="border-color: #000000">';
+
+    // $("#responseDiv").empty();
+    var responseDiv = $("#responseDiv");
+    responseDiv.append(innerHtml);
+    responseDiv.animate({
+      scrollTop: responseDiv[0].scrollHeight
+    }, "fast");
+    remarkDiv(responseDiv);
+
+    return jResponse;
+  };
 
 
 	var addOption = function (id, name) {
 		$("#frmListIntrvs").append('<option value="'+id+'">'+name+'</option>');		
-	}
+	};
 	
 	
 	var onGetInterviews = function (o) {
@@ -50,7 +97,7 @@ var DelIntrvsAjaxResponse = function () {
 		try {
 			var jResponse = YAHOO.lang.JSON.parse(o.responseText);
 			console.log ("interviews deleted...:");
-			
+			/*
 			var intrvsList = jResponse.interviews_deleted;
 			var codPat = (intrvsList.length > 0)? intrvsList[0].codpat: "";
 			var samples = jResponse.samples;
@@ -79,21 +126,22 @@ var DelIntrvsAjaxResponse = function () {
 			innerHtml += "</li></ul>";
 			
 			$("#responseDiv").empty();
-			$("#responseDiv").append(innerHtml);	
-			
+			$("#responseDiv").append(innerHtml);
+			*/
+      displayResponse(jResponse);
 		}
 		catch (exp) {
 			alert ("JSON Parse failed: "+exp);
 			return;
 		}
 		
-	}
+	};
 	
 	
 	var onFail = function (o) {
 		overlay.hide();
 		console.log("Ajax request failed");
-	}
+	};
 
 
 
@@ -101,7 +149,7 @@ var DelIntrvsAjaxResponse = function () {
 		var msg = testStr || 'DelIntrvsAjaxResponse instanced';
 		
 		console.log(msg);
-	}
+	};
 	
 	
 	return {
