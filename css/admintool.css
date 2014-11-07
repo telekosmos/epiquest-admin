@@ -77,3 +77,15 @@ div#msg {
   height:60px;
   width:100%;
 }
+
+
+div#responseDiv {
+  transition: background-color 1s linear;
+  -moz-transition: background-color 0.5s linear;    /* FF3.7+ */
+  -o-transition: background-color 0.5s linear;      /* Opera 10.5 */
+  -webkit-transition: background-color 0.5s linear; /* Saf3.2+, Chrome */
+}
+
+.operation-done {
+  background-color: lightgreen;
+}

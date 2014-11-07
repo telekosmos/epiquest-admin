@@ -9,6 +9,13 @@
 
 var ChangeCodesAjaxResponse = function () {
 
+  var remarkDiv = function(msgDiv) {
+    msgDiv.addClass('operation-done');
+    setTimeout(function() {
+      msgDiv.removeClass('operation-done');
+    }, 500);
+  };
+
   var displayMsg = function(jResponse) {
 
     var innerContent = "", count=0;
@@ -59,10 +66,12 @@ var ChangeCodesAjaxResponse = function () {
     innerContent += 'Non-existent (source) subjects: <ul>' + subjectsNonExistent +'</ul><hr style="border-color: #000000">';
 
     // $("#responseDiv").empty();
-    $("#responseDiv").append(innerContent);
-    $("#responseDiv").animate({
-      scrollTop: $("#responseDiv")[0].scrollHeight
+    var responseDiv = $("#responseDiv");
+    responseDiv.append(innerContent);
+    responseDiv.animate({
+      scrollTop: responseDiv[0].scrollHeight
     }, "fast");
+    remarkDiv(responseDiv);
 
     return jResponse;
   }
