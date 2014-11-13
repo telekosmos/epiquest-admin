@@ -144,6 +144,9 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
         buildSubjectsWithSamples((Map)taskResult.get("pats_with_samples")));
       jsonObj.put("subjects_unchanged",
         buildSubjectsUnchanged((Map)taskResult.get("patients_unchanged")));
+      jsonObj.put("subjects_nonexistent",
+        buildSubjectsNonExistent((Map)taskResult.get("patients_nonexistent")));
+
       System.out.println("Retrieved "+codes.size()+" codes to change");
       jsonObj.put("result", 1);
       jsonObj.put("filename", filename);
@@ -181,6 +184,8 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
         buildSubjectsWithSamples((Map)taskResult.get("pats_with_samples")));
       jsonObj.put("subjects_unchanged",
         buildSubjectsUnchanged((Map)taskResult.get("patients_unchanged")));
+      jsonObj.put("subjects_nonexistent",
+        buildSubjectsNonExistent((Map)taskResult.get("patients_nonexistent")));
       System.out.println("(Single) Retrieved "+codes.size()+" codes to change");
       jsonObj.put("result", 1);
     }
@@ -189,6 +194,7 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
       jsonObj.put("msg", "Malformed subject codes file");
     }
 
+    // patientsNonexistent
     return jsonObj;
   }
 
@@ -205,7 +211,9 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
     Iterator subjIt = subjKeys.iterator();
     while (subjIt.hasNext()) {
       String subjCode = (String)subjIt.next();
-      List samplesList = (List)subjSamples.get(subjCode);
+      // List samplesList = (List)subjSamples.get(subjCode);
+      List samplesList = new ArrayList();
+      samplesList.addAll((Collection)subjSamples.get(subjCode));
 
       JSONArray jsonArray = new JSONArray();
       jsonArray.addAll(samplesList);
@@ -232,6 +240,21 @@ public class ChangeSubjectsCodeServlet extends HttpServlet {
       String oldOne = (String)oldOnesIt.next();
       JSONObject aCode = new JSONObject();
       aCode.put(oldOne, subjsUnchanged.get(oldOne));
+      jsonCodes.add(aCode);
+    }
+
+    return jsonCodes;
+  }
+
+
+  private JSONArray buildSubjectsNonExistent (Map subjsNonExistent) {
+    Set oldOnes = subjsNonExistent.keySet();
+    Iterator oldOnesIt = oldOnes.iterator();
+    JSONArray jsonCodes = new JSONArray();
+    while (oldOnesIt.hasNext()) {
+      String oldOne = (String)oldOnesIt.next();
+      JSONObject aCode = new JSONObject();
+      aCode.put(oldOne, subjsNonExistent.get(oldOne));
       jsonCodes.add(aCode);
     }
 

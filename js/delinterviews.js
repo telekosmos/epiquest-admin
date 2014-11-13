@@ -42,6 +42,7 @@ var DelIntrvFormCtrl = function () {
 			
 			var patCode = $('#type_code').val();
 			postData += patCode;
+      ajaxResp.setSubject(patCode);
 			
 			xReq.setUrl(APP_ROOT+"/servlet/qryservlet");
 	    xReq.setMethod("GET");

@@ -9,6 +9,13 @@
 
 var ChangeCodesAjaxResponse = function () {
 
+  var remarkDiv = function(msgDiv) {
+    msgDiv.addClass('operation-done');
+    setTimeout(function() {
+      msgDiv.removeClass('operation-done');
+    }, 500);
+  };
+
   var displayMsg = function(jResponse) {
 
     var innerContent = "", count=0;
@@ -46,11 +53,25 @@ var ChangeCodesAjaxResponse = function () {
       });
     })
     subjectsUnchanged = (subjectsUnchanged == "")? "None": subjectsUnchanged;
-    innerContent += 'Subjects unchanged: <ul>' + subjectsUnchanged +'</ul><hr style="border-color: #000000">';
+    innerContent += 'Subjects unchanged (target subject exists): <ul>' + subjectsUnchanged +'</ul>';
+
+    var subjectsNonExistent = '';
+    $.each(jResponse.subjects_nonexistent, function(i, pair) {
+      $.each(pair, function(key, val) {
+        subjectsNonExistent += '<li>'+key+' -> '+val+'</li>';
+        count++;
+      });
+    })
+    subjectsNonExistent = (subjectsNonExistent == "")? "None": subjectsNonExistent;
+    innerContent += 'Non-existent (source) subjects: <ul>' + subjectsNonExistent +'</ul><hr style="border-color: #000000">';
 
     // $("#responseDiv").empty();
-    $("#responseDiv").append(innerContent);
-    // $("#responseDiv").html(innerContent);
+    var responseDiv = $("#responseDiv");
+    responseDiv.append(innerContent);
+    responseDiv.animate({
+      scrollTop: responseDiv[0].scrollHeight
+    }, "fast");
+    remarkDiv(responseDiv);
 
     return jResponse;
   }
@@ -79,14 +100,14 @@ var ChangeCodesAjaxResponse = function () {
       return;
     }
 
-  }
+  };
 
 
   var clearIntrvCombo = function () {
     var intrvSel = $("#frmListPats");
 
     $(intrvSel).empty();
-  }
+  };
 
 
 

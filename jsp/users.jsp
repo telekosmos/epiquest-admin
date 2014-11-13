@@ -354,7 +354,7 @@ System.out.println("Principal's name: "+user);
 										String idOpt = "id=\"g-"+group.getId()+"-"+group.getType().getId()+"\"";
 										out.println("<option "+idOpt+" value=\"" + group.getId() + "\"" + 
 												" onmouseover=\"Tip('"+ group.getName() + "');\" onmouseout=\"UnTip();\">" + 
-												group.getName()
+												group.getName() + " ("+group.getCodgroup() + ")"
 												+ "</option>");
 									}
 								%>

@@ -85,7 +85,8 @@ import java.net.URLEncoder;
  */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String what = request.getParameter("what");
-		// String usrId = request.getParameter("usrid");
+		String appUsrId = request.getParameter("usrid"); // this is the user of the app
+
     String usrId = request.getSession().getAttribute("usrid").toString();
 		String jsonResp = "";
 
@@ -107,10 +108,17 @@ import java.net.URLEncoder;
 		response.setCharacterEncoding("UTF-8");
 				
 		PrintWriter out;
-		Session hibSes = HibernateUtil.getSessionFactory().openSession();
-		AppUser theUsr = null;
+    Session hibSes = HibernateUtil.getSessionFactory().openSession();
+    // if (hibSes == null || !hibSes.isOpen())
+      // hibSes = HibernateUtil.getSessionFactory().openSession();
+
+		AppUser sessionUsr = null, // the user currently using the app
+            paramUser = null; // the user got through params to get info about
 		if (usrId != null)
-			theUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
+			sessionUsr = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(usrId));
+
+    if (appUsrId != null)
+      paramUser = (AppUser)hibSes.get(AppUser.class, Integer.parseInt(appUsrId));
 		
 		AppUserCtrl usrCtrl = new AppUserCtrl (hibSes);
 		IntrvController intrvCtrl = new IntrvController(hibSes);
@@ -124,18 +132,28 @@ import java.net.URLEncoder;
 			String orderSec = request.getParameter("secid"); // actually the section order
 
       // Get the groups in the case a country is requested
+      AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
+      groups = HibernateUtil.getSecondaryGroups(hibSes, group);
+      String grpIds = "";
+      if (!groups.isEmpty()) {
+        for (int i=0; i < groups.size(); i++)
+          grpIds += groups.get(i).getId()+",";
+
+        grpIds = grpIds.substring(0, grpIds.length()-1);
+      }
+      else
+        grpIds = grpId;
 
       System.out.println("the qString: "+request.getQueryString());
 
       String isRepDump = request.getParameter(AjaxUtilServlet.REPD); // rep dumps
-
       String dumpOut = "";
       if (isRepDump == null) { // Subject per line download
         dumpOut = dr.getAdminDump(prjCode, intrvId, grpId, Integer.valueOf(orderSec));
 
         logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
         logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
-        // logMsg += theUsr == null? "": " by user '"+theUsr.getUsername()+"'";
+        // logMsg += sessionUsr == null? "": " by user '"+sessionUsr.getUsername()+"'";
         this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
 
         out = response.getWriter();
@@ -149,17 +167,6 @@ import java.net.URLEncoder;
         attachedFile = attachedFile.substring(1, attachedFile.length());
         response.setHeader("Content-Disposition", "attachment; filename="+attachedFile);
 
-        AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
-        groups = HibernateUtil.getSecondaryGroups(hibSes, group);
-        String grpIds = "";
-        if (!groups.isEmpty()) {
-          for (int i=0; i < groups.size(); i++)
-            grpIds += groups.get(i).getId()+",";
-
-          grpIds = grpIds.substring(0, grpIds.length()-1);
-        }
-        else
-          grpIds = grpId;
 
         try {
           dr.getRepBlocksDump(prjCode, intrvId, grpIds, Integer.parseInt(orderSec));
@@ -175,7 +182,7 @@ import java.net.URLEncoder;
 
         logMsg = "Request download for project code '"+prjCode+"'; interview database id ";
         logMsg += intrvId +" and section "+orderSec+"; group(s) db id "+grpId;
-        // logMsg += theUsr == null? "": " by user '"+theUsr.getUsername()+"'";
+        // logMsg += sessionUsr == null? "": " by user '"+sessionUsr.getUsername()+"'";
         this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
 
         return;
@@ -185,8 +192,8 @@ import java.net.URLEncoder;
 // GET GROUPS
     out = response.getWriter();
 		if (what.equals(AjaxUtilServlet.GRPS)) {
-      System.out.println("Before getting groups..."+(theUsr != null? theUsr.getUsername(): " no user"));
-			groups = (theUsr == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(theUsr);
+      System.out.println("Before getting groups..." + (paramUser != null ? paramUser.getUsername() : " no user"));
+			groups = (paramUser == null)? usrCtrl.getAllGroups(): usrCtrl.getGroups(paramUser);
 			if (groups.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"groups\":[]}";
@@ -199,7 +206,7 @@ import java.net.URLEncoder;
 			}
 
       logMsg = "Request to retrieve groups";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 // SECONDARY GROUPS
 		else if (what.equals(AjaxUtilServlet.HOSPITALS)) {
@@ -208,8 +215,8 @@ import java.net.URLEncoder;
 			
 			AppGroup group = (AppGroup)hibSes.get(AppGroup.class,	Integer.parseInt(grpId));
 			// groups = group.getContainees();
-      if (theUsr != null)
-        groups = usrCtrl.getSecondaryGroups(theUsr, group); // have to update the jar file
+      if (paramUser != null)
+        groups = usrCtrl.getSecondaryGroups(paramUser, group); // have to update the jar file
       else
         groups = group.getContainees();
 			
@@ -224,12 +231,12 @@ import java.net.URLEncoder;
 												"\",\"id\":"+grp.getId()+", \"code\":\""+grp.getCodgroup()+"\"},";
 			}
       logMsg = "Request to retrieve secondary groups";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 		
 // GET PROJECTS
 		else if (what.equals(AjaxUtilServlet.PRJS)) {
-			prjs = (theUsr == null)? usrCtrl.getAllProjects(): usrCtrl.getProjects(theUsr);
+			prjs = (paramUser == null)? usrCtrl.getAllProjects(): usrCtrl.getProjects(paramUser);
 			if (prjs.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"prjs\":[]}";
@@ -242,12 +249,13 @@ import java.net.URLEncoder;
 											",\"code\":\""+URLEncoder.encode(prj.getProjectCode(), "UTF-8")+"\"},";
 			}
       logMsg = "Request to retrieve projects";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 
 // GET ROLES		
 		else if (what.equals(AjaxUtilServlet.ROLES)) {
-			roles = (theUsr == null)? usrCtrl.getAllRoles(): usrCtrl.getRoleFromUser(theUsr);
+			roles = (paramUser == null)? usrCtrl.getAllRoles():
+                                  usrCtrl.getRoleFromUser(paramUser);
 			if (roles.size() == 0){
 				nothing = true;
 				jsonResp = "{\"totalCount\": 0, \"roles\":[]}";
@@ -259,7 +267,7 @@ import java.net.URLEncoder;
 												"\",\"id\":"+role.getId()+"},";
 			}
       logMsg = "Request to retrieve roles";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 
 // INTERVIEWS BASED on a prjid and a grpId 		
@@ -285,7 +293,7 @@ import java.net.URLEncoder;
 			}
       logMsg = "Request to retrieve questionnaires for project '"+prj.getName()+"'";
       logMsg += (grp != null)? " and group '"+grp.getName()+"'": "";
-      // logMsg += (theUsr == null)? "": " for user '"+theUsr.getUsername()+"'";
+      // logMsg += (sessionUsr == null)? "": " for user '"+sessionUsr.getUsername()+"'";
 		}
 		
 // SECTIONS for a interview/questionnaire
@@ -309,13 +317,16 @@ import java.net.URLEncoder;
       logMsg = "Request to retrieve sections for the questionnaire '"+intrv.getName()+"'";
 		}
 		
-		
+// SUBJECTS/PATIENTS
 		else if (what.equals(AjaxUtilServlet.SUBJECT)) {
 			String prjCode = request.getParameter("prjid");
 			String hospCode = request.getParameter("grpCode");
 			String typeCode = request.getParameter("subjType"); // "", 1, 2 or 3
 			
-// System.out.println("when getting subjects, hibSes is " + hibSes.isOpen());
+      System.out.println("AjaxUtilServlet: when getting subjects, hibSes is " + hibSes.isOpen());
+      // if (hibSes.isOpen() == false)
+        hibSes = HibernateUtil.getSessionFactory().openSession();
+
 			List<Patient> pats = 
 						HibernateUtil.getPatiens4ProjsGrps(hibSes, prjCode, hospCode, typeCode);
 			
@@ -337,6 +348,9 @@ import java.net.URLEncoder;
 		// gets patient codes from the part of the code (autocomplete oriented)
 		else if (what.equals(AjaxUtilServlet.PATS_FROM_TEXT)) {
 			String patCode = request.getParameter("q");
+      if (hibSes.isOpen() == false)
+        hibSes = HibernateUtil.getSessionFactory().openSession();
+
 			List<String> pats = HibernateUtil.getPatientsFromCode(hibSes, patCode);
 			
 			String[] patCodes = new String[pats.size()];
@@ -375,8 +389,6 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			
 			nothing = true;
 		}
-		
-		
 		else {
 			nothing = true;
 			jsonResp = jsonResp.length() > 0? jsonResp: "{\"msg\":\"Nothing to retrieve\"}";
@@ -389,11 +401,11 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
 			jsonResp += "]}";
 		}
 		
-		if (hibSes.isOpen())
-			hibSes.close();
-
     this.logRequest(hibSes, usrId, request.getSession().getId(), logMsg, request.getRemoteAddr());
-		out.print (jsonResp);
+    if (hibSes.isOpen())
+      hibSes.close();
+
+    out.print (jsonResp);
 	}  	
 	
 
@@ -703,16 +715,13 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
     HashMap patSamples = (HashMap)jsonMap.get("pats_with_samples");
     List samples = new ArrayList();
     samples.addAll(patSamples.values());
-
-
     Iterator sampleIt = samples.iterator();
     while (sampleIt.hasNext()) {
       jsonOut += sampleIt.next().toString()+",";
     }
     jsonOut = samples.size()>0? jsonOut.substring(0, jsonOut.length()-1): jsonOut;
+
     jsonOut += "], \"interviews_deleted\":[";
-
-
     List deletedOnes = (List)jsonMap.get("interviews_deleted");
     Iterator deletedIt = deletedOnes.iterator();
     while (deletedIt.hasNext()) {
@@ -721,6 +730,16 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
       jsonOut += "{\"codpat\":\""+pair.get(0)+"\", \"intrv\":\""+pair.get(1)+"\"},";
     }
     jsonOut = deletedOnes.size()>0? jsonOut.substring(0, jsonOut.length()-1):jsonOut;
+
+    jsonOut += "], \"last_interviews\":[";
+    LinkedHashSet lastIntrvs = (LinkedHashSet)jsonMap.get("last_interviews");
+    Iterator lastOne = lastIntrvs.iterator();
+    while(lastOne.hasNext()) {
+      List pair = (List)lastOne.next();
+      jsonOut += "{\"codpat\":\""+pair.get(0)+"\", \"last_one\":"+pair.get(1)+"},";
+      // jsonOut += lastOne.next().toString()+",";
+    }
+    jsonOut = lastIntrvs.size()>0? jsonOut.substring(0, jsonOut.length()-1): jsonOut;
 
     jsonOut += "], \"sim\":"+sim+"}";
     

@@ -97,11 +97,15 @@ public class AuthenticationFilter implements Filter {
 
 				String sessionId = session.getId();
 				Session hibSes = HibernateUtil.getSessionFactory().openSession();
+        // Session hibSes = HibernateUtil.getSessionFactory().getCurrentSession();
+        // if (hibSes == null || !hibSes.isOpen())
+          // hibSes = HibernateUtil.getSessionFactory().openSession();
 				
 				AppUserCtrl userCtrl = new AppUserCtrl (hibSes);
 				AppUser appUsr = userCtrl.getUser(username);
 				
 				if (appUsr.wasRemoved()) {
+          hibSes.close();
 					httpResp.sendRedirect("../logout.jsp");
 					return;
 				}
@@ -140,6 +144,7 @@ System.out.println("user: "+username+"; roles: "+strRoles);
 				if (strRoles.length() > 0)
 					strRoles = strRoles.substring(0, strRoles.length()-1);
 				else {
+          hibSes.close();
 					httpResp.sendRedirect("../logout.jsp");
 					return;
 				}

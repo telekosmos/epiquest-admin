@@ -34,12 +34,12 @@ public class SqlDataRetriever {
                                     Integer secOrder) {
 		
 		try {
-			this.conn = this.getConnection ();
-			this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			// this.conn = this.getConnection ();
+			// this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			
 			String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
 	  	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
-	  	
+
 	     String sqlqry = "select p.codpatient, g.name as grpname, "+
 	        "i.name as intrvname, s.name as secname, "+
 	      "q.codquestion as codq, a.thevalue, s.section_order, "+
@@ -63,10 +63,17 @@ public class SqlDataRetriever {
 	      " order by 1, 7, 10, 8, 5, 9";
 
       System.out.println ("\nSqlDataRetriever => ResultSet query:\n"+sqlqry);
-      ResultSet rs = this.stmt.executeQuery(sqlqry);
+      // ResultSet rs = this.stmt.executeQuery(sqlqry);
+      ResultSet rs = this.getScrollableRS(sqlqry);
       
       return rs;
 		}
+    catch (Exception ex) {
+      System.out.println("SqlDataRetreiver.getFullResultSet: "+ex.getMessage());
+
+      return null;
+    }
+    /*
 		catch (ClassNotFoundException cnfe) {
 	    System.out.println("Couldn't find the driver!");
 	    System.out.println("Let's print a stack trace, and exit.");
@@ -80,9 +87,64 @@ public class SqlDataRetriever {
 			
 			return null;
 		}
+		*/
 	}
 
 
+
+  /**
+   * Retrieves the full resultset in order to retrive all answers for a section
+   * and a country, represented by all groups which are child groups for that country
+   * @param prjCode, the project code
+   * @param intrvId, the database interview id
+   * @param grpIds, the secondary groups for the chosen country
+   * @param secOrder, the section order
+   * @return a java.sql.ResultSet object with ALL queried rows
+   */
+  public ResultSet getFullResultsetForCountry (String prjCode, Integer intrvId,
+                                               String grpIds,  Integer secOrder) {
+    try {
+      // this.conn = this.getConnection ();
+      // this.stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+      String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
+      // String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
+      String grpParam = "g.idgroup in ("+grpIds+")";
+
+      String sqlqry = "select p.codpatient, g.name as grpname, "+
+        "i.name as intrvname, s.name as secname, "+
+        "q.codquestion as codq, a.thevalue, s.section_order, "+
+        "it.item_order, pga.answer_order, pga.answer_number, it.\"repeatable\" as itrep "+
+        "from patient p, pat_gives_answer2ques pga, appgroup g,	performance pf, "+
+        "question q, answer a, interview i, item it, section s, project pj "+
+        "where "+ grpParam +
+        " and i.idinterview = "+intrvId +
+        " and pj.project_code = '"+prjCode+"' " +
+        "and pj.idprj = i.codprj "+
+        "and pf.codinterview = i.idinterview "+
+        "and pf.codgroup = g.idgroup "+
+        "and s.codinterview = i.idinterview "+
+        "and pf.codpat = p.idpat "+
+        "and pga.codpat = p.idpat "+
+        "and pga.codquestion = q.idquestion "+
+        "and pga.codanswer = a.idanswer "+
+        "and q.idquestion = it.iditem "+
+        "and it.idsection = s.idsection " +
+        "and s.section_order = " + secParam +
+        " order by 1, 7, 10, 8, 5, 9";
+
+      System.out.println ("\nSqlDataRetriever => getResultsetForCountry query:\n"+sqlqry);
+      ResultSet rs = this.getScrollableRS(sqlqry); // .stmt.executeQuery(sqlqry);
+
+      return rs;
+    }
+    catch (Exception sqlEx) {
+      System.out.println ("Err getting scrollable resultset...");
+      sqlEx.printStackTrace();
+
+      return null;
+    }
+  }
 
 
   public ResultSet getScrollableRS (String qry) {

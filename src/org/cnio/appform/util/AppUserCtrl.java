@@ -46,13 +46,15 @@ public class AppUserCtrl {
 
 	public static final Integer COD_HOSPITAL_INI_IE = Integer.valueOf(70);
 	public static final Integer COD_HOSPITAL_END_IE = Integer.valueOf(89);
-	public static final int LOGIN_SUCCESS = 0;
+
+  public static final int LOGIN_SUCCESS = 0;
 	public static final int LOGIN_FAIL = 1;
 	public static final int LOGIN_CONCURRENT = 2;
 	public static final int LOGIN_USER_WRONG = 3;
 	public static final int LOGIN_MISMATCH_PASSWD = 4;
 	public static final int LOGIN_EXCEED_ATTEMPTS = 5;
 	public static final int MAX_LOGIN_ATTEMPTS = 5;
+
 	public static final String ADMIN_ROLE = "ADMIN";
 	public static final String EDITOR_ROLE = "EDITOR";
 	public static final String INTRVR_ROLE = "INTERVIEWER";
@@ -1282,7 +1284,7 @@ ex.printStackTrace(System.err);
   /**
    * Enable or disabled an user
    * @param user {AppUser} the user to be disabled/enabled
-   * @param enable {boolean} if true, user is enabled; otherwise disabled
+   * @param disable {boolean} if true, user is enabled; otherwise disabled
    * @return true on successful completion; otherwise returns false
    */
   public boolean setUserDisabled(AppUser user, boolean disable) {

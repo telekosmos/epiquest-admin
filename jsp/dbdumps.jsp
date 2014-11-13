@@ -227,6 +227,31 @@ System.out.println("Principal's name: "+user);
       
   </div> <!-- EO row-fluid -->
   </form>
+
+  <div class="row-fluid" style="margin-top: 3em;">
+    <div class="offset2 span8">
+      <!--
+      <div class="alert alert-error" id="errorDiv">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4>Message</h4>
+        <div id="errMsg">At least a main group must be chosen to retrieve a dump</div>
+      </div>
+      -->
+      <div class="alert alert-success" id="alertDiv">
+        <!--
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        -->
+        <h4>Message</h4>
+        <div id="msg">Dump requested with the parameters:<br/>
+         Project: ISBLAC<br/>
+         Group: Hospital blablabla<br/>
+         Questionnaire: Aliquots<br/>
+         Section: Introduction
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div> <!-- EO container -->
 
   <!--

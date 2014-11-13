@@ -51,6 +51,7 @@ System.out.println("Principal's name: "+user);
   <link href="../css/jasny-bootstrap-responsive.css" rel="stylesheet">
   
   <link href="../css/overlay.css" rel="stylesheet">
+<link href="../css/admintool.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {

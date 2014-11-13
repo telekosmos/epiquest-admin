@@ -43,6 +43,7 @@ public class DataRetriever {
 	protected DataWriter dw;
 	
 	protected Hashtable mapVarNames;
+  protected String grpIds="";
 	
 	public final static int MAX_ROWS = 15000;
 	
@@ -62,7 +63,26 @@ public class DataRetriever {
 		
 		dw = new DataWriter (null);
 	}
-	
+
+
+  /**
+   * Checks if grpId is a country group and, if so, retrieves the set of secondary
+   * groups and use them to retrieve data from all of them
+   * @param grpId, the group id selected by user
+   */
+  protected void buildGroups(String grpId) {
+    Session hibSes = HibernateUtil.getSessionFactory().openSession();
+    AppGroup group = (AppGroup)hibSes.get(AppGroup.class, Integer.parseInt(grpId));
+    List<AppGroup>groups = HibernateUtil.getSecondaryGroups(hibSes, group);
+    if (!groups.isEmpty()) {
+      for (int i=0; i < groups.size(); i++)
+        this.grpIds += groups.get(i).getId()+",";
+
+      this.grpIds = grpIds.substring(0, grpIds.length()-1);
+    }
+    else
+      this.grpIds = grpId;
+  }
 	
 /**
  * Execute an sql query on hibernate and return the result
@@ -124,17 +144,20 @@ public class DataRetriever {
     repeatIds = (repeatIds == null || repeatIds.equalsIgnoreCase(""))?
                           getRepeatableItems(prjCode, intrvId, secOrder): repeatIds;
 
+    String repeatIdsClause = (repeatIds == null || repeatIds.equalsIgnoreCase(""))?
+          "": "and (it.ite_iditem is null or it.ite_iditem not in ("+repeatIds+")) ";
     String qry =
       "select it.iditem, it.content, s.section_order, it.item_order "+
-        "from interview i, section s, item it, project prj "+
+        "from interview i, section s, item it, question q, project prj "+
         "where prj.project_code = '"+prjCode+"' "+
         "and prj.idprj = i.codprj " +
         "and s.codinterview = i.idinterview "+
         "and i.idinterview in ("+intrvId+") "+
         "and it.idsection = s.idsection "  +
+        "and it.iditem = q.idquestion " +
         secOrderConstraint +
         "and it.\"repeatable\" = 0 "+
-        "and (it.ite_iditem is null or it.ite_iditem not in ("+repeatIds+")) "+
+        repeatIdsClause +
         "order by 3, 4;";
 
     List<Object[]> ids = execQuery (qry, -1, -1);
@@ -313,6 +336,8 @@ public class DataRetriever {
 	                                  Integer intrvId, Integer sortOrder, Integer secOrder) {
   	String repids = getRepeatableItems (prjCode, intrvId, secOrder);
   	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
+
+    grpParam = this.grpIds.equalsIgnoreCase("")? grpParam: "g.idgroup in ("+this.grpIds+")";
   	
 /*  	Comparator <String> comparator = 
   		(sortOrder != null && sortOrder == 1)? new InvKeyComparator (): new KeyComparator ();
@@ -443,7 +468,7 @@ System.out.println();
   
   
  /**
-  * Similar to method getRepeatableHeader (...) but this method gets only the 
+  * Similar to method getRepeatableHeader (...) but this method gets ONLY the
   * questions which does not have repeatable answers
   * @param prjCode the code of the project
   * @param grpId the database id of the group
@@ -455,8 +480,10 @@ System.out.println();
       								Integer intrvId, Integer sortOrder, Integer secOrder) {
   	
   	String repids = getRepeatableItems (prjCode, intrvId, secOrder);
+    String noRepIds = getNoRepeatableItems(prjCode, intrvId, secOrder, repids);
   	String repIdsConstraint = repids.length() == 0? "and it.ite_iditem is NULL ": 
-  														"and (it.ite_iditem not in ("+repids+") or it.ite_iditem is NULL)";
+  														"and (it.ite_iditem not in ("+repids+") or it.ite_iditem is NULL) ";
+    String noRepIdsClause = noRepIds.length() == 0? "": "and it.iditem in ("+noRepIds+") ";
   						
   	String sql = "select q.codquestion as codq, it.item_order as itorder, qa.answer_order "+
   				"from interview i, section s, item it, question q, question_ansitem qa "+
@@ -466,7 +493,8 @@ System.out.println();
   				"and it.idsection = s.idsection "+
   				"and it.iditem = q.idquestion "+
 //  				"and it.\"repeatable\" = 0 "+
-  				repIdsConstraint +
+//  				repIdsConstraint +
+          noRepIdsClause +
   				"and q.idquestion = qa.codquestion "+
   				"order by 2";
 // System.out.println("getHdr:\n"+sql);
@@ -477,7 +505,7 @@ System.out.println();
     				new TreeMap<String,String> (new KeyComparator());
 */  				
 
-  	Map<String,String> repMap = getRepeatHeader (prjCode, grpId, intrvId, sortOrder, secOrder);
+  	Map<String,String> repMap = getRepeatHeader(prjCode, grpId, intrvId, sortOrder, secOrder);
   	
 // with the repeatable questions already on the treemap
 // now is time for the "simple" questions, which key is done as
@@ -512,6 +540,7 @@ System.out.println();
   	int count = 0;
   	String secParam = (secOrder == null)?"s.section_order ": secOrder.toString();
   	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
+    grpParam = this.grpIds.equalsIgnoreCase("")? grpParam: "g.idgroup in ("+this.grpIds+")";
   	
     String sqlqry = "select count(*) as resultset_size " +
 	 		"from (" +
@@ -699,6 +728,7 @@ System.out.println ("\nResultSet query:\n"+sqlqry);
  */
   public List<Object[]> getPats4Intrv (String prjCode, Integer intrvId, Integer grpId) {
   	String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
+    grpParam = this.grpIds.equalsIgnoreCase("")? grpParam: "g.idgroup in ("+this.grpIds+")";
   	String sqlQry = "select p.codpatient as codpat, g.name as grpName" +
   			" from patient p, performance pf, appgroup g " +
   			"where " + grpParam +
@@ -900,56 +930,58 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
 	  public void getDump (String prjCode, Integer intrvId, Integer grpId,
 	  						        Integer orderSec, Integer sortOrder, String fileName)
 	  										throws java.io.IOException {
+      BufferedWriter fileOut = new BufferedWriter (
+          new OutputStreamWriter (new FileOutputStream (fileName), Charset.forName("UTF-8")));
+      LinkedHashMap<String,String> listMapHdr = getHeader(prjCode, grpId, intrvId, sortOrder, orderSec);
 
-	  	BufferedWriter fileOut = new BufferedWriter (
-	          new OutputStreamWriter (new FileOutputStream (fileName), Charset.forName("UTF-8")));
-	  	LinkedHashMap<String,String> listMapHdr = getHeader (prjCode, grpId, intrvId, sortOrder, orderSec);
-	  	
 //write file header
-	  	String fileHeader = (mapVarNames == null)? dw.writeHeader(listMapHdr):
-	  																					dw.writeMappedHdr (listMapHdr, mapVarNames);
+      String fileHeader = (mapVarNames == null)? dw.writeHeader(listMapHdr):
+        dw.writeMappedHdr (listMapHdr, mapVarNames);
 // ver si lo que saca con var names y con codes es lo mismo
-// primero s�lo con la cabecera y 
+// primero s�lo con la cabecera y
 // luego probar con varias secciones y pa�ses
-			if (fileHeader == null) {
-				System.out.println("An error was found when getting variable names from file");
-				System.out.println("Try again without supplying a variable names file");
-			}
-			else {
+      if (fileHeader == null) {
+        System.out.println("An error was found when getting variable names from file");
+        System.out.println("Try again without supplying a variable names file");
+      }
+      else {
         System.out.println("Output to "+fileName);
-				System.out.println ("Writing file header as:");
-				System.out.println(fileHeader);
-				
-		  	fileOut.append (fileHeader);
-		  	fileOut.flush();
-		  	
-		  	List<Object[]> patients = getPats4Intrv(prjCode, intrvId, grpId);
-		  	int resultsetSize = 
-	  					this.getFullResultsetSize(prjCode, intrvId, grpId, orderSec);
-		  	int maxRows = DataRetriever.MAX_ROWS, offset = 0, rowsProcessed;
+        System.out.println ("Writing file header as:");
+        System.out.println(fileHeader);
+
+        fileOut.append (fileHeader);
+        fileOut.flush();
+
+        List<Object[]> patients = getPats4Intrv(prjCode, intrvId, grpId);
+        int resultsetSize =
+          this.getFullResultsetSize(prjCode, intrvId, grpId, orderSec);
 
 ////////////////////////////////////////////////////
 //		  	resultSet = getFullResultSet (prjCode, intrvId, grpId, orderSec, -1, -1);
 //		  	dw.buildResult (patients, listMapHdr, resultSet, fileOut);
 
-		  	SqlDataRetriever sqldr = new SqlDataRetriever();
-		  	java.sql.ResultSet rs = sqldr.getFullResultSet(prjCode, intrvId, grpId, orderSec);
-		  	
-		  	try {
-		  		if (patients.size() > 0)
-		  			dw.buildResultSet(patients, listMapHdr, rs, fileOut);
-		  	}
-		  	catch (Exception ex) {
-		  		ex.printStackTrace();
-		  	}
-			}
-	    fileOut.close(); 
-	  }
+        SqlDataRetriever sqldr = new SqlDataRetriever();
+        java.sql.ResultSet rs;
+        if (this.grpIds.equalsIgnoreCase(""))
+          rs = sqldr.getFullResultSet(prjCode, intrvId, grpId, orderSec);
+        else
+          rs = sqldr.getFullResultsetForCountry(prjCode, intrvId, this.grpIds, orderSec);
+
+        try {
+          if (patients.size() > 0)
+            dw.buildResultSet(patients, listMapHdr, rs, fileOut);
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+      fileOut.close();
+    }
 
 
 
   /**
-   * Interfaz method to download a dump from the web admin. Based in the legacy
+   * Interface method to download a dump from the web admin. Based in the legacy
    * dump methods to get dumps in regular files via command line.
    * @param prjCode, the project code
    * @param intrvId, the interview id (can be redundant...)
@@ -957,12 +989,14 @@ System.out.println (rows.size() + " patiens for \npatients4Intrv query: "+sqlQry
    * @param orderSec the section defined by its order in the questionnaire
    * @return the download data as a string object
    */
-	  public String getAdminDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
-	  	
+  public String getAdminDump (String prjCode, String intrvId, String grpId, Integer orderSec) {
+
+
 	  	long timestamp = (new java.util.Date()).getTime();
 	  	String filename = DataRetriever.DEFAULT_PATH +"/"+ DataRetriever.DEFAULT_FILENAME + 
 	  						(new Long(timestamp)).toString()+".csv";
 	  	StringBuffer fileContent = new StringBuffer();
+      this.buildGroups(grpId); // init secondary groups if grpId is a country!!!
 	  	
 	  	try {
 	  		// this.getDump(prjCode, intrvId, grpId, orderSec, null, filename);
