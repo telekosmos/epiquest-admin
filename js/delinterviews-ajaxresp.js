@@ -9,6 +9,10 @@
 
 var DelIntrvsAjaxResponse = function () {
 
+  var subject = '';
+  var setSubject = function(paramSubject) {
+    subject = paramSubject;
+  }
 
   var remarkDiv = function(msgDiv) {
     msgDiv.addClass('operation-done');
@@ -17,9 +21,10 @@ var DelIntrvsAjaxResponse = function () {
     }, 500);
   };
 
+
   var displayResponse = function(jResponse) {
     var intrvsList = jResponse.interviews_deleted;
-    var codPat = (intrvsList.length > 0)? intrvsList[0].codpat: "";
+    var codPat = (intrvsList.length > 0)? intrvsList[0].codpat: jResponse.last_interviews[0].codpat;
     var samples = jResponse.samples;
     var sim = jResponse.sim;
 
@@ -28,18 +33,27 @@ var DelIntrvsAjaxResponse = function () {
     var innerHtml = "<p>" + timestamp +"<br/>";
     innerHtml += (sim? "(<strong>Simulation</strong> update)": "(<strong>Live</strong> update)");
     innerHtml += (codPat == "")? "": " For patient <strong>"+codPat+"</strong></p>";
-    innerHtml += "<ul><li>Interviews deleted: "+intrvsList.length;
+    innerHtml += "<ul><li>Interviews deleted: "+intrvsList.length+'<br/>';
     for (var i=0; i<intrvsList.length; i++)
       innerHtml += "'<i>"+intrvsList[i].intrv+"</i>', ";
 
-
     innerHtml = (intrvsList.length > 0)? innerHtml.substring(0, innerHtml.length-2): innerHtml;
+
+    innerHtml += '</li>';
+    if (jResponse.last_interviews[0].last_one == true) {
+      innerHtml += '<li style="color:red; font-weight:bolder">';
+      innerHtml += 'The interview(s) were not deleted as they are the last interviews for subject ';
+      innerHtml += jResponse.last_interviews[0].codpat + '<br/>';
+      innerHtml += '<span style="color:black">Contact the database admin in charge if you really want to delete';
+      innerHtml += '</span>';
+    }
+
     innerHtml += "</li><li>";
     if (samples.length == 0)
       innerHtml += "No samples for this patient";
 
     else {
-      innerHtml += "Samples (when '<i>QES*</i>' questionnaire): ";
+      innerHtml += "Samples for "+codPat+":<br/>"; // (when '<i>QES*</i>' questionnaire): ";
       for (var i=0; i<samples.length; i++)
         innerHtml += "'"+samples[i]+"', ";
 
@@ -69,12 +83,31 @@ var DelIntrvsAjaxResponse = function () {
 		$("#frmListIntrvs").empty();
 		try {
 			var jResponse = YAHOO.lang.JSON.parse(o.responseText);
+      if (jResponse.num == 0) {
+        var responseDiv = $("#responseDiv");
+
+        var date = new Date();
+        var timestamp = '['+date.toLocaleTimeString()+", "+date.toLocaleDateString()+']';
+        var innerHtml = "<p>" + timestamp +"<br/>";
+        innerHtml += '<span style="color:red;font-weight: bold">';
+        innerHtml += 'No interview for subject <i>'+subject+'</i>';
+        innerHtml += '</span><hr style="border-color: #000000">';
+
+        responseDiv.append(innerHtml);
+        responseDiv.animate({
+          scrollTop: responseDiv[0].scrollHeight
+        }, "fast");
+        remarkDiv(responseDiv);
+
+        return;
+      }
+
 			var arrayIntrvs = jResponse.interviews;
 			var res = arrayIntrvs.length > 0;
 			if (res) {
 				// $("#frmListPats").append('<option value="-1">Choose...</option>');
 				
-				for (i=0; i<arrayIntrvs.length; i++) {
+				for (var i=0; i<arrayIntrvs.length; i++) {
 					var intrv = arrayIntrvs[i];
 					var name = intrv.name;
 					var id = intrv.id;
@@ -156,7 +189,8 @@ var DelIntrvsAjaxResponse = function () {
 		onGetInterviews: onGetInterviews,
 		onResponseDelete: onResponseDelete,
 		onFail: onFail,
-		
+
+    setSubject: setSubject,
 		test: test
 	}
 	

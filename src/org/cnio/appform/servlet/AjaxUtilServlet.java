@@ -715,16 +715,13 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
     HashMap patSamples = (HashMap)jsonMap.get("pats_with_samples");
     List samples = new ArrayList();
     samples.addAll(patSamples.values());
-
-
     Iterator sampleIt = samples.iterator();
     while (sampleIt.hasNext()) {
       jsonOut += sampleIt.next().toString()+",";
     }
     jsonOut = samples.size()>0? jsonOut.substring(0, jsonOut.length()-1): jsonOut;
+
     jsonOut += "], \"interviews_deleted\":[";
-
-
     List deletedOnes = (List)jsonMap.get("interviews_deleted");
     Iterator deletedIt = deletedOnes.iterator();
     while (deletedIt.hasNext()) {
@@ -733,6 +730,16 @@ System.out.println("ending session in AjaxUtilServlet: "+ses);
       jsonOut += "{\"codpat\":\""+pair.get(0)+"\", \"intrv\":\""+pair.get(1)+"\"},";
     }
     jsonOut = deletedOnes.size()>0? jsonOut.substring(0, jsonOut.length()-1):jsonOut;
+
+    jsonOut += "], \"last_interviews\":[";
+    LinkedHashSet lastIntrvs = (LinkedHashSet)jsonMap.get("last_interviews");
+    Iterator lastOne = lastIntrvs.iterator();
+    while(lastOne.hasNext()) {
+      List pair = (List)lastOne.next();
+      jsonOut += "{\"codpat\":\""+pair.get(0)+"\", \"last_one\":"+pair.get(1)+"},";
+      // jsonOut += lastOne.next().toString()+",";
+    }
+    jsonOut = lastIntrvs.size()>0? jsonOut.substring(0, jsonOut.length()-1): jsonOut;
 
     jsonOut += "], \"sim\":"+sim+"}";
     

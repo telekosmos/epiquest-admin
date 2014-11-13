@@ -100,14 +100,14 @@ var ChangeCodesAjaxResponse = function () {
       return;
     }
 
-  }
+  };
 
 
   var clearIntrvCombo = function () {
     var intrvSel = $("#frmListPats");
 
     $(intrvSel).empty();
-  }
+  };
 
 
 
