@@ -91,7 +91,7 @@ var DelIntrvFormCtrl = function () {
 	
 	
 	return {
-		init: init,
+		init: init
 		
 	}
 	
