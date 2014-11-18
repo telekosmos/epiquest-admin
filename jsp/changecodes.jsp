@@ -62,26 +62,37 @@ System.out.println("Principal's name: "+user);
     /* Sticky footer styles
       -------------------------------------------------- */
 
+      html {
+        overflow: hidden;
+      }
       html,
       body {
         height: 100%;
         /* The html and body elements cannot have any padding or margin. */
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
       }
 
       /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
+      .wrap {
+        /* min-height: 100%;
+        height: auto !important; */
         height: 100%;
         /* Negative indent footer by it's height */
         margin: 0 auto -60px;
+        overflow-y: scroll;
       }
 
       /* Set the fixed height of the footer here */
-      #push,
+      /* For navbar (bootstrap) position is the same */
       #footer {
-        height: 60px;
+        height: 40px;
+        bottom: 0;
+        position: fixed;
+        width: 100%;
       }
+
       #footer {
         background-color: #f5f5f5;
       }
@@ -137,9 +148,9 @@ System.out.println("Principal's name: "+user);
 </head>
 
 <body>
-<div id="wrap">
+<div id="wrap" class="wrap">
 
-<%@include file="inc/navbar.jsp" %>
+  <%@include file="inc/navbar.jsp" %>
 
 <div class="container-fluid">
   <div class="page-header page-title">
@@ -276,7 +287,7 @@ System.out.println("Principal's name: "+user);
       </div>
     </div> <!-- EO row-fluid for listOfRetreived - buttons - listOfSelected -->
 
-    <div class="row-fluid" style="margin-top: 1em;">
+    <div class="row-fluid" style="margin-top: 1em; margin-bottom: 5em;">
       <div class="offset2 span2">
         <button type="button" class="btn btn-inverse" id="btnReset"><i class="icon-refresh icon-white"></i> Reset</button>
       </div>
@@ -290,7 +301,7 @@ System.out.println("Principal's name: "+user);
 
   </form>
 </div> <!-- container fluid -->
-
+<!-- </div> <!-- inner-wrap -->
 <div id="footer">
   <div class="container">
     <p class="muted credit">
@@ -300,6 +311,8 @@ System.out.println("Principal's name: "+user);
 </div>
 
 </div> <!-- EO wrap -->
+
+
 
 
 <%-- this is to create the modal "dialog" to run the progress bar --%>

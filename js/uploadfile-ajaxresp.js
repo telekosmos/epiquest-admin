@@ -14,6 +14,12 @@ var UploadFileAjaxResponse = function() {
     console.error(msg);
   };
 
+  var remarkDiv = function(msgDiv) {
+    msgDiv.addClass('operation-done');
+    setTimeout(function() {
+      msgDiv.removeClass('operation-done');
+    }, 500);
+  };
 
   /**
    * Display a message in the display messages area with the number of the codes
@@ -77,11 +83,20 @@ var UploadFileAjaxResponse = function() {
     innerContent += 'Non-existent (source) subjects: <ul>' + subjectsNonExistent +'</ul><hr style="border-color: #000000">';
 
     // $("#responseDiv").empty();
+    var responseDiv = $("#responseDiv");
+    responseDiv.append(innerContent);
+    responseDiv.animate({
+      scrollTop: responseDiv[0].scrollHeight
+    }, "fast");
+    remarkDiv(responseDiv);
+
+    return o;
+    /*
     $("#responseDiv").append(innerContent);
     $("#responseDiv").animate({
       scrollTop: $("#responseDiv")[0].scrollHeight
     }, 'fast');
-
+    */
   }
 
   var onFileUpload = function(o) {
