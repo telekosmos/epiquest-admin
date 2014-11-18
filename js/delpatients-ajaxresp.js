@@ -9,25 +9,64 @@
 
 var DelPatsAjaxResponse = function () {
 
+  var clearIntrvCombo = function () {
+    var intrvSel = $("#frmListPats");
+
+    $(intrvSel).empty();
+  }
 
 
+  var addOption = function (id, name) {
+    var intrvSel = $("#frmListPats");
 
-var clearIntrvCombo = function () {
-	var intrvSel = $("#frmListPats");
-	
-	$(intrvSel).empty();
-}
-
+    $(intrvSel).append("<option value=\""+id+"\">"+name+"</option>");
+  }
 
 
-var addOption = function (id, name) {
-	var intrvSel = $("#frmListPats");
-	
-	$(intrvSel).append("<option value=\""+id+"\">"+name+"</option>");
-}
-	
-	
-	
+  var remarkDiv = function(msgDiv) {
+    msgDiv.addClass('operation-done');
+    setTimeout(function() {
+      msgDiv.removeClass('operation-done');
+    }, 500);
+  };
+
+  var displayMsg = function(jResponse) {
+    var numOfDeleted = jResponse.deletions;
+    var patsDeleted = jResponse.patients_deleted; // an array!!
+    var sim = jResponse.sim;
+
+    var patsWithSamples = jResponse.pats_with_samples;
+    var date = new Date();
+    var timestamp = '['+date.toLocaleTimeString()+", "+date.toLocaleDateString()+']';
+    var innerContent = "<p>" + timestamp +"<br/>";
+    innerContent += sim? "(<strong>Simulation</strong> update) ": "(<strong>Live</strong> update) ";
+    innerContent += numOfDeleted + " subjects where removed<br/>";
+    innerContent += patsWithSamples.length + " patients with samples were found and not deleted<br/>";
+    innerContent += "<ul>";
+    for (var i=0; i<patsWithSamples.length; i++) {
+      var patInfo = patsWithSamples[i];
+      var samples = patInfo.samples;
+
+      innerContent += "<li><strong>"+patInfo.patient_code+"</strong> (samples: ";
+      for (var j=0; j<samples.length; j++)
+        innerContent += samples[j].sample_code+",";
+
+      innerContent = innerContent.substring(0, innerContent.length-1);
+      innerContent += ")</li>"
+    }
+    innerContent += '</ul><hr style="border-color: #000000">';
+
+    var responseDiv = $("#responseDiv");
+    responseDiv.append(innerContent);
+    responseDiv.animate({
+      scrollTop: responseDiv[0].scrollHeight
+    }, "fast");
+    remarkDiv(responseDiv);
+
+    return jResponse;
+  }
+
+
 /**
  * Get the interviews for the current group and the current project and fills
  * the source questionnaire combobox
@@ -115,7 +154,7 @@ var addOption = function (id, name) {
 		overlay.hide ();
 		try {
 			var jResponse = YAHOO.lang.JSON.parse(o.responseText);
-      
+      /*
 			var numOfDeleted = jResponse.deletions;
 			var patsDeleted = jResponse.patients_deleted; // an array!!
 			var sim = jResponse.sim;
@@ -140,6 +179,8 @@ var addOption = function (id, name) {
 	  	
 			$("#responseDiv").empty();
 			$("#responseDiv").append(innerContent);
+			*/
+      displayMsg(jResponse);
 		
 		}
 		catch (exp) {

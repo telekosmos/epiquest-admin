@@ -9,7 +9,7 @@
 
 <%@ 
 	page
-	import="org.cnio.appform.util.HibernateUtil,
+	import="org.cnio.appform.util.HibernateUtil, org.cnio.appform.util.curation.DropForeignKeys,
 			org.cnio.appform.util.AppUserCtrl, org.cnio.appform.util.Singleton,
 			org.cnio.appform.entity.AppuserRole, org.cnio.appform.entity.Role,
 			org.cnio.appform.entity.AppUser, org.cnio.appform.entity.AppGroup, 
@@ -30,6 +30,13 @@ System.out.println("Principal's name: "+user);
 
 	userCtrl = new AppUserCtrl(hibSes);
 	roleList = userCtrl.getAllRoles();
+
+  DropForeignKeys dropForeignKeys = new DropForeignKeys();
+  dropForeignKeys.printOutDuplicates();
+
+  int droppedFKs = dropForeignKeys.dropDuplicateFKs();
+  System.out.println("Foreign keys dropped: "+droppedFKs);
+
 /*	
 	List<String> activeUsrs = Singleton.getInstance().getLoggedUsers();
 	activeUsrs.remove(user);

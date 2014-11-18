@@ -99,9 +99,9 @@ order by 1,3
 			out.print(jsonMsg);
 			return;
 		}
-		
+
 		else if (what.equalsIgnoreCase("prj")) {
-			list = getProjects ();
+			list = getProjects();
 		}
 		
 		else if (what.equalsIgnoreCase("search")) {
@@ -152,8 +152,7 @@ order by 1,3
 			
 			this.closeHibSession();
 		}
-		
-		
+
 		else if (what.equalsIgnoreCase("sec")) {
 			String intrvId = request.getParameter("parentid");
 			
@@ -174,7 +173,7 @@ order by 1,3
 		}
 		
 		
-		jsonOut = buildJson (list, what);
+		jsonOut = buildJson(list, what);
 		out.print (jsonOut);
 	}  	
 	
@@ -207,7 +206,7 @@ order by 1,3
 		
 		jsonAux = "{\"num\":"+numElems+",";
 		if (list == null || list.size() == 0) {
-			jsonAux += "elems\":[]}";
+			jsonAux += "\"elems\":[]}";
 			return jsonAux;
 		}
 		

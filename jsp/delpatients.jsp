@@ -50,6 +50,7 @@ System.out.println("Principal's name: "+user);
   <link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
   
   <link href="../css/overlay.css" rel="stylesheet">
+  <link href="../css/admintool.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {
@@ -198,7 +199,7 @@ System.out.println("Principal's name: "+user);
 	    </ul>
 	  </div>
 	  <div class="span6 well" style="overflow-y: auto;height:140px;" id="responseDiv">
-	  	No previous operation message	    
+	  	No previous operation message<hr style="border-color: black">
 	  </div>
 	</div>
 </div> <!-- EO container -->
@@ -293,7 +294,7 @@ System.out.println("Principal's name: "+user);
     <div class="span2">
       <button type="button" class="btn btn-inverse" id="btnClr"><i class="icon-repeat icon-white"></i> Clear</button>
     </div>
- 
+
   </div> <!-- EO row-fluid list patients -->
   
 	</form>

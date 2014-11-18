@@ -1,8 +1,11 @@
 
 
 var ChangeCodesCtrl = function() {
-  var ajaxResp, simulation = true;
+  var ajaxResp, uploadFileCtrl;
+  var simulation = true;
   var comboProj, comboCountry, comboType, comboHosp, listPats;
+  var processBtn, goBtn, resetBtn, clearBtn;
+  var files;
 
   /**
    * Get questionnaires based on the project and group they belong to
@@ -63,14 +66,38 @@ var ChangeCodesCtrl = function() {
 
   }
 
+
+  /**
+   * It makes an ajax request to change the subject code of the subject currently
+   * selected on the list of subjects
+   */
+  var changeSingleSubject = function() {
+    var oldSubject = listPats.val();
+    var newSubject = $("#selSubject").val();
+    if (!oldSubject && !newSubject)
+      return;
+
+    console.log("Change "+oldSubject+" to "+newSubject);
+
+    var postData = "old="+oldSubject+"&new="+newSubject+"&sim="+simulation;
+    postData += "&single=1";
+    var xReq = new AjaxReq();
+    xReq.setPostdata(postData);
+    xReq.setMethod('POST');
+    xReq.setUrl(APP_ROOT+'/servlet/ChangeCodesServlet');
+    xReq.setCallback(ajaxResp.onSubjectChange, ajaxResp.onFail, ajaxResp, null);
+    xReq.startReq();
+  }
+
+
   var init = function() {
     var that = this;
 
     console.log("Change codes control initializing...");
-    ajaxResp = new DelPatsAjaxResponse ();
+    ajaxResp = new ChangeCodesAjaxResponse();
+    uploadFileCtrl = new UploadFileCtrl();
+    uploadFileCtrl.init();
 
-    $('.fileupload').init();
-    /*
     simulation = $("#chkSimulation").is(":checked");
     $("label.checkbox").tooltip({
       title: "Does not perform a real delete",
@@ -79,8 +106,9 @@ var ChangeCodesCtrl = function() {
 
     $("#chkSimulation").change(function () {
       simulation = !simulation;
+      console.log("sim: "+simulation);
     });
-    */
+
     comboProj = $("#frmPrj");
     comboCountry = $("#frmCountry");
     comboHosp = $("#frmHospital");
@@ -94,6 +122,25 @@ var ChangeCodesCtrl = function() {
     $(comboCountry).change(fillHospitals);
     $(comboHosp).change(retrievePats);
     $(comboType).change(retrievePats);
+
+    // upload widget
+    // $('input[type="file"]').attr('name', 'filecodes');
+    // $('input[type="file"]').on('change', prepareUpload);
+    // $('form').on('submit', uploadFiles);
+    $("#btnReset").click(function (ev) {
+      $("#frmPatsDeletion")[0].reset();
+      $("#uploadform")[0].reset();
+      $(listPats).empty();
+      simulation = true;
+      $("#chkSimulation").prop('checked', true);
+    });
+
+    listPats.change(function() {
+      console.log("patient selected: ");
+      $("#selSubject").val($(this).val());
+    });
+    $("#btnChange").bind('click', changeSingleSubject);
+
   }
 
   return {
@@ -106,11 +153,15 @@ var ChangeCodesCtrl = function() {
 
 
 
-var changeCodesCtrl;
+var changeCodesCtrl, uploadFileCtrl;
 var overlay;
 $(document).ready(function () {
   overlay = new Overlay ();
 
   changeCodesCtrl = new ChangeCodesCtrl();
   changeCodesCtrl.init();
+
+  // for file upload: uploadfile.js
+  // uploadFileCtrl = new UploadFileCtrl();
+  // uploadFileCtrl.init();
 });

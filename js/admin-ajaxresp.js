@@ -86,7 +86,7 @@ var groupSecondary = 2
 		var msg = o.responseText;
 		
 //		document.getElementById("body").appendChild(document.createTextNode(msg));
-		alert (msg);
+		console.error(msg);
 	};
 	
 

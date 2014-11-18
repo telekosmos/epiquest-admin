@@ -132,7 +132,7 @@ var DBDumpFormCtrl = function () {
     $(comboCountry).change(function () {
       me.fillSecondaryGroups();
       me.fillIntrvs();
-    })
+    });
     $(comboGrp).change(fillIntrvs);
     $(comboIntrv).change(fillSections);
 
@@ -147,6 +147,42 @@ var DBDumpFormCtrl = function () {
       var intrvid = $(comboIntrv).val();
       var secOrder = $(comboSec).val();
       var repeatingDump = repeatingCheck.prop('checked');
+      var errMsg = "";
+      //  what=dump&prjid=-1&grpid=&intrvid=-1&secid=-1"
+      if (prjid === undefined || prjid == -1)
+        errMsg = "A project must be selected";
+
+      else if (mainGrp === undefined || mainGrp == -1)
+        errMsg = "At least a main group must be chosen to retrieve a dump";
+
+      else if (intrvid === undefined || intrvid == -1)
+        errMsg = "A questionnaire must be chosen to retrieve a dump";
+
+      else if (secOrder === undefined || secOrder == -1)
+        errMsg = "One section must be chosen to retrieve a dump";
+
+      else
+        errMsg = "";
+
+      if (errMsg != "") {
+        $("div.alert").removeClass('alert-success').addClass('alert-error').
+          css('visibility', 'visible');
+        $("div#msg").html(errMsg);
+        return;
+      }
+      else {
+        var okMsg = 'Dump requested with the parameters:<br/>';
+        okMsg += '<b>Project</b>: '+$("#frmProject option:selected").html()+'<br/>';
+        okMsg += '<b>Country</b>: '+$("#frmCountry option:selected").html()+'<br/>';
+        var secGrp = $("#frmGroup option:selected").val() == -1? "": $("#frmGroup option:selected").html();
+        okMsg += '<b>Group</b>: '+ secGrp +'<br/>';
+        okMsg += '<b>Questionnaire</b>: '+$("#frmQuestionnaire option:selected").html()+'<br/>';
+        okMsg += '<b>Section</b>: '+$("#frmSection option:selected").html()+'<br/>';
+
+        $("div.alert").removeClass('alert-error').addClass('alert-success').
+          css('visibility', 'visible');
+        $("div#msg").html(okMsg);
+      }
 
       var grpid = secondaryGrp == -1? (mainGrp == -1? '': mainGrp): secondaryGrp;
       var dumpUrl = APP_ROOT + '/servlet/AjaxUtilServlet?what=dump&prjid=' + prjid + '&grpid=';
@@ -173,6 +209,7 @@ var DBDumpFormCtrl = function () {
       $(theForm)[0].reset();
     });
 
+    $("#alertDiv").css('visibility', 'hidden');
   }
 
 

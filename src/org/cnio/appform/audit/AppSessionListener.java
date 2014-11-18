@@ -28,209 +28,206 @@ import org.cnio.appform.util.Singleton;
 
 public class AppSessionListener implements HttpSessionListener {
 
-	private int sessionCount;
-	private Session hibSes;
-	
-	public AppSessionListener() {
-		this.sessionCount = 0;
-		hibSes = HibernateUtil.getSessionFactory().openSession();
-	}
-	
+  private int sessionCount;
+  private Session hibSes;
 
-/**
- * This method is call back by the container when one session is created. 
- * Actually, it does nothing as the session creation logging is done in
- * jsp/index.jsp
- */
-	public void sessionCreated(HttpSessionEvent se) {
+  public AppSessionListener() {
+    this.sessionCount = 0;
+    hibSes = HibernateUtil.getSessionFactory().openSession();
+  }
 
-		HttpSession session = se.getSession();
 
-		// increment the session count
-		sessionCount++;
+  /**
+   * This method is call back by the container when one session is created.
+   * Actually, it does nothing as the session creation logging is done in
+   * jsp/index.jsp
+   */
+  public void sessionCreated(HttpSessionEvent se) {
 
-		String sessionid = session.getId();
-		Date now = new Date();
-System.out.println("AppSessionListner.sessionCreated: "+session.getId()+"!!!");
-		boolean islogged = checkUserLogged (session);
-		
-	}
-	
+    HttpSession session = se.getSession();
 
-/**
- * This is the method called back by the container when one session is
- * invalidated/destroyed. It is intended to do post-invalidated-session 
- * processing
- * In order to implement the logging for the application, a row with the same
- * sessionid has to be retrieved to get the username, then one row is inserted
- * in the applog table and the user row has to be updated to set the loggedin
- * field to 0
- */
-	public void sessionDestroyed (HttpSessionEvent se) {
-		
-		HttpSession session = se.getSession();
-		String id = session.getId(), msgLog = "", username = "";
-		String hql = "from AppDBLogger where sessionId='"+id+"' order by evTime desc";
-		List<AppDBLogger> logRows = null;
-		
-		Integer logged = (Integer)session.getAttribute("logged");
-		Integer usrId = (Integer)session.getAttribute("usrid");
-		
-		
-System.out.println(".sessionDestroyed: " +"el usrId que siempre peta: "+
-							usrId+" and logged: "+logged);		
-		
-		if (logged == null)
-			return;
+    // increment the session count
+    sessionCount++;
 
-		Transaction tx = null;
-		try {
-			if (!hibSes.isOpen())
-				hibSes = HibernateUtil.getSessionFactory().openSession();
-			
-			AppUser theUser = usrId == null? null: (AppUser)hibSes.get(AppUser.class, usrId);
-			
-			tx = hibSes.beginTransaction();
-			Query qry = hibSes.createQuery(hql);
-			logRows = qry.list();
-System.out.println(".sessionDestroyed: before checking theUser is null");
-			if (logRows != null && logRows.size() > 0 && theUser != null) {
+    String sessionid = session.getId();
+    Date now = new Date();
+    System.out.println("AppSessionListner.sessionCreated: " + session.getId() + "!!!");
+    boolean islogged = checkUserLogged(session);
+
+  }
+
+
+  /**
+   * This is the method called back by the container when one session is
+   * invalidated/destroyed. It is intended to do post-invalidated-session
+   * processing
+   * In order to implement the logging for the application, a row with the same
+   * sessionid has to be retrieved to get the username, then one row is inserted
+   * in the applog table and the user row has to be updated to set the loggedin
+   * field to 0
+   */
+  public void sessionDestroyed(HttpSessionEvent se) {
+
+    HttpSession session = se.getSession();
+    String id = session.getId(), msgLog = "", username = "";
+    String hql = "from AppDBLogger where sessionId='" + id + "' order by evTime desc";
+    List<AppDBLogger> logRows = null;
+
+    Integer logged = (Integer) session.getAttribute("logged");
+    Integer usrId = (Integer) session.getAttribute("usrid");
+
+
+    System.out.println(".sessionDestroyed: " + "el usrId que siempre peta: " +
+      usrId + " and logged: " + logged);
+
+    if (logged == null)
+      return;
+
+    Transaction tx = null;
+    try {
+      if (!hibSes.isOpen())
+        hibSes = HibernateUtil.getSessionFactory().openSession();
+
+      AppUser theUser = usrId == null ? null : (AppUser) hibSes.get(AppUser.class, usrId);
+
+      tx = hibSes.beginTransaction();
+      Query qry = hibSes.createQuery(hql);
+      logRows = qry.list();
+      System.out.println(".sessionDestroyed: before checking theUser is null");
+      if (logRows != null && logRows.size() > 0 && theUser != null) {
 // set the user loggedin to 0 and loggedfrom to null
-				username = theUser.getUsername();
-System.out.println("trying to reset the user: "+username);
+        username = theUser.getUsername();
+        System.out.println("trying to reset the user: " + username);
 //				theUser.setLoggedIn(0);
-				theUser.setLoggedFrom(null);
-				theUser.setLoginAttempts(0);
-			}
-			else {
-				LogFile.error("No previous data found for this session ("+
-							id+") in database log");
-			}
-			tx.commit();
-			
-			tx.begin();
-System.out.println("sessionlistener: after tx.begin user.isLogged "+
-		Singleton.getInstance().isLogged(username));			
+        theUser.setLoggedFrom(null);
+        theUser.setLoginAttempts(0);
+      } else {
+        LogFile.error("No previous data found for this session (" +
+          id + ") in database log");
+      }
+      tx.commit();
+
+      System.out.println("sessionlistener: after tx.begin user.isLogged " +
+        Singleton.getInstance().isLogged(theUser.getId()));
+
+      boolean removed = Singleton.getInstance().rmvUser(theUser.getId());
+      System.out.println("user "+theUser.getUsername()+" was "+(removed? "removed": "not removed"));
+
+      tx.begin();
 // set all groups belonging this user to active=0
-			AppUserCtrl usrCtrl = new AppUserCtrl (hibSes);
-			AppGroup primary = usrCtrl.getPrimaryActiveGroup(theUser),
-							secondary = usrCtrl.getSecondaryActiveGroup(theUser);
+      AppUserCtrl usrCtrl = new AppUserCtrl(hibSes);
+      AppGroup primary = usrCtrl.getPrimaryActiveGroup(theUser),
+        secondary = usrCtrl.getSecondaryActiveGroup(theUser);
 
-			String hqlQry = "from RelGrpAppuser r where r.appuser=:user and (" +
-					"r.appgroup=:primary", hqlQryBis =" or r.appgroup=:secondary)";
-			
-			if (primary != null || secondary != null) {
-			
-				if (secondary == null) {
-					qry = hibSes.createQuery(hqlQry+")");
-					qry.setEntity("user", theUser);
-					qry.setEntity("primary", primary);
-				}
-				else {
-					qry = hibSes.createQuery(hqlQry+hqlQryBis);
-					qry.setEntity("user", theUser);
-					qry.setEntity("primary", primary);
-					qry.setEntity("secondary", secondary);
-				}
-				
+      String hqlQry = "from RelGrpAppuser r where r.appuser=:user and (" +
+        "r.appgroup=:primary", hqlQryBis = " or r.appgroup=:secondary)";
+
+      if (primary != null || secondary != null) {
+
+        if (secondary == null) {
+          qry = hibSes.createQuery(hqlQry + ")");
+          qry.setEntity("user", theUser);
+          qry.setEntity("primary", primary);
+        } else {
+          qry = hibSes.createQuery(hqlQry + hqlQryBis);
+          qry.setEntity("user", theUser);
+          qry.setEntity("primary", primary);
+          qry.setEntity("secondary", secondary);
+        }
+
 // set to 0 all possible active groups, not only the current active one(s)
-				List<RelGrpAppuser> rels = qry.list();
-				for (Iterator<RelGrpAppuser> it=rels.iterator(); it.hasNext();) {
-					RelGrpAppuser rel = it.next();
-System.out.println ("Deactive group "+rel.getAppgroup().getId());
-					rel.setActive(0);
-				}
-			}
-			msgLog = "SessionListener: User '"+username+"'("+usrId+") has logged out";
-System.out.println(msgLog);			
-			LogFile.info(msgLog);
+        List<RelGrpAppuser> rels = qry.list();
+        for (Iterator<RelGrpAppuser> it = rels.iterator(); it.hasNext(); ) {
+          RelGrpAppuser rel = it.next();
+          System.out.println("Deactive group " + rel.getAppgroup().getId());
+          rel.setActive(0);
+        }
+      }
+      msgLog = "SessionListener: User '" + username + "'(" + usrId + ") has logged out";
+      System.out.println(msgLog);
+      LogFile.info(msgLog);
 
-			tx.commit();
-		}
-		catch (HibernateException hibEx) {
-			if (tx != null) {
-				tx.rollback();
-				hibSes.close();
-			}
-hibEx.printStackTrace();			
-			String msg = "Unable to finish and record logging out for session "+id;
-			StackTraceElement[] stack = hibEx.getStackTrace();
-			LogFile.error(msg);
-			LogFile.error(hibEx.getLocalizedMessage());
-			LogFile.logStackTrace(stack);
-		}
-		catch (Exception ex) {
-			if (tx != null) {
-				tx.rollback();
-				hibSes.close();
-			}
-ex.printStackTrace();			
-			String msg = "Unable to finish and record logging out for session "+id;
-			StackTraceElement[] stack = ex.getStackTrace();
-			LogFile.error(msg);
-			LogFile.error(ex.getLocalizedMessage());
-			LogFile.logStackTrace(stack);
-		}
-		finally {
-System.out.println(".sessionDestroyed: closing hibSes.");
-			hibSes.close();
-		}
+      tx.commit();
+    }
+    catch (HibernateException hibEx) {
+      if (tx != null) {
+        tx.rollback();
+        hibSes.close();
+      }
+      hibEx.printStackTrace();
+      String msg = "Unable to finish and record logging out for session " + id;
+      StackTraceElement[] stack = hibEx.getStackTrace();
+      LogFile.error(msg);
+      LogFile.error(hibEx.getLocalizedMessage());
+      LogFile.logStackTrace(stack);
+    } catch (Exception ex) {
+      if (tx != null) {
+        tx.rollback();
+        hibSes.close();
+      }
+      ex.printStackTrace();
+      String msg = "Unable to finish and record logging out for session " + id;
+      StackTraceElement[] stack = ex.getStackTrace();
+      LogFile.error(msg);
+      LogFile.error(ex.getLocalizedMessage());
+      LogFile.logStackTrace(stack);
+    } finally {
+      System.out.println(".sessionDestroyed: closing hibSes.");
+      hibSes.close();
+    }
 
-		session.removeAttribute("logged");
-		session.removeAttribute("usrid");
-		session.removeAttribute("user");
-		session.removeAttribute("roles");
-		session.removeAttribute("primaryGrpId");
-		session.removeAttribute("primaryGrpName");
-		session.removeAttribute("secondaryGrpId");
-		session.removeAttribute ("secondaryGrpName");
-		
-		Singleton.getInstance().rmvUser(username);
-		
-		--sessionCount;// decrement the session count variable
-	}
-	
-	
-	
-	public boolean checkUserLogged (HttpSession ses) {
-		
-/**		
-		String user = request.getUserPrincipal().getName();
-		String ipAddr = request.getRemoteAddr();
-		String sessId = request.getSession().getId();
+    session.removeAttribute("logged");
+    session.removeAttribute("usrid");
+    session.removeAttribute("user");
+    session.removeAttribute("roles");
+    session.removeAttribute("primaryGrpId");
+    session.removeAttribute("primaryGrpName");
+    session.removeAttribute("secondaryGrpId");
+    session.removeAttribute("secondaryGrpName");
 
-		Session hibSes = HibernateUtil.getSessionFactory().openSession();
-		
-		AppUserCtrl userCtrl = new AppUserCtrl (hibSes);
-		AppUser appUsr = userCtrl.getUser(user);
-		
-		if (appUsr.wasRemoved()) {
-			response.sendRedirect("../logout.jsp");
-			return;
-		}
-		
-	System.out.println("username: "+appUsr.getUsername()+"; logged? "+appUsr.getLoggedIn());
-	System.out.println("checking: "+ipAddr+" x "+ appUsr.getLoggedFrom() + ": "+!ipAddr.equalsIgnoreCase(appUsr.getLoggedFrom()));
-	// This piece of code avoids one user logs in concurrently from DIFFERENT ips
-		if (appUsr.getLoggedIn() == 1 && !ipAddr.equalsIgnoreCase(appUsr.getLoggedFrom())) {
-			LogFile.info ("user ALREADY logged: '"+appUsr.getUsername()+
-					"' from "+ipAddr+" (vs "+appUsr.getLoggedFrom()+") with "+
-					session.getId()+" and redirecting...");
-			
-			userCtrl.logSessionInit(appUsr.getId(), user, "", "", ipAddr,
-					AppUserCtrl.LOGIN_CONCURRENT);
-			session.invalidate();
-			response.sendRedirect("../nologged.jsp");
-			return;
-		}
-	*/
-		
-System.out.println("Num of session attributes in t=0:");
-		int i = 0;
-		for (Enumeration<String> attrs = ses.getAttributeNames(); attrs.hasMoreElements();	) {
-			System.out.println(++i+": "+attrs.nextElement());
-		}
-		
-		return false;
-	}
+    --sessionCount;// decrement the session count variable
+  }
+
+
+  public boolean checkUserLogged(HttpSession ses) {
+
+/**
+ String user = request.getUserPrincipal().getName();
+ String ipAddr = request.getRemoteAddr();
+ String sessId = request.getSession().getId();
+
+ Session hibSes = HibernateUtil.getSessionFactory().openSession();
+
+ AppUserCtrl userCtrl = new AppUserCtrl (hibSes);
+ AppUser appUsr = userCtrl.getUser(user);
+
+ if (appUsr.wasRemoved()) {
+ response.sendRedirect("../logout.jsp");
+ return;
+ }
+
+ System.out.println("username: "+appUsr.getUsername()+"; logged? "+appUsr.getLoggedIn());
+ System.out.println("checking: "+ipAddr+" x "+ appUsr.getLoggedFrom() + ": "+!ipAddr.equalsIgnoreCase(appUsr.getLoggedFrom()));
+ // This piece of code avoids one user logs in concurrently from DIFFERENT ips
+ if (appUsr.getLoggedIn() == 1 && !ipAddr.equalsIgnoreCase(appUsr.getLoggedFrom())) {
+ LogFile.info ("user ALREADY logged: '"+appUsr.getUsername()+
+ "' from "+ipAddr+" (vs "+appUsr.getLoggedFrom()+") with "+
+ session.getId()+" and redirecting...");
+
+ userCtrl.logSessionInit(appUsr.getId(), user, "", "", ipAddr,
+ AppUserCtrl.LOGIN_CONCURRENT);
+ session.invalidate();
+ response.sendRedirect("../nologged.jsp");
+ return;
+ }
+ */
+
+    System.out.println("Num of session attributes in t=0:");
+    int i = 0;
+    for (Enumeration<String> attrs = ses.getAttributeNames(); attrs.hasMoreElements(); ) {
+      System.out.println(++i + ": " + attrs.nextElement());
+    }
+
+    return false;
+  }
 }

@@ -46,13 +46,15 @@ public class AppUserCtrl {
 
 	public static final Integer COD_HOSPITAL_INI_IE = Integer.valueOf(70);
 	public static final Integer COD_HOSPITAL_END_IE = Integer.valueOf(89);
-	public static final int LOGIN_SUCCESS = 0;
+
+  public static final int LOGIN_SUCCESS = 0;
 	public static final int LOGIN_FAIL = 1;
 	public static final int LOGIN_CONCURRENT = 2;
 	public static final int LOGIN_USER_WRONG = 3;
 	public static final int LOGIN_MISMATCH_PASSWD = 4;
 	public static final int LOGIN_EXCEED_ATTEMPTS = 5;
 	public static final int MAX_LOGIN_ATTEMPTS = 5;
+
 	public static final String ADMIN_ROLE = "ADMIN";
 	public static final String EDITOR_ROLE = "EDITOR";
 	public static final String INTRVR_ROLE = "INTERVIEWER";
@@ -731,17 +733,38 @@ public class AppUserCtrl {
 		return getSecondaryGroups(myUsr, grp);
 	}
 
+
+
+
 	/**
 	 * This method returns all secondary groups bound to the user represented by
-	 * the user entity 
+	 * the user entity. If user.isAdmin, just return all groups belonging to mainGrp
 	 * @param user, the user entity
 	 * @return
 	 */
 	public List<AppGroup> getSecondaryGroups(AppUser user, AppGroup mainGrp) {
 		List lGrps = null;
-		String hql = "select a from AppGroup a join a.relGrpAppusrs r where "
-				+ "a.type.name='HOSPITAL' and r.appuser=:user "
-				+ "and a.container=:maingrp order by a.name";
+    List<Role> userRoles = this.getRoleFromUser(user);
+    boolean isAdmin = false;
+    for (int i=0; i<userRoles.size(); i++) {
+      Role role = userRoles.get(i);
+      if (role.getName().indexOf("admin") != -1) {
+        isAdmin = true;
+        break;
+      }
+    }
+
+    String hql;
+		if (!isAdmin) {
+      hql = "select a from AppGroup a join a.relGrpAppusrs r where "
+          + "a.type.name='HOSPITAL' and r.appuser=:user "
+          + "and a.container=:maingrp order by a.name";
+    }
+    else {
+      hql = "select a from AppGroup a where "
+        + "a.type.name='HOSPITAL' "
+        + "and a.container=:maingrp order by a.name";
+    }
 
 		Transaction tx = null;
 		AppGroup group = null;
@@ -755,7 +778,8 @@ public class AppUserCtrl {
 			}
 
 			qry = this.theSess.createQuery(hql);
-			qry.setEntity("user", user);
+      if (!isAdmin)
+        qry.setEntity("user", user);
 			qry.setEntity("maingrp", mainGrp);
 			lGrps = qry.list();
 
@@ -1260,7 +1284,7 @@ ex.printStackTrace(System.err);
   /**
    * Enable or disabled an user
    * @param user {AppUser} the user to be disabled/enabled
-   * @param enable {boolean} if true, user is enabled; otherwise disabled
+   * @param disable {boolean} if true, user is enabled; otherwise disabled
    * @return true on successful completion; otherwise returns false
    */
   public boolean setUserDisabled(AppUser user, boolean disable) {

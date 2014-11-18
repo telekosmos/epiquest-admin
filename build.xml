@@ -54,10 +54,11 @@
 
 	<!-- delete temporary resources used in build time -->
 	<target name="clean" id="cleaning">
+    <!--
 		<delete>
 			<fileset dir="${dest.dir}" includes="**/*" />
 		</delete>
-	
+	  -->
 		<delete dir="${temp.dir}" />
 		<delete dir="${temp.dir.classes}" />
 		<delete dir="${temp.dir.meta-inf}" />
@@ -66,7 +67,7 @@
 
 	<!-- make directories to use in build time -
 	<target name="prepare" depends="clean"> -->
-  <target name="prepare">
+  <target name="prepare" depends="clean">
 		<echo>=== PREPARING OUTPUT DIRECTORIES ===</echo>
 		<mkdir dir="${dest.dir}" />
 		<mkdir dir="${temp.dir}" />
@@ -91,7 +92,7 @@
 <!-- here the META-INF AND .svn directories have to be excluded -->
 <!-- persistence.xml in WEB-INF/classes/META-INF is also excluded -->
 		<javac debug="on" srcdir="${src.dir}" destdir="${temp.dir.classes}" 
-			includes="**/*" excludes=".svn/ META-INF/ **/Water*.java Ajax*.java **/test/">
+			includes="**/*" excludes=".svn/ META-INF/ Ajax*.java **/test/">
 			<classpath refid="build.class.path" />
 		</javac>
 
@@ -123,6 +124,15 @@
 				<include name="*.jar" />
 			</fileset>
 		</copy>
+
+    <copy todir="${temp.dir.classes}">
+      <fileset dir="${webinf.dir}/classes">
+        <include name="*.class"/>
+        <exclude name="*.xml*"/>
+        <exclude name="*.props"/>
+        <exclude name="*.dtd"/>
+      </fileset>
+    </copy>
 
 		<copy todir="${temp.dir}/jsp">
 			<fileset dir="${jsp.dir}">
@@ -189,7 +199,7 @@
 
 
 	<!-- GENERIC PRODUCTION PACKAGE -->
-	<target name="generic-war" depends="compile">
+	<target name="generic-war" depends="compile"> <!-- depends="prepare"> -->
 		<echo>=== PRODUCTION GENERIC PACKAGE ===</echo>
 
 		<antcall target="transfer" />
@@ -316,8 +326,8 @@
 	
 	
 	
-	<!-- PACKAGE -->
-	<target name="production-package" depends="compile">
+	<!-- PACKAGE -->                                              º
+	<target name="production-package" depends="compile"> <!-- depends="prepare"> -->
 		<echo>=== PRODUCTION -UBIO- PACKAGE ===</echo>
 
 		<antcall target="transfer" />

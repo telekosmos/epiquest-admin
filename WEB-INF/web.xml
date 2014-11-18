@@ -136,7 +136,13 @@
       <param-value>5</param-value>
     </init-param>
 	</servlet>
-
+  <servlet>
+    <description>Manages file upload and codes changes</description>
+    <display-name>ChageSubjectsCodeServlet</display-name>
+    <servlet-name>ChangeSubjectsCodeServlet</servlet-name>
+    <servlet-class>org.cnio.appform.servlet.ChangeSubjectsCodeServlet
+    </servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>JaasServlet</servlet-name>
     <url-pattern>/servlet/JaasServlet</url-pattern>
@@ -161,6 +167,11 @@
 		<servlet-name>MngGroupsServlet</servlet-name>
 		<url-pattern>/servlet/MngGroupsServlet</url-pattern>
 	</servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>ChangeSubjectsCodeServlet</servlet-name>
+    <url-pattern>/servlet/ChangeCodesServlet</url-pattern>
+  </servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>MngUsersServlet</servlet-name>

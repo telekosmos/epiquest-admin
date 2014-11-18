@@ -51,6 +51,7 @@ System.out.println("Principal's name: "+user);
   <link href="../css/jasny-bootstrap-responsive.css" rel="stylesheet">
   
   <link href="../css/overlay.css" rel="stylesheet">
+<link href="../css/admintool.css" rel="stylesheet">
   <style type="text/css">
   /*
     body {
@@ -61,26 +62,37 @@ System.out.println("Principal's name: "+user);
     /* Sticky footer styles
       -------------------------------------------------- */
 
+      html {
+        overflow: hidden;
+      }
       html,
       body {
         height: 100%;
         /* The html and body elements cannot have any padding or margin. */
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
       }
 
       /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
+      .wrap {
+        /* min-height: 100%;
+        height: auto !important; */
         height: 100%;
         /* Negative indent footer by it's height */
         margin: 0 auto -60px;
+        overflow-y: scroll;
       }
 
       /* Set the fixed height of the footer here */
-      #push,
+      /* For navbar (bootstrap) position is the same */
       #footer {
-        height: 60px;
+        height: 40px;
+        bottom: 0;
+        position: fixed;
+        width: 100%;
       }
+
       #footer {
         background-color: #f5f5f5;
       }
@@ -126,53 +138,57 @@ System.out.println("Principal's name: "+user);
       .page-title h1 {
         font-size: 42px
       }
+
+      .border-separator {
+        border-bottom: 1px solid #eeeeee;
+      }
   </style>
   
   <title>EPIQUEST Admin</title>
 </head>
 
 <body>
-<div id="wrap">
+<div id="wrap" class="wrap">
 
-<%@include file="inc/navbar.jsp" %>
+  <%@include file="inc/navbar.jsp" %>
 
 <div class="container-fluid">
   <div class="page-header page-title">
     <h1>Change subjects code</h1>
   </div>
-  <div class="row-fluid">
+  <div class="row-fluid border-separator">
     <div class="span6 description-list">
       <span class="text-error">Mind what you are doing: changing code patients means the old ones only can be retrieved from backup and it takes a bit</span><br/>
 
       <h4>Two options to change subjects code:</h4>
       <ul><strong>Upload a file</strong>
-        <li>Create a text file with one line for each subject you want to change</li>
+        <li>Create a <strong>text file</strong> with one line for each subject you want to change</li>
         <li>Each line must be as <code>old_subject_code:new_subject_code</code></li>
-        <li>Then upload the file and click the <strong>Process</strong> button</li>
+        <li>Then <strong>Select file</strong> and click the <strong>Process</strong> button</li>
       </ul>
       <ul><strong>Use the form</strong>
-        <li>Filter the patients you want to delete by choosing project, groups and types</li>
+        <li>Filter the patients you want to update by choosing project, groups and types</li>
         <li>Then choose the filtered patients from the list just below the combo boxes</li>
         <li>When a subject is selected, you can change the code in the textbox</li>
-        <li>Click the <strong>GO!</strong> button to change that code only</li>
+        <li>Click the <strong>Change</strong> button to change that code only</li>
       </ul>
     </div>
     <div class="span6 well" style="overflow-y: auto;height:240px;" id="responseDiv">
-      No previous operation message
+      No previous operation message<hr style="border-color: black">
     </div>
   </div>
 </div> <!-- EO container -->
 
-<hr/>
 
 <!-- upload file -->
 <div class="container-fluid">
-  <div class="row-fluid">
+  <div class="row-fluid border-separator">
     <div class="offset2 span2" style="text-align: right;">
       <h4 style="line-height: 10px;">Upload a file</h4>
     </div>
 
     <div class="span4">
+      <form id="uploadform" enctype="multipart/form-data">
       <div class="fileupload fileupload-new" data-provides="fileupload">
         <div class="input-append">
 
@@ -187,6 +203,7 @@ System.out.println("Principal's name: "+user);
           <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
         </div>
       </div>
+      </form>
     </div>
 
     <div class="span1">
@@ -195,7 +212,7 @@ System.out.println("Principal's name: "+user);
   </div>
 </div>
 
-<hr/>
+
 <!-- form container fluid -->
 <div class="container-fluid">
   <form name="frmPatsDeletion" id="frmPatsDeletion">
@@ -250,51 +267,41 @@ System.out.println("Principal's name: "+user);
       </div>
     </div> <!-- EO row-fluid for combo boxes -->
 
-    <div class="row-fluid">
+    <div class="row-fluid border-separator">
       <div class="offset2 span8 well">
 
         <div class="span5" style="margin-left:4%">
           <label>Retrieved subjects</label>
-          <select size="8" class="input-block-level" id="frmListPats" name="frmListPats" multiple="multiple">
+          <select size="8" class="input-block-level" id="frmListPats" name="frmListPats">
           </select>
         </div>
         <!--
         <div class="span1" style="padding: 5% 0%;"></div>
         -->
         <div class="span6">
-          <label>Selected subjects (for deletion)</label>
+          <label>New code for selected subject</label>
           <input type="text" placeholder="Selected subject"
                  name="selSubject" id="selSubject" style="margin-bottom: 0"/>
-          <button class="btn btn-inverse" type="button">Change</button>
+          <button class="btn btn-inverse" type="button" id="btnChange">Change</button>
         </div>
-        <!--
-        <div class="span1">
-          <button class="btn btn-inverse" type="button">Change</button>
-        </div>
-        -->
       </div>
     </div> <!-- EO row-fluid for listOfRetreived - buttons - listOfSelected -->
 
-    <div class="row-fluid">
+    <div class="row-fluid" style="margin-top: 1em; margin-bottom: 5em;">
       <div class="offset2 span2">
         <button type="button" class="btn btn-inverse" id="btnReset"><i class="icon-refresh icon-white"></i> Reset</button>
       </div>
 
-      <div class="offset2 span3" style="text-align: right;">
+      <div class="offset3 span3" style="text-align: right;">
         <label class="checkbox inline" style="padding-right:2%">
           <input type="checkbox" id="chkSimulation" checked="checked"> Simulation
         </label>
-        <button type="button" class="btn btn-inverse" id="btnSend"><i class="icon-exclamation-sign icon-white"></i> Delete</button>
       </div>
-      <div class="span2">
-        <button type="button" class="btn btn-inverse" id="btnClr"><i class="icon-repeat icon-white"></i> Clear</button>
-      </div>
-
     </div> <!-- EO row-fluid list patients -->
 
   </form>
 </div> <!-- container fluid -->
-
+<!-- </div> <!-- inner-wrap -->
 <div id="footer">
   <div class="container">
     <p class="muted credit">
@@ -304,6 +311,8 @@ System.out.println("Principal's name: "+user);
 </div>
 
 </div> <!-- EO wrap -->
+
+
 
 
 <%-- this is to create the modal "dialog" to run the progress bar --%>
@@ -337,6 +346,8 @@ System.out.println("Principal's name: "+user);
 
 <script type="text/javascript" src="../js/overlay.js"></script>
 
+<script type="text/javascript" src="../js/uploadfile-ajaxresp.js"></script>
+<script type="text/javascript" src="../js/uploadfile.js"></script>
 <script type="text/javascript" src="../js/changecodes-ajaxresp.js"></script>
 <script type="text/javascript" src="../js/changecodes.js"></script>
 

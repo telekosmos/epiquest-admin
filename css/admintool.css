@@ -64,6 +64,11 @@ input:disabled {
 	display: block;
 }
 
+
+div#msg {
+  margin-top: 1em;
+}
+
 #footer {
   background-color: #f5f5f5;
   position: absolute;
@@ -71,4 +76,16 @@ input:disabled {
   bottom:0px;
   height:60px;
   width:100%;
+}
+
+
+div#responseDiv {
+  transition: background-color 1s linear;
+  -moz-transition: background-color 0.5s linear;    /* FF3.7+ */
+  -o-transition: background-color 0.5s linear;      /* Opera 10.5 */
+  -webkit-transition: background-color 0.5s linear; /* Saf3.2+, Chrome */
+}
+
+.operation-done {
+  background-color: lightgreen;
 }
