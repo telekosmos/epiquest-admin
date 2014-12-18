@@ -1,11 +1,13 @@
 package org.cnio.appform.test;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.cnio.appform.util.dump.*;
 import org.inb.dbtask.*;
 
@@ -36,15 +38,41 @@ public class DumpTest {
 		String intrvId = "4150";
 		String grpId = "";
 		String orderSec = "1";
-		
+
+    prjCode = "188"; // ISBLAC
+    intrvId = "5300"; // IDC - Impreso...
+    grpId = "304"; // Hospital del mar
+    orderSec = "20"; // Very last section
+
+    try {
+      RepeatableRetriever rr = new RepeatableRetriever();
+      String dumpOut = rr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+      FileOutputStream fos = new FileOutputStream("resources/isblac-idc-sec20.csv");
+      fos.write(dumpOut.getBytes());
+      fos.close();
+      /*
+      SXSSFWorkbook book =
+        rr.getRepBlocksDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+      FileOutputStream fos = new FileOutputStream("resources/test-qry-sec21bis.xlsx");
+      book.write(fos);
+      fos.close();
+      */
+      // rr.getAdminDump(prjCode, intrvId, grpId, Integer.parseInt(orderSec));
+    }
+    catch(Exception ex) {
+      System.out.println("Err repeat dumping: "+ex.getMessage());
+      ex.printStackTrace();
+    }
+
 //		String dumpOut = dr.getAdminDump(prjCode, intrvId, "", Integer.parseInt(orderSec));
 //		String dumpOut = dr.getAdminDump("157", "4150", null, 2);
 //		System.out.println(dumpOut);
 		
-		DumpTest dt = new DumpTest();
-		dt.delPatients();
+		// DumpTest dt = new DumpTest();
+		// dt.delPatients();
 	}
-	
+
+
 	public void delPatients () {
 		String dbUrl = "jdbc:postgresql://localhost:4321/appform";
 		String subjects = "188011009,157102002,15750101501,15750101504,15750101507,15750101508,15750101509,162131001";

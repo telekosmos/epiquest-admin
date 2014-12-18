@@ -228,7 +228,7 @@ System.out.println("Principal's name: "+user);
   </div> <!-- EO row-fluid -->
   </form>
 
-  <div class="row-fluid" style="margin-top: 3em;">
+  <div class="row-fluid" style="margin-top: 3em; margin-bottom: 6em;">
     <div class="offset2 span8">
       <!--
       <div class="alert alert-error" id="errorDiv">

@@ -1,5 +1,5 @@
-host=padme.cnio.es
-port=5432
-user=gcomesana
-pass=appform
+host=<db host>
+port=<db port>
+user=<db usr>
+pass=<db passwd>
 datasource=appform

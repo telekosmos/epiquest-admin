@@ -312,7 +312,9 @@ System.out.println ("Writing out data");
 // new patient with list of results
   		if (out.length() == 0) {
   			intrvName = (String)innRow[2];
+        intrvName = intrvName == null? "": intrvName;
         secName = (String)innRow[3];
+        secName = secName == null? "": secName;
 
         out.append("\""+patRef+"\""+CSV_SEP);
         out.append("\""+grpRef+"\""+CSV_SEP);

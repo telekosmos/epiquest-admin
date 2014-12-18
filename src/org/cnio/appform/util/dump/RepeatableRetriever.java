@@ -5,14 +5,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.*;
-import org.cnio.appform.entity.AppGroup;
+import org.cnio.appform.util.HibernateUtil;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -100,6 +97,7 @@ public class RepeatableRetriever extends DataRetriever {
   // " limit "+this.MAX_QUERY_SIZE;
 
 
+  // All questions-answers for a section of a questionnaire-project
   protected String simpleAnswersQry = "select p.codpatient, pj.\"name\" as prjname, g.name as grpname, i.name as intrvname, s.name as secname, " +
     "q.codquestion as codq, a.thevalue, s.section_order, it.item_order, pga.answer_number, " +
     "pga.answer_order, it.repeatable as itrep " +
@@ -123,6 +121,43 @@ public class RepeatableRetriever extends DataRetriever {
     "and s.section_order = ssss " +
     "order by 1, 8, 10, 9, 11";
 
+  protected String simpleAnswersQryFull = "select pats.codpatient, " +
+    "pgas.prjname as prjname, pats.grpname as grpname, " +
+    "pgas.intrvname as intrvname, pgas.secname as secname, " +
+    "pgas.codq as codq, a.thevalue, pgas.section_order, pgas.item_order, " +
+    "pgas.answer_number, pgas.answer_order, pgas.itrep, pats.idpat " +
+    "from (" +
+    // "-- patietns with 5300' performance" +
+    "select pf.codpat, codpatient, g.name as grpname, p.idpat " +
+    "from interview i, performance pf, patient p, appgroup g " +
+    // "where g.idgroup in (304)" +
+    "where gggg " +
+    "and i.idinterview = iiii " +
+    "and pf.codinterview = i.idinterview " +
+    "and pf.codgroup = g.idgroup " +
+    "and pf.codpat = p.idpat" +
+    ") pats " +
+    "left join (" +
+    "select items.*, pga.codpat, pga.codanswer, pga.answer_number, pga.answer_order " +
+    "from (" +
+    "select it.iditem, it.\"content\", it.item_order, it.repeatable as itrep, " +
+    "pj.\"name\" as prjname, i.name as intrvname," +
+    "s.name as secname, s.section_order, q.codquestion as codq " +
+    "from interview i, section s, item it, question q, project pj " +
+    "where i.idinterview = iiii " +
+    "      and pj.project_code = 'pppp' " +
+    "and pj.idprj = i.codprj " +
+    "and i.idinterview = s.codinterview " +
+    "and s.section_order = ssss " +
+    "and it.idsection = s.idsection " +
+    "and it.iditem = q.idquestion " +
+    "  and (it.ite_iditem is null rrrr) " +
+    "and it.\"repeatable\" = 0 " +
+    ") items left join pat_gives_answer2ques pga on (pga.codquestion = items.iditem) " +
+    ") " +
+    "pgas on (pats.codpat = pgas.codpat) " +
+    "left join answer a on (pgas.codanswer = a.idanswer) " +
+    "order by 1, 8, 10, 9, 11;";
 
 
   private String repIds;
@@ -272,14 +307,14 @@ public class RepeatableRetriever extends DataRetriever {
     String repIdsQry = this.repIds.equalsIgnoreCase("")? "":
       "or it.ite_iditem not in ("+this.repIds+") ";
 
-    String qry = simpleAnswersQry;
+    //  String qry = simpleAnswersQry;
+    String qry = simpleAnswersQryFull;
     qry = qry.replaceAll("ssss", secParam)
       .replaceAll("gggg", grpParam)
       .replaceAll("pppp", prjCode)
       .replaceAll("iiii", intrvId.toString())
       .replaceAll("rrrr", repIdsQry);
 
-    // List<Object[]> rs = execQuery(qry, MAX_QUERY_SIZE*queryTimes, MAX_QUERY_SIZE);
     ResultSet scrollRs = this.sdr.getScrollableRS(qry);
     return scrollRs;
 
@@ -326,6 +361,7 @@ public class RepeatableRetriever extends DataRetriever {
     // Then, dump all answers for the items
     // Queries retrieve
     int oldItemOrder = 9999, newItemOrder;
+    String oldPatient = HibernateUtil.DUMMY_PAT, newPatient;
     int lineCount = 1;
     Row xlsRow = sheet.createRow(lineCount);
 
@@ -346,13 +382,27 @@ public class RepeatableRetriever extends DataRetriever {
     // Object[] row;
     long ini = new Date().getTime();
     while (scrollRs.next()) {
-      // row = rs.remove(0);
-      if (scrollRs.getObject(9) instanceof Integer)
+
+      if (scrollRs.getObject(9) == null)
+        newItemOrder = 0;
+      else if (scrollRs.getObject(9) instanceof Integer)
         newItemOrder = scrollRs.getInt(9);
       else
         newItemOrder = Integer.parseInt(scrollRs.getString(9));
 
-      if (newItemOrder < oldItemOrder) { // start new subject
+      newPatient = scrollRs.getString(1);
+      // new subject based on the item_order
+      // boundary between two subjects in dataset happens when
+      // item_order goes lower than previous one or
+      // as now nulls are allowed, for that subject item_order will be zero
+      // and the oldOne > 0 or == 0 if two nulls are continue
+      // and when changes back to a normal subject, new item_order will be gt 0 but old item_order will be 0
+      // So that, the below guard
+      // without nulls allowed for subjects in this dataset,
+      // the first guard would be enough
+      if (newItemOrder < oldItemOrder ||
+          (newItemOrder >= 0 && oldItemOrder == 0)) { // start new subject
+      // if (newPatient.compareTo(oldPatient) != 0) { // start new subject
         if (xlsRow.getLastCellNum()-1 > 0) {
           lineCount++;
           xlsRow = sheet.createRow(lineCount);
@@ -366,6 +416,7 @@ public class RepeatableRetriever extends DataRetriever {
       // xlsRow = writeOutItem((String)row[6], xlsRow);
       xlsRow = writeOutItem(scrollRs.getString(7), xlsRow);
       oldItemOrder = newItemOrder;
+      // oldPatient = newPatient;
       this.queryTimes++;
     }
     long end = new Date().getTime();

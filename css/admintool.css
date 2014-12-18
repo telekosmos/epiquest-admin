@@ -71,7 +71,7 @@ div#msg {
 
 #footer {
   background-color: #f5f5f5;
-  position: absolute;
+  position: fixed;
   left:0px;
   bottom:0px;
   height:60px;

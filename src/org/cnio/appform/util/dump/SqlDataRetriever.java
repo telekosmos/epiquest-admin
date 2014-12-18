@@ -111,6 +111,7 @@ public class SqlDataRetriever {
       // String grpParam = (grpId == null? "1=1 ": "g.idgroup = "+grpId);
       String grpParam = "g.idgroup in ("+grpIds+")";
 
+      // change for the other
       String sqlqry = "select p.codpatient, g.name as grpname, "+
         "i.name as intrvname, s.name as secname, "+
         "q.codquestion as codq, a.thevalue, s.section_order, "+
@@ -132,6 +133,40 @@ public class SqlDataRetriever {
         "and it.idsection = s.idsection " +
         "and s.section_order = " + secParam +
         " order by 1, 7, 10, 8, 5, 9";
+
+      // cambio de orden en el dominio de la query, igual al de arriba
+      sqlqry = "select pats.codpatient, pats.grpname as grpname, " +
+        "pgas.intrvname as intrvname, pgas.secname as secname, " +
+        "pgas.codq as codq, a.thevalue, pgas.section_order, " +
+        "pgas.item_order, pgas.answer_order, pgas.answer_number, " +
+        "pgas.itrep, pats.idpat " +
+        "from (" +
+        "select pf.codpat, codpatient, g.name as grpname, p.idpat " +
+        "from interview i, performance pf, patient p, appgroup g " +
+        "where " + grpParam +
+        " and i.idinterview = " + intrvId +
+        " and pf.codinterview = i.idinterview " +
+        "and pf.codgroup = g.idgroup " +
+        "and pf.codpat = p.idpat" +
+        ") " +
+        " pats left join (" +
+        "select items.*, pga.codpat, pga.codanswer, pga.answer_number, pga.answer_order " +
+        "from (" +
+        "select it.iditem, it.\"content\", it.item_order, it.repeatable as itrep, " +
+        "pj.\"name\" as prjname, i.name as intrvname,s.name as secname, s.section_order, " +
+        "q.codquestion as codq " +
+        "from interview i, section s, item it, question q, project pj " +
+        "where i.idinterview = " + intrvId +
+        " and pj.project_code = '" + prjCode+"' " +
+        "and pj.idprj = i.codprj " +
+        "and i.idinterview = s.codinterview " +
+        "and s.section_order = " + secParam +
+        " and it.idsection = s.idsection " +
+        "and it.iditem = q.idquestion   " +
+        ") items left join pat_gives_answer2ques pga on (pga.codquestion = items.iditem) " +
+        ") pgas on (pats.codpat = pgas.codpat) " +
+        "left join answer a on (pgas.codanswer = a.idanswer) " +
+        "order by 1, 7, 10, 8, 5, 9;";
 
       System.out.println ("\nSqlDataRetriever => getResultsetForCountry query:\n"+sqlqry);
       ResultSet rs = this.getScrollableRS(sqlqry); // .stmt.executeQuery(sqlqry);
