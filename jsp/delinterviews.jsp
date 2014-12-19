@@ -176,7 +176,7 @@ System.out.println("Principal's name: "+user);
 </div> <!-- EO container -->
 
 
-<div class="container-fluid">
+<div class="container-fluid" style="padding-bottom: 60px;">
   <form id="frmCloning" name="frmCloning">
   <div class="row-fluid">
     <div class="span6 offset3">

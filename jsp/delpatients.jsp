@@ -204,7 +204,7 @@ System.out.println("Principal's name: "+user);
 	</div>
 </div> <!-- EO container -->
 
-<div class="container-fluid">
+<div class="container-fluid" style="padding-bottom: 60px;">
 	<form name="frmPatsDeletion" id="frmPatsDeletion">
 	<input type="hidden" name="what" value="dp" />
 	

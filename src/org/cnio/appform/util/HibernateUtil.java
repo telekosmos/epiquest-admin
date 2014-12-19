@@ -51,6 +51,7 @@ public class HibernateUtil {
 	 public static final Integer TEXT_HIGHLIGHT = new Integer (1);
 		public static final Integer TEXT_NORMAL	= new Integer (0);
 
+  public static final String DUMMY_PAT = "15769696969";
 // This value is set by default here but, actually, it is got from the
 // JaasServlet init-param
 	public static Integer MAX_LOGIN_ATTEMPTS = 8;
@@ -1237,7 +1238,8 @@ LogFile.stderr("Exception in addQuestion2Section (...)");
 		String likeCriteria = patCode+"%";
 
 		System.out.println("Shhhhhhit: hibSes.open? "+hibSes.isOpen());
-    String hqlStr = "from Patient p where p.codpatient like :likeCriteria order by p.codpatient";
+    String hqlStr = "from Patient p where p.codpatient like :likeCriteria " +
+      "and p.codpatient <> '"+HibernateUtil.DUMMY_PAT+ "' order by p.codpatient";
     List<Patient> pats = hibSes.createQuery(hqlStr).setString("likeCriteria", likeCriteria).list();
 		
 		/*

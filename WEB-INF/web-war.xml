@@ -14,19 +14,19 @@
     <description>Database server name</description>
     <param-name>dbServerName</param-name>
 <!--    <param-value>ubio.bioinfo.cnio.es</param-value> -->
-    <param-value>padme.cnio.es</param-value>
+    <param-value>db server</param-value>
   </context-param>
 	
 	<context-param>
     <description>Database User</description>
     <param-name>dbUserName</param-name>
-    <param-value>gcomesana</param-value>
+    <param-value>username</param-value>
   </context-param>
 	
 	<context-param>
     <description>Database User Passwd</description>
     <param-name>dbPassword</param-name>
-    <param-value>appform</param-value>
+    <param-value>password</param-value>
   </context-param>
 	
 	<context-param>

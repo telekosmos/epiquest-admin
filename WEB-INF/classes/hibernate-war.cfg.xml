@@ -9,11 +9,11 @@
     <property name="query.substitutions">yes 'Y', no 'N'</property>
     <property name="connection.driver_class">org.postgresql.Driver</property>
  	  <property name="connection.url">
- 			jdbc:postgresql://padme.cnio.es:5432/appform 
+ 			jdbc:postgresql://yourhost:yourport/appform
 		</property> 
 		
-    <property name="connection.username">gcomesana</property>
- 		<property name="connection.password">appform</property> 
+    <property name="connection.username">theuser</property>
+ 		<property name="connection.password">the password</property>
 
     <!-- Use the C3P0 connection pool provider -->
     <property name="hibernate.c3p0.min_size">5</property>
